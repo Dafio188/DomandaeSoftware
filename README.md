@@ -359,3 +359,54 @@ docker-compose up -d
 3. **🌍 SCALE**: Usa Webdock per produzione seria
 
 **Vuoi che ti mostri come deployare anche su Webdock oltre a Railway? Così hai entrambe le opzioni pronte!** 
+
+## 🚀 **OPZIONI DEPLOYMENT**
+
+### 📊 **CONFRONTO SOLUZIONI HOSTING**
+
+| Caratteristica | **Railway** 🚂 | **Webdock Epyc** 💪 | **Webdock Nano4** 💎 |
+|---|---|---|---|
+| **💰 Prezzo** | $5/mese (free credit) | €4.30/mese | €4.30/mese |
+| **🚀 Setup** | 2-click deploy | Script automatico | Script ottimizzato |
+| **🔧 Controllo** | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **📊 Risorse** | 512MB RAM | 2GB RAM, 2 vCPU | 1-2GB RAM, 1-2 vCPU |
+| **🌐 Traffic** | Limitato | 1TB/mese | 1TB/mese |
+| **⚡ Performance** | Medio | Alto | Medio-Alto |
+| **🎯 Ideale per** | MVP/Test | Produzione | Startup/Piccole App |
+
+### 🎯 **RACCOMANDAZIONI**
+
+1. **🚀 STARTUP**: Inizia con **Webdock Nano4** per il miglior rapporto qualità/prezzo
+2. **📈 CRESCITA**: Scala su **Webdock Epyc** per più risorse
+3. **🔬 TEST**: Usa **Railway** per prototipazione rapida
+
+### 🌟 **WEBDOCK NANO4 - CONFIGURAZIONE OTTIMIZZATA**
+
+**✅ Perché Scegliere il Piano Nano4:**
+- **💎 Miglior Rapporto Qualità/Prezzo**: €4.30/mese
+- **🚀 NVMe SSD**: Storage ultra-veloce
+- **⚡ AMD Epyc**: CPU di ultima generazione
+- **🌍 EU-Based**: Server in Danimarca (GDPR compliant)
+- **🔋 Green Energy**: 100% energia rinnovabile
+
+**📊 Configurazione Ottimizzata:**
+```bash
+# Deployment ottimizzato per Nano4
+curl -fsSL https://raw.githubusercontent.com/Dafio188/DomandaeSoftware/main/scripts/deploy-webdock-nano.sh -o deploy-nano.sh
+chmod +x deploy-nano.sh
+./deploy-nano.sh tuodominio.com
+```
+
+**🔧 Ottimizzazioni Specifiche Nano4:**
+- ✅ **1GB Swap** configurato automaticamente
+- ✅ **PostgreSQL ottimizzato** per RAM limitata
+- ✅ **1 Worker Django** invece di 3
+- ✅ **Resource limits** Docker configurati
+- ✅ **Logging ridotto** per risparmiare spazio
+- ✅ **Cache disabilitata** per risparmiare RAM
+
+**📈 Performance Attese Nano4:**
+- **👥 Utenti simultanei**: 20-50
+- **📊 Pageviews/mese**: 5,000-10,000
+- **⚡ Response time**: <500ms
+- **💾 Database**: Fino a 5GB 
