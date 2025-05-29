@@ -1,0 +1,206 @@
+/* Privacy Policy Page Styles */
+.privacy-policy-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  padding: 100px 0;
+}
+
+.hero-decoration {
+  position: absolute;
+  top: 0;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Data Category Cards */
+.data-category {
+  background: rgba(0,0,0,0.02);
+  padding: 20px;
+  border-radius: 15px;
+  border-left: 4px solid #667eea;
+}
+
+.finalita-card {
+  background: rgba(0,0,0,0.02);
+  padding: 25px;
+  border-radius: 15px;
+  height: 100%;
+  border-left: 4px solid #28a745;
+}
+
+/* Security Measures */
+.security-measure {
+  text-align: center;
+  padding: 30px 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.security-measure:hover {
+  transform: translateY(-5px);
+}
+
+.security-icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+.security-icon::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.3;
+  animation: pulse 2s infinite;
+}
+
+/* Rights Items */
+.right-item {
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.right-item:last-child {
+  border-bottom: none;
+}
+
+/* Contact Info */
+.contact-info {
+  background: rgba(102,126,234,0.1);
+  padding: 30px;
+  border-radius: 15px;
+  border: 2px solid rgba(102,126,234,0.2);
+}
+
+/* Card Headers con Gradienti */
+.card-header.bg-gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.card-header.bg-gradient-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.card-header.bg-gradient-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%) !important;
+}
+
+.card-header.bg-gradient-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+}
+
+.card-header.bg-gradient-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+}
+
+/* Badges e Stati */
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.1; }
+  100% { transform: scale(1); opacity: 0.3; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 0;
+  }
+  
+  .security-measure {
+    margin-bottom: 30px;
+    padding: 25px 15px;
+  }
+  
+  .data-category, .finalita-card {
+    margin-bottom: 25px;
+    padding: 20px 15px;
+  }
+  
+  .contact-info {
+    padding: 20px;
+  }
+  
+  .card-body {
+    padding: 3rem 2rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .display-3 {
+    font-size: 2.5rem;
+  }
+  
+  .card-body {
+    padding: 2rem 1.5rem !important;
+  }
+  
+  .card-header {
+    padding: 1.5rem !important;
+  }
+  
+  .security-icon {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .data-category, .finalita-card {
+    padding: 15px;
+  }
+}
+
+/* Smooth transitions for interactivity */
+.card, .security-measure, .data-category, .finalita-card {
+  transition: all 0.3s ease;
+}
+
+/* Enhanced focus states for accessibility */
+.btn:focus, .card:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .hero-decoration, .security-icon::after {
+    display: none;
+  }
+  
+  .card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+  }
+} 

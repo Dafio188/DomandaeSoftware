@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Browser - Domanda & Software</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .test { margin: 15px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .loading { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test Browser - Domanda & Software</h1>
+        <p>Questa pagina testa se il browser può eseguire JavaScript e caricare React.</p>
+        
+        <div id="tests"></div>
+        
+        <div class="test loading">
+            <strong>⏳ Test in corso...</strong><br>
+            Attendere il completamento dei test automatici.
+        </div>
+    </div>
+    
+    <script>
+        function addTest(title, type, message) {
+            const testsDiv = document.getElementById('tests');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test ' + type;
+            testDiv.innerHTML = `
+                <strong>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'} ${title}</strong><br>
+                ${message}
+            `;
+            testsDiv.appendChild(testDiv);
+        }
+        
+        // Test 1: JavaScript base
+        try {
+            addTest('JavaScript Base', 'success', 'JavaScript funziona correttamente in questo browser.');
+        } catch(e) {
+            addTest('JavaScript Base', 'error', 'Errore JavaScript: ' + e.message);
+        }
+        
+        // Test 2: Console API
+        try {
+            console.log('Test console.log');
+            addTest('Console API', 'success', 'Console API disponibile per debug.');
+        } catch(e) {
+            addTest('Console API', 'error', 'Console API non disponibile: ' + e.message);
+        }
+        
+        // Test 3: Fetch API
+        if (typeof fetch !== 'undefined') {
+            addTest('Fetch API', 'success', 'Fetch API disponibile per chiamate HTTP.');
+            
+            // Test 4: Chiamata al backend
+            fetch('/api/richieste/')
+                .then(response => {
+                    if (response.ok) {
+                        addTest('Backend API', 'success', `Backend risponde correttamente (${response.status})`);
+                    } else {
+                        addTest('Backend API', 'error', `Backend errore: ${response.status}`);
+                    }
+                })
+                .catch(error => {
+                    addTest('Backend API', 'error', 'Errore connessione backend: ' + error.message);
+                });
+        } else {
+            addTest('Fetch API', 'error', 'Fetch API non disponibile in questo browser.');
+        }
+        
+        // Test 5: Moduli ES6
+        try {
+            const testModule = () => 'ES6 modules work';
+            addTest('ES6 Modules', 'success', 'Sintassi ES6 supportata.');
+        } catch(e) {
+            addTest('ES6 Modules', 'error', 'ES6 non supportato: ' + e.message);
+        }
+        
+        // Test 6: Verifica React nel sistema principale
+        setTimeout(() => {
+            fetch('/')
+                .then(response => response.text())
+                .then(html => {
+                    addTest('Sistema Principale', 'info', `HTML principale caricato (${html.length} caratteri)`);
+                    
+                    if (html.includes('id="root"')) {
+                        addTest('Div Root', 'success', 'Div #root trovato nel sistema principale.');
+                    } else {
+                        addTest('Div Root', 'error', 'Div #root non trovato.');
+                    }
+                    
+                    // Estrai e testa il file JS
+                    const jsMatch = html.match(/src="(\/assets\/[^"]*\.js)"/);
+                    if (jsMatch) {
+                        const jsFile = jsMatch[1];
+                        addTest('File JS', 'info', `File JavaScript trovato: ${jsFile}`);
+                        
+                        fetch(jsFile)
+                            .then(jsResponse => {
+                                if (jsResponse.ok) {
+                                    addTest('Caricamento JS', 'success', `File JS caricato (${jsResponse.headers.get('content-length') || 'N/A'} bytes)`);
+                                } else {
+                                    addTest('Caricamento JS', 'error', `Errore caricamento JS: ${jsResponse.status}`);
+                                }
+                            })
+                            .catch(error => {
+                                addTest('Caricamento JS', 'error', 'Errore fetch JS: ' + error.message);
+                            });
+                    } else {
+                        addTest('File JS', 'error', 'Nessun file JavaScript trovato nell\'HTML.');
+                    }
+                })
+                .catch(error => {
+                    addTest('Sistema Principale', 'error', 'Errore caricamento sistema: ' + error.message);
+                });
+        }, 1000);
+        
+        // Test 7: Info browser
+        setTimeout(() => {
+            const info = `
+                <strong>Informazioni Browser:</strong><br>
+                User Agent: ${navigator.userAgent}<br>
+                Lingua: ${navigator.language}<br>
+                Platform: ${navigator.platform}<br>
+                Cookies: ${navigator.cookieEnabled ? 'Abilitati' : 'Disabilitati'}<br>
+                Local Storage: ${typeof localStorage !== 'undefined' ? 'Disponibile' : 'Non disponibile'}<br>
+                URL: ${window.location.href}<br>
+                Protocol: ${window.location.protocol}
+            `;
+            addTest('Info Browser', 'info', info);
+            
+            // Rimuovi il messaggio di loading
+            const loadingDiv = document.querySelector('.loading');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }, 2000);
+        
+        // Test 8: Errori JavaScript globali
+        window.addEventListener('error', function(e) {
+            addTest('Errore JavaScript', 'error', `Errore globale: ${e.message} (${e.filename}:${e.lineno})`);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            addTest('Promise Rejection', 'error', `Promise non gestita: ${e.reason}`);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: domanda_software
+      POSTGRES_USER: domanda
+      POSTGRES_PASSWORD: domanda_pw
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+    command: postgres -c listen_addresses='*' -c log_statement=all
+
+  backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      - DEBUG=1
+      - DJANGO_SECRET_KEY=supersecretkey
+      - DJANGO_ALLOWED_HOSTS=*
+      - DB_NAME=domanda_software
+      - DB_USER=domanda
+      - DB_PASSWORD=domanda_pw
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
+    ports:
+      - "8001:8000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data: 

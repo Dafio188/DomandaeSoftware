@@ -1,0 +1,344 @@
+/* Le Tue Idee Page Styles */
+.idee-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  padding: 100px 0;
+}
+
+.hero-decoration {
+  position: absolute;
+  top: 0;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Stats Badges in Hero */
+.stat-badge {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  display: inline-flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-badge:hover {
+  transform: translateY(-2px);
+}
+
+/* Form Styles */
+.form-control, .form-select {
+  border: 2px solid rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25);
+}
+
+/* Idea Cards Grid */
+.idee-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.idea-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.idea-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+}
+
+.idea-header {
+  padding: 20px 25px 15px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.categoria-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.autore-info {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.idea-content {
+  padding: 25px;
+  line-height: 1.6;
+}
+
+.idea-footer {
+  padding: 20px 25px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  background: rgba(0,0,0,0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.idea-stats {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.idea-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.idea-actions .btn {
+  min-width: 70px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.idea-actions .btn:hover {
+  transform: translateY(-2px);
+}
+
+.idea-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Admin Response */
+.admin-response {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  margin: 0 25px 25px;
+  padding: 20px;
+  border-radius: 15px;
+  border-left: 4px solid #ffc107;
+  position: relative;
+}
+
+.admin-response::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 20px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #fff3cd;
+}
+
+.response-header {
+  display: flex;
+  align-items: center;
+  color: #856404;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+/* Privacy Points */
+.privacy-point {
+  text-align: center;
+  padding: 20px;
+}
+
+.privacy-point h6 {
+  margin-bottom: 10px;
+}
+
+/* Loading and Empty States */
+.text-center.py-5 {
+  padding: 80px 0 !important;
+}
+
+/* Fixed Notifications */
+.alert.position-fixed {
+  max-width: 400px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 0;
+  }
+  
+  .stats-row .row {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stat-badge {
+    margin-bottom: 10px;
+    width: 100%;
+    justify-content: center;
+    max-width: 250px;
+  }
+  
+  .idee-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .idea-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .idea-stats {
+    justify-content: center;
+  }
+  
+  .idea-actions {
+    justify-content: center;
+  }
+  
+  .admin-response {
+    margin: 0 15px 20px;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .display-3 {
+    font-size: 2.5rem;
+  }
+  
+  .hero-section {
+    padding: 40px 0;
+  }
+  
+  .idea-card {
+    border-radius: 15px;
+  }
+  
+  .idea-content {
+    padding: 20px;
+  }
+  
+  .idea-header {
+    padding: 15px 20px 10px;
+  }
+  
+  .idea-footer {
+    padding: 15px 20px;
+  }
+  
+  .categoria-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+  
+  .alert.position-fixed {
+    left: 10px;
+    right: 10px;
+    max-width: none;
+  }
+}
+
+/* Additional hover effects */
+.idea-card .categoria-badge {
+  transition: transform 0.3s ease;
+}
+
+.idea-card:hover .categoria-badge {
+  transform: scale(1.05);
+}
+
+/* Smooth transitions for all interactive elements */
+.btn, .form-control, .form-select, .card {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar for long content */
+.idea-content {
+  max-height: none;
+  overflow: visible;
+}
+
+/* Enhanced focus states for accessibility */
+.btn:focus, .form-control:focus, .form-select:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Gradient backgrounds for card headers */
+.card-header.bg-gradient-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+/* Icon animations */
+.fa-spin {
+  animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 

@@ -1,0 +1,463 @@
+/* Scopo del Sito Page Styles */
+.scopo-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  padding: 100px 0;
+}
+
+.hero-decoration {
+  position: absolute;
+  top: 0;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* User Type Toggle */
+.user-type-toggle .btn-group .btn {
+  border-radius: 25px !important;
+  padding: 12px 30px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.user-type-toggle .btn-group .btn:first-child {
+  border-top-right-radius: 25px !important;
+  border-bottom-right-radius: 25px !important;
+}
+
+.user-type-toggle .btn-group .btn:last-child {
+  border-top-left-radius: 25px !important;
+  border-bottom-left-radius: 25px !important;
+}
+
+.user-type-toggle .btn-warning {
+  background: linear-gradient(45deg, #ffc107, #ffb300);
+  border-color: #ffc107;
+  box-shadow: 0 5px 15px rgba(255,193,7,0.4);
+}
+
+.user-type-toggle .btn-outline-light:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateY(-2px);
+}
+
+/* Project Type Cards */
+.project-type-card {
+  background: white;
+  padding: 30px 25px;
+  border-radius: 20px;
+  text-align: center;
+  height: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-type-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.project-type-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+}
+
+.project-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto 20px;
+  font-size: 1.8rem;
+  position: relative;
+}
+
+.project-icon::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.3;
+  animation: pulse 2s infinite;
+}
+
+.esempi-list {
+  background: rgba(102,126,234,0.05);
+  padding: 15px;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+  text-align: left;
+}
+
+/* Processo Timeline */
+.processo-timeline {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.processo-step {
+  position: relative;
+  margin-bottom: 50px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.processo-step:not(:last-child) .step-connector {
+  position: absolute;
+  left: 50px;
+  top: 100px;
+  bottom: -50px;
+  width: 3px;
+  background: linear-gradient(to bottom, #667eea, #764ba2);
+  z-index: 1;
+}
+
+.step-content {
+  display: flex;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.step-content:hover {
+  transform: translateX(10px);
+}
+
+.step-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  position: relative;
+}
+
+.step-number {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.step-icon {
+  font-size: 1.5rem;
+  opacity: 0.9;
+}
+
+.step-body {
+  padding: 30px;
+  flex: 1;
+}
+
+.step-actions {
+  background: rgba(102,126,234,0.05);
+  padding: 20px;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.action-item:last-child {
+  border-bottom: none;
+}
+
+/* Garanzie Cards */
+.garanzia-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  overflow: hidden;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.garanzia-card:hover {
+  transform: translateY(-5px);
+}
+
+.garanzia-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 30px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.garanzie-list {
+  padding: 30px;
+}
+
+.garanzia-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.garanzia-item:last-child {
+  border-bottom: none;
+}
+
+.garanzia-item .fa {
+  font-size: 1.2rem;
+  margin-top: 3px;
+}
+
+.cliente-garanzie .garanzia-header {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+}
+
+.fornitore-garanzie .garanzia-header {
+  background: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
+  color: #0c5aa6;
+}
+
+/* Pricing Card */
+.pricing-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+  overflow: hidden;
+  border: 1px solid rgba(102,126,234,0.2);
+}
+
+.pricing-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+}
+
+.pricing-section {
+  padding: 25px;
+  border-radius: 15px;
+  height: 100%;
+}
+
+.cliente-pricing {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 2px solid #28a745;
+}
+
+.fornitore-pricing {
+  background: linear-gradient(135deg, #cce5ff 0%, #b8daff 100%);
+  border: 2px solid #007bff;
+}
+
+.pricing-details {
+  margin-top: 15px;
+}
+
+.pricing-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.pricing-item:last-child {
+  border-bottom: none;
+}
+
+.pricing-item .label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.pricing-item .value {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.pricing-note {
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(255,255,255,0.8);
+  border-radius: 10px;
+}
+
+/* CTA Card */
+.cta-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 50px;
+  border-radius: 25px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+}
+
+.cta-illustration {
+  position: relative;
+  z-index: 2;
+}
+
+.cta-card .btn {
+  position: relative;
+  z-index: 2;
+  border: 2px solid rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
+}
+
+.cta-card .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* Color Utilities */
+.text-purple {
+  color: #6f42c1 !important;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.1; }
+  100% { transform: scale(1); opacity: 0.3; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 0;
+  }
+  
+  .user-type-toggle .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .user-type-toggle .btn-group .btn {
+    border-radius: 25px !important;
+    margin-bottom: 10px;
+  }
+  
+  .processo-step {
+    margin-bottom: 30px;
+  }
+  
+  .step-content {
+    flex-direction: column;
+  }
+  
+  .step-header {
+    min-width: auto;
+    flex-direction: row;
+    padding: 20px;
+  }
+  
+  .step-number {
+    margin-bottom: 0;
+    margin-right: 15px;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+  
+  .processo-step:not(:last-child) .step-connector {
+    display: none;
+  }
+  
+  .cta-card {
+    padding: 30px 20px;
+    text-align: center;
+  }
+  
+  .project-type-card, .garanzia-card {
+    margin-bottom: 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .display-3 {
+    font-size: 2.5rem;
+  }
+  
+  .display-5 {
+    font-size: 2rem;
+  }
+  
+  .project-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .step-body {
+    padding: 20px;
+  }
+  
+  .pricing-section {
+    padding: 20px;
+  }
+  
+  .garanzie-list {
+    padding: 20px;
+  }
+} 
