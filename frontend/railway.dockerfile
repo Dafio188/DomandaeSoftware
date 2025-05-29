@@ -9,7 +9,11 @@ RUN npm ci --only=production
 # Copy source code
 COPY . .
 
-# Build the app
+# Set build-time environment variables
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
+# Build the app with environment variables
 RUN npm run build
 
 # Production stage with nginx

@@ -1,0 +1,14 @@
+{
+  "build": {
+    "builder": "dockerfile",
+    "dockerfilePath": "railway.dockerfile"
+  },
+  "deploy": {
+    "startCommand": "nginx -g 'daemon off;'",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300
+  },
+  "env": {
+    "VITE_API_URL": "https://domanda-backend-production.railway.app"
+  }
+} 
