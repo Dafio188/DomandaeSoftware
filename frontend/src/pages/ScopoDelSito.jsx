@@ -181,7 +181,7 @@ function ScopoDelSito() {
               <FaCode className="me-3 text-info" />
               Cosa Puoi Realizzare
             </h2>
-            <p className="lead text-muted">Tipologie di software e progetti supportati dalla nostra piattaforma</p>
+            <p className="lead text-light">Tipologie di software e progetti supportati dalla nostra piattaforma</p>
           </div>
           
           <div className="row g-4">
@@ -226,7 +226,7 @@ function ScopoDelSito() {
                 </>
               )}
             </h2>
-            <p className="lead text-muted">
+            <p className="lead text-light">
               {activeUserType === 'cliente' 
                 ? 'Il processo completo per realizzare il tuo progetto software'
                 : 'Come trovare progetti interessanti e costruire la tua carriera freelance'
@@ -275,7 +275,7 @@ function ScopoDelSito() {
               <FaShieldAlt className="me-3 text-success" />
               Le Nostre Garanzie
             </h2>
-            <p className="lead text-muted">Cosa ti garantiamo per una collaborazione sicura e di successo</p>
+            <p className="lead text-light">Cosa ti garantiamo per una collaborazione sicura e di successo</p>
           </div>
           
           <div className="row g-4">
@@ -366,7 +366,7 @@ function ScopoDelSito() {
               <FaEuroSign className="me-3 text-success" />
               Commissioni e Costi
             </h2>
-            <p className="lead text-muted">Trasparenza totale sui costi - nessuna sorpresa</p>
+            <p className="lead text-light">Trasparenza totale sui costi - nessuna sorpresa</p>
           </div>
           
           <div className="row g-4 justify-content-center">

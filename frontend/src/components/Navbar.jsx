@@ -14,7 +14,33 @@ function Navbar() {
   return (
     <RBNavbar bg="primary" variant="dark" expand="lg">
       <Container fluid>
-        <RBNavbar.Brand as={Link} to="/">Domanda & Software</RBNavbar.Brand>
+        <div className="d-flex align-items-center">
+          <RBNavbar.Brand as={Link} to="/" className="me-3">Domanda & Software</RBNavbar.Brand>
+          <div className="d-flex align-items-center">
+            <img 
+              src="/images/LOGO_TECNOBRIDGE.png" 
+              alt="TechnoBridge" 
+              style={{ 
+                height: '32px', 
+                width: 'auto',
+                backgroundColor: 'white',
+                padding: '4px',
+                borderRadius: '6px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'inline';
+              }}
+            />
+            <span 
+              className="text-primary bg-white px-2 py-1 rounded fw-bold ms-2" 
+              style={{ fontSize: '0.7rem', display: 'none' }}
+            >
+              TechnoBridge
+            </span>
+          </div>
+        </div>
         <RBNavbar.Toggle aria-controls="navbarNav" />
         <RBNavbar.Collapse id="navbarNav">
           <Nav className="me-auto">
@@ -24,6 +50,7 @@ function Navbar() {
             {user && (
               <Nav.Link as={Link} to="/le-tue-idee">Le Tue Idee</Nav.Link>
             )}
+            <Nav.Link as={Link} to="/faq">FAQ & Supporto</Nav.Link>
             <Nav.Link as={Link} to="/privacy-policy">Privacy Policy</Nav.Link>
           </Nav>
           <Nav className="ms-auto">

@@ -1,5 +1,6 @@
-import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import UnifiedNavbar from './components/UnifiedNavbar';
+import AdminNavbar from './components/AdminNavbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -18,26 +19,40 @@ import ChiSiamo from './pages/ChiSiamo';
 import ScopoDelSito from './pages/ScopoDelSito';
 import LeTueIdee from './pages/LeTueIdee';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import FAQ from './pages/FAQ';
+import Contatti from './pages/Contatti';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+  const isAdminPage = location.pathname.startsWith('/dashboard/admin') || location.pathname.startsWith('/admin');
+
   return (
     <>
-      <Navbar />
-      <div className="container mt-4">
+      {/* Navbar condizionale */}
+      {isAdminPage ? <AdminNavbar /> : <UnifiedNavbar />}
+      
+      {/* Container con padding-top per compensare navbar fixed */}
+      <div className={isHomePage ? "" : "container mt-4"} style={{ paddingTop: isHomePage ? '0' : '90px' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/chi-siamo" element={<ChiSiamo />} />
           <Route path="/scopo-del-sito" element={<ScopoDelSito />} />
           <Route path="/le-tue-idee" element={<LeTueIdee />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contatti" element={<Contatti />} />
           <Route path="/login" element={<Login />} />
           <Route path="/richieste" element={<RichiestePage />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/dashboard/cliente" element={<ProtectedRoute><DashboardCliente /></ProtectedRoute>} />
           <Route path="/dashboard/fornitore" element={<ProtectedRoute><DashboardFornitore /></ProtectedRoute>} />
           <Route path="/dashboard/admin" element={<ProtectedRoute><DashboardAdmin /></ProtectedRoute>} />
+          {/* Rotte alternative con trattino per compatibilità */}
+          <Route path="/dashboard-cliente" element={<ProtectedRoute><DashboardCliente /></ProtectedRoute>} />
+          <Route path="/dashboard-fornitore" element={<ProtectedRoute><DashboardFornitore /></ProtectedRoute>} />
           <Route path="/progetto/:id" element={<ProtectedRoute><Progetto /></ProtectedRoute>} />
           <Route path="/register" element={<Register />} />
           <Route path="/prodotti-pronti" element={<ProdottiPronti />} />

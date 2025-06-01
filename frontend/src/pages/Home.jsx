@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import AcquistoModal from '../components/AcquistoModal';
-import { FaUserTie, FaUser, FaShieldAlt, FaLock, FaEuroSign, FaStar, FaHandshake, FaArrowRight, FaMoneyBillWave, FaComments, FaHeadset, FaUserShield, FaRocket, FaLightbulb, FaCode, FaChartLine, FaGlobe, FaMobile, FaDesktop, FaCloud, FaCogs, FaSearch, FaHeart, FaCheckCircle, FaBolt, FaTrophy, FaPlay, FaQuoteLeft, FaShoppingCart, FaEye, FaAward } from 'react-icons/fa';
+import { FaUserTie, FaUser, FaShieldAlt, FaLock, FaEuroSign, FaStar, FaHandshake, FaArrowRight, FaMoneyBillWave, FaComments, FaHeadset, FaUserShield, FaRocket, FaLightbulb, FaCode, FaChartLine, FaGlobe, FaMobile, FaDesktop, FaCloud, FaCogs, FaSearch, FaHeart, FaCheckCircle, FaBolt, FaTrophy, FaPlay, FaQuoteLeft, FaShoppingCart, FaEye, FaAward, FaUsers, FaBars, FaTimes, FaHome, FaInfoCircle, FaEnvelope, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import Slider from 'react-slick';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -12,7 +12,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import Testimonianze from '../components/Testimonianze';
 
 function Home() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [richieste, setRichieste] = useState([]);
   const [prodotti, setProdotti] = useState([]);
   const [activeGaranzia, setActiveGaranzia] = useState(null);
@@ -21,6 +21,87 @@ function Home() {
   // Stati per il modal di acquisto
   const [showAcquistoModal, setShowAcquistoModal] = useState(false);
   const [prodottoSelezionato, setProdottoSelezionato] = useState(null);
+
+  // Stati per menu mobile
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Sistema foto dinamico
+  const [heroImage, setHeroImage] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Sistema dinamico per caricare tutte le foto dalla cartella
+  const [allHeroImages, setAllHeroImages] = useState([]);
+  
+  // Carica dinamicamente tutte le immagini dalla cartella foto_home
+  useEffect(() => {
+    const loadImages = async () => {
+      try {
+        // Carica tutti i file dalla cartella foto_home
+        const imageModules = import.meta.glob('/foto_home/*.(png|jpg|jpeg|webp)', { eager: true });
+        
+        const imageArray = Object.keys(imageModules).map((path, index) => ({
+          src: path,
+          alt: `Domanda & Software - Immagine ${index + 1}`
+        }));
+        
+        console.log('Immagini caricate dinamicamente:', imageArray);
+        setAllHeroImages(imageArray);
+        
+        // Imposta la prima immagine random
+        if (imageArray.length > 0) {
+          const randomIndex = Math.floor(Math.random() * imageArray.length);
+          setCurrentImageIndex(randomIndex);
+          setHeroImage(imageArray[randomIndex]);
+          console.log(`Caricata foto iniziale: ${imageArray[randomIndex].src}`);
+        }
+      } catch (error) {
+        console.error('Errore caricamento immagini:', error);
+        // Fallback alle immagini hardcoded
+        const fallbackImages = [
+          { src: '/foto_home/sfondo_home.png', alt: 'Domanda & Software - Marketplace' },
+          { src: '/foto_home/sfondo_home_2.png', alt: 'Domanda & Software - Sviluppatori' },
+          { src: '/foto_home/sfondo_home_3.png', alt: 'Domanda & Software - Progetti' }
+        ];
+        setAllHeroImages(fallbackImages);
+        setCurrentImageIndex(0);
+        setHeroImage(fallbackImages[0]);
+      }
+    };
+    
+    loadImages();
+  }, []);
+
+  // Rotazione automatica foto con intervalli random
+  useEffect(() => {
+    if (allHeroImages.length === 0) return; // Non iniziare se non ci sono immagini
+    
+    const getRandomInterval = () => Math.floor(Math.random() * 5000) + 8000; // 8-13 secondi random
+    
+    const scheduleNextImage = () => {
+      const interval = getRandomInterval();
+      console.log(`Prossima foto tra ${interval/1000} secondi`);
+      
+      setTimeout(() => {
+        setCurrentImageIndex(prev => {
+          // Scegli un indice diverso da quello attuale
+          let nextIndex;
+          do {
+            nextIndex = Math.floor(Math.random() * allHeroImages.length);
+          } while (nextIndex === prev && allHeroImages.length > 1);
+          
+          setHeroImage(allHeroImages[nextIndex]);
+          console.log(`Cambiata a foto: ${allHeroImages[nextIndex].src}`);
+          return nextIndex;
+        });
+        scheduleNextImage(); // Programma la prossima rotazione
+      }, interval);
+    };
+
+    scheduleNextImage();
+    
+    // Cleanup non necessario perché usiamo setTimeout ricorsivo
+    return () => {};
+  }, [allHeroImages]);
 
   // Opzioni tipo software per visualizzazione
   const tipiSoftware = [
@@ -164,7 +245,6 @@ function Home() {
     { icon: <FaCode />, title: "Sviluppo Software", desc: "Soluzioni custom su misura", projects: 45, color: "#4e73df" },
     { icon: <FaMobile />, title: "App Mobile", desc: "iOS e Android nativi", projects: 23, color: "#e74a3b" },
     { icon: <FaGlobe />, title: "Siti Web", desc: "Design moderni e responsivi", projects: 67, color: "#1cc88a" },
-    { icon: <FaChartLine />, title: "Business Intelligence", desc: "Analisi dati avanzate", projects: 12, color: "#f6c23e" },
     { icon: <FaCloud />, title: "Cloud Solutions", desc: "Soluzioni scalabili", projects: 18, color: "#36b9cc" },
     { icon: <FaCogs />, title: "Automazione", desc: "Processi intelligenti", projects: 34, color: "#6f42c1" }
   ];
@@ -207,164 +287,219 @@ function Home() {
 
   return (
     <div className="home-page">
-      {/* HERO SECTION CON IMMAGINE DI SFONDO */}
-      <section className="hero-section position-relative overflow-hidden">
-        {/* Immagine di sfondo */}
-        <div className="hero-background position-absolute top-0 start-0 w-100 h-100"></div>
+      {/* HERO SECTION WIDESCREEN CON MENU OVERLAY */}
+      <section 
+        className="hero-section position-relative overflow-hidden"
+        style={{
+          height: '55vh',
+          minHeight: '450px',
+          maxHeight: '650px',
+          width: '100vw',
+          marginLeft: 'calc(-50vw + 50%)',
+          marginRight: 'calc(-50vw + 50%)',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        }}
+      >
+        {/* Immagine di sfondo widescreen */}
+        {heroImage && (
+          <img 
+            src={heroImage.src}
+            alt={heroImage.alt}
+            className="position-absolute top-0 start-0 w-100 h-100"
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'center center',
+              zIndex: 1,
+              width: '100%',
+              height: '100%'
+            }}
+            onLoad={() => console.log('Immagine caricata:', heroImage.src)}
+            onError={() => console.error('Errore caricamento immagine:', heroImage.src)}
+          />
+        )}
         
-        {/* Overlay per migliorare la leggibilità del testo */}
-        <div className="hero-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+        {/* Overlay gradiente per leggibilità */}
+        <div 
+          className="position-absolute top-0 start-0 w-100 h-100"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2))',
+            zIndex: 2
+          }}
+        />
         
-        <div className="container position-relative z-3">
-          <div className="row align-items-center py-5" style={{ minHeight: '80vh' }}>
-            <div className="col-lg-7" data-aos="fade-right">
-              <div className="hero-content text-white py-5">
-                <div className="hero-badge mb-4">
-                  <span className="badge bg-primary bg-opacity-90 text-white rounded-pill px-4 py-2 fs-6 shadow">
-                    <FaRocket className="me-2" />
-                    Il futuro del software development
-                  </span>
-                </div>
-                
-                <h1 className="display-2 fw-bold mb-4 hero-title">
-                  Domanda & <span className="text-gradient">Software</span>
-                </h1>
-                
-                <p className="lead mb-4 fs-4 text-white">
-                  Il marketplace che connette <strong>visionari</strong> con i migliori <strong>sviluppatori</strong>. 
-                  Trasforma le tue idee in soluzioni software innovative.
-                </p>
-                
-                <div className="hero-stats row g-4 mb-5">
-                  <div className="col-4">
-                    <div className="stat-item text-center bg-white bg-opacity-10 rounded-4 p-3">
-                      <h3 className="fw-bold mb-1 text-white">{stats.richieste}+</h3>
-                      <small className="text-white opacity-90">Progetti</small>
-                    </div>
-                  </div>
-                  <div className="col-4">
-                    <div className="stat-item text-center bg-white bg-opacity-10 rounded-4 p-3">
-                      <h3 className="fw-bold mb-1 text-white">{stats.fornitori}+</h3>
-                      <small className="text-white opacity-90">Sviluppatori</small>
-                    </div>
-                  </div>
-                  <div className="col-4">
-                    <div className="stat-item text-center bg-white bg-opacity-10 rounded-4 p-3">
-                      <h3 className="fw-bold mb-1 text-white">{stats.soddisfazione}%</h3>
-                      <small className="text-white opacity-90">Soddisfazione</small>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="hero-cta d-flex flex-wrap gap-3">
-                  <Link to="/register" className="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-lg">
-                    <FaRocket className="me-2" />
-                    Inizia Ora
-                  </Link>
-                  <a href="#categorie" className="btn btn-outline-light btn-lg rounded-pill px-5 py-3 shadow">
-                    <FaPlay className="me-2" />
-                    Scopri Come
-                  </a>
-                </div>
-              </div>
-            </div>
-            
-            <div className="col-lg-5 text-center" data-aos="fade-left">
-              <div className="hero-visual py-5">
-                <div className="floating-cards position-relative" style={{ height: '400px' }}>
-                  <div className="floating-card position-absolute" style={{ top: '10%', left: '10%' }} data-aos="zoom-in" data-aos-delay="200">
-                    <div className="card border-0 shadow-lg rounded-4 bg-white" style={{ width: '250px' }}>
-                      <div className="card-body p-4">
-                        <div className="d-flex align-items-center mb-3">
-                          <div className="icon-wrapper bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                            <FaLightbulb className="text-primary" size={24} />
-                          </div>
-                          <div>
-                            <h6 className="mb-0 fw-bold">Idea Innovativa</h6>
-                            <small className="text-muted">CRM per startup</small>
-                          </div>
-                        </div>
-                        <div className="progress mb-2" style={{ height: '6px' }}>
-                          <div className="progress-bar bg-primary" style={{ width: '75%' }}></div>
-                        </div>
-                        <small className="text-muted">3 offerte ricevute</small>
-                      </div>
-                    </div>
-                  </div>
+        {/* CONTENUTO HERO CENTRATO */}
+        <div className="container-fluid position-relative" style={{ zIndex: 3, height: '100%' }}>
+          <div className="row align-items-center justify-content-center" style={{ height: '100%', paddingTop: '90px' }}>
+            <div className="col-12 col-lg-10 d-flex justify-content-center align-items-center">
+              <div className="hero-main-card text-center" data-aos="fade-up" style={{ width: '100%', maxWidth: '800px' }}>
+                <div className="py-3 px-3">
+                  <h1 className="display-2 fw-bold mb-3 text-white" style={{ 
+                    textShadow: '3px 3px 8px rgba(0,0,0,0.9)',
+                    lineHeight: '1.1',
+                    marginBottom: '1.5rem'
+                  }}>
+                    Domanda & <span className="text-warning">Software</span>
+                  </h1>
                   
-                  <div className="floating-card position-absolute" style={{ top: '40%', right: '0%' }} data-aos="zoom-in" data-aos-delay="400">
-                    <div className="card border-0 shadow-lg rounded-4 bg-success text-white" style={{ width: '220px' }}>
-                      <div className="card-body p-4">
-                        <div className="d-flex align-items-center justify-content-between">
-                          <div>
-                            <h6 className="mb-1 fw-bold">Progetto Completato</h6>
-                            <small className="opacity-75">App E-commerce</small>
-                          </div>
-                          <FaCheckCircle size={32} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="lead mb-4 text-white fs-4" style={{ 
+                    textShadow: '2px 2px 6px rgba(0,0,0,0.9)',
+                    maxWidth: '700px',
+                    margin: '0 auto 2rem auto',
+                    lineHeight: '1.4'
+                  }}>
+                    Il marketplace che connette <strong>visionari</strong> con i migliori <strong>sviluppatori</strong>. 
+                    Trasforma le tue idee in soluzioni software innovative.
+                  </p>
                   
-                  <div className="floating-card position-absolute" style={{ bottom: '10%', left: '20%' }} data-aos="zoom-in" data-aos-delay="600">
-                    <div className="card border-0 shadow-lg rounded-4 bg-warning" style={{ width: '200px' }}>
-                      <div className="card-body p-4">
-                        <div className="d-flex align-items-center justify-content-between">
-                          <div>
-                            <h6 className="mb-1 fw-bold text-dark">Guadagno</h6>
-                            <h4 className="mb-0 text-dark">€15.750</h4>
-                          </div>
-                          <FaTrophy size={32} className="text-dark" />
-                        </div>
-                      </div>
-                    </div>
+                  <div className="hero-cta d-flex flex-wrap gap-4 justify-content-center">
+                    <Link to="/register" className="btn btn-warning btn-lg rounded-pill px-5 py-3 shadow-lg fs-5 fw-bold">
+                      <FaRocket className="me-2" />
+                      Inizia Ora
+                    </Link>
+                    <a href="#categorie" className="btn btn-outline-light btn-lg rounded-pill px-5 py-3 shadow border-2 fs-5">
+                      <FaPlay className="me-2" />
+                      Scopri Come
+                    </a>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        
+        {/* Indicatori foto cliccabili */}
+        <div className="photo-indicators">
+          {allHeroImages.map((_, index) => (
+            <div
+              key={index}
+              className={`photo-indicator ${index === currentImageIndex ? 'active' : ''}`}
+              onClick={() => {
+                setCurrentImageIndex(index);
+                setHeroImage(allHeroImages[index]);
+              }}
+            />
+          ))}
+        </div>
       </section>
 
       {/* CATEGORIE SOFTWARE */}
-      <section className="py-5 bg-light" id="categorie">
+      <section className="py-5 bg-dark" id="categorie">
         <div className="container">
           <div className="text-center mb-5" data-aos="fade-up">
-            <h2 className="display-4 fw-bold mb-3">Categorie Software</h2>
-            <p className="lead text-muted">Scopri le nostre specializzazioni e trova il partner perfetto per il tuo progetto</p>
+            <h2 className="display-4 fw-bold mb-3 text-white">Categorie Software</h2>
+            <p className="lead text-light">Scopri le nostre specializzazioni e trova il partner perfetto per il tuo progetto</p>
           </div>
           
+          {/* LAYOUT ATTUALE - Soluzione 1: Compatto */}
           <div className="row g-4">
             {categorieHighlight.map((cat, index) => (
               <div key={index} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={index * 100}>
                 <div className="categoria-card h-100">
-                  <div className="card border-0 rounded-4 shadow-sm h-100 overflow-hidden">
-                    <div className="card-body p-4 position-relative">
-                      <div className="categoria-icon mb-3" style={{ color: cat.color }}>
-                        {cat.icon}
+                  <div className="card border-2 border-opacity-10 rounded-4 shadow-lg h-100 overflow-hidden card-hover">
+                    <div className="card-body p-3 position-relative d-flex flex-column justify-content-between" style={{ minHeight: '180px' }}>
+                      <div>
+                        <div className="d-flex align-items-center mb-3">
+                          <div className="categoria-icon me-3 flex-shrink-0" style={{ color: cat.color, fontSize: '2.5rem' }}>
+                            {cat.icon}
+                          </div>
+                          <div className="flex-grow-1">
+                            <h5 className="fw-bold mb-1 text-white" style={{ fontSize: '1.3rem', lineHeight: '1.2' }}>{cat.title}</h5>
+                            <p className="text-muted mb-0" style={{ fontSize: '0.95rem', lineHeight: '1.3' }}>{cat.desc}</p>
+                          </div>
+                        </div>
                       </div>
-                      <h5 className="fw-bold mb-2">{cat.title}</h5>
-                      <p className="text-muted mb-3">{cat.desc}</p>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <small className="text-muted">{cat.projects} progetti attivi</small>
-                        <FaArrowRight style={{ color: cat.color }} />
+                      <div className="d-flex justify-content-between align-items-center mt-auto">
+                        <small className="text-muted fw-semibold" style={{ fontSize: '0.9rem' }}>{cat.projects} progetti attivi</small>
+                        <FaArrowRight style={{ color: cat.color }} size={18} />
                       </div>
-                      <div className="categoria-overlay" style={{ background: `linear-gradient(135deg, ${cat.color}20, ${cat.color}10)` }}></div>
+                      <div className="categoria-overlay" style={{ background: `linear-gradient(135deg, ${cat.color}15, ${cat.color}08)` }}></div>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* LAYOUT ALTERNATIVO - Soluzione 2: Orizzontale (commentato)
+          <div className="row g-3">
+            {categorieHighlight.map((cat, index) => (
+              <div key={index} className="col-12" data-aos="fade-up" data-aos-delay={index * 100}>
+                <div className="categoria-card">
+                  <div className="card border-2 border-opacity-10 rounded-4 shadow-lg overflow-hidden card-hover">
+                    <div className="card-body p-4 position-relative">
+                      <div className="row align-items-center">
+                        <div className="col-auto">
+                          <div className="categoria-icon-circle d-flex align-items-center justify-content-center rounded-circle" 
+                               style={{ 
+                                 width: '80px', 
+                                 height: '80px', 
+                                 backgroundColor: `${cat.color}20`,
+                                 color: cat.color, 
+                                 fontSize: '2rem' 
+                               }}>
+                            {cat.icon}
+                          </div>
+                        </div>
+                        <div className="col">
+                          <div className="row align-items-center">
+                            <div className="col-md-8">
+                              <h5 className="fw-bold mb-1 text-white" style={{ fontSize: '1.4rem' }}>{cat.title}</h5>
+                              <p className="text-muted mb-0" style={{ fontSize: '1rem' }}>{cat.desc}</p>
+                            </div>
+                            <div className="col-md-4 text-md-end">
+                              <div className="d-flex align-items-center justify-content-md-end">
+                                <small className="text-muted fw-semibold me-3">{cat.projects} progetti attivi</small>
+                                <FaArrowRight style={{ color: cat.color }} size={20} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="categoria-overlay" style={{ background: `linear-gradient(135deg, ${cat.color}15, ${cat.color}08)` }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          */}
+
+          {/* LAYOUT ALTERNATIVO - Soluzione 3: Ultra-Compatto (commentato)
+          <div className="row g-3">
+            {categorieHighlight.map((cat, index) => (
+              <div key={index} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={index * 100}>
+                <div className="categoria-card-compact">
+                  <div className="card border-0 rounded-3 shadow-sm overflow-hidden card-hover" 
+                       style={{ 
+                         background: `linear-gradient(135deg, ${cat.color}10, ${cat.color}05)`,
+                         border: `2px solid ${cat.color}30 !important`
+                       }}>
+                    <div className="card-body p-3 text-center">
+                      <div className="categoria-icon mb-2" style={{ color: cat.color, fontSize: '2rem' }}>
+                        {cat.icon}
+                      </div>
+                      <h6 className="fw-bold mb-1 text-white" style={{ fontSize: '1.1rem' }}>{cat.title}</h6>
+                      <p className="text-muted mb-2 small">{cat.desc}</p>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <small className="text-muted" style={{ fontSize: '0.8rem' }}>{cat.projects} progetti</small>
+                        <FaArrowRight style={{ color: cat.color }} size={14} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          */}
         </div>
       </section>
 
-      {/* COME FUNZIONA - VERSIONE MIGLIORATA */}
-      <section className="py-5 bg-light">
+      {/* COME FUNZIONA */}
+      <section className="py-5 bg-dark">
         <div className="container">
           <div className="text-center mb-5" data-aos="fade-up">
-            <h2 className="display-4 fw-bold mb-3">Come Funziona</h2>
-            <p className="lead text-muted">Il processo è semplice, veloce e trasparente</p>
+            <h2 className="display-4 fw-bold mb-3 text-white">Come Funziona</h2>
+            <p className="lead text-light">Semplice, veloce e sicuro. In 3 passi trasformi la tua idea in realtà</p>
           </div>
           
           <div className="row g-5">
@@ -385,8 +520,8 @@ function Home() {
                       1
                     </div>
                     <div className="step-content">
-                      <h5 className="fw-bold mb-2">Pubblica la tua idea</h5>
-                      <p className="text-muted mb-0">Descrivi dettagliatamente il software che hai in mente, il budget e i tempi di realizzazione desiderati.</p>
+                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Pubblica la tua idea</h5>
+                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Descrivi dettagliatamente il software che hai in mente, il budget e i tempi di realizzazione desiderati.</p>
                     </div>
                   </div>
                   
@@ -395,8 +530,8 @@ function Home() {
                       2
                     </div>
                     <div className="step-content">
-                      <h5 className="fw-bold mb-2">Ricevi offerte qualificate</h5>
-                      <p className="text-muted mb-0">Sviluppatori esperti verificati ti invieranno proposte personalizzate con tempi e costi dettagliati.</p>
+                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Ricevi offerte qualificate</h5>
+                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Sviluppatori esperti verificati ti invieranno proposte personalizzate con tempi e costi dettagliati.</p>
                     </div>
                   </div>
                   
@@ -405,8 +540,8 @@ function Home() {
                       3
                     </div>
                     <div className="step-content">
-                      <h5 className="fw-bold mb-2">Scegli e collabora</h5>
-                      <p className="text-muted mb-0">Seleziona l'offerta migliore e inizia a collaborare con pagamenti sicuri e comunicazione supervisionata.</p>
+                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Scegli e collabora</h5>
+                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Seleziona l'offerta migliore e inizia a collaborare con pagamenti sicuri e comunicazione supervisionata.</p>
                     </div>
                   </div>
                 </div>
@@ -437,8 +572,8 @@ function Home() {
                       1
                     </div>
                     <div className="step-content">
-                      <h5 className="fw-bold mb-2">Esplora le opportunità</h5>
-                      <p className="text-muted mb-0">Naviga tra le richieste di progetti e trova quelli che corrispondono perfettamente alle tue competenze.</p>
+                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Esplora le opportunità</h5>
+                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Naviga tra le richieste di progetti e trova quelli che corrispondono perfettamente alle tue competenze.</p>
                     </div>
                   </div>
                   
@@ -447,8 +582,8 @@ function Home() {
                       2
                     </div>
                     <div className="step-content">
-                      <h5 className="fw-bold mb-2">Invia la tua proposta</h5>
-                      <p className="text-muted mb-0">Presenta la tua offerta professionale con tempi di consegna, costi competitivi e metodologia di lavoro.</p>
+                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Invia la tua proposta</h5>
+                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Presenta la tua offerta professionale con tempi di consegna, costi competitivi e metodologia di lavoro.</p>
                     </div>
                   </div>
                   
@@ -457,8 +592,8 @@ function Home() {
                       3
                     </div>
                     <div className="step-content">
-                      <h5 className="fw-bold mb-2">Sviluppa e guadagna</h5>
-                      <p className="text-muted mb-0">Una volta accettata l'offerta, sviluppa il progetto e ricevi il pagamento garantito al completamento.</p>
+                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Sviluppa e guadagna</h5>
+                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Una volta accettata l'offerta, sviluppa il progetto e ricevi il pagamento garantito al completamento.</p>
                     </div>
                   </div>
                 </div>
@@ -477,7 +612,7 @@ function Home() {
           <div className="row mt-5 pt-5">
             <div className="col-12" data-aos="fade-up">
               <div className="text-center mb-4">
-                <h4 className="fw-bold text-dark">Perché scegliere Domanda&Software?</h4>
+                <h4 className="fw-bold text-white">Perché scegliere Domanda&Software?</h4>
               </div>
               <div className="row g-4">
                 <div className="col-md-3 text-center">
@@ -515,11 +650,11 @@ function Home() {
       </section>
 
       {/* RICHIESTE IN EVIDENZA */}
-      <section className="py-5 bg-light" id="richieste">
+      <section className="py-5 bg-dark" id="richieste">
         <div className="container">
           <div className="text-center mb-5" data-aos="fade-up">
-            <h2 className="display-4 fw-bold mb-3">Richieste in Evidenza</h2>
-            <p className="lead text-muted">Scopri le ultime opportunità pubblicate dalla community</p>
+            <h2 className="display-4 fw-bold mb-3 text-white">Richieste in Evidenza</h2>
+            <p className="lead text-light">Scopri le ultime opportunità pubblicate dalla community</p>
           </div>
           
           {richieste.length > 0 ? (
@@ -531,17 +666,23 @@ function Home() {
                     return (
                       <div key={r.id} className="px-3">
                         <div className="richiesta-card">
-                          <div className="card border-0 shadow-lg rounded-4 h-100 overflow-hidden">
+                          <div className="card border-2 border-opacity-10 shadow-lg rounded-4 h-100 overflow-hidden card-hover">
                             <div className="card-body p-4">
                               <div className="d-flex align-items-center mb-3">
                                 {tipoSoftware && (
-                                  <div className="badge rounded-pill me-2" style={{ backgroundColor: `${tipoSoftware.color}20`, color: tipoSoftware.color }}>
+                                  <div className="badge rounded-pill me-2 fw-semibold text-truncate" style={{ 
+                                    backgroundColor: `${tipoSoftware.color}25`, 
+                                    color: tipoSoftware.color, 
+                                    border: `1px solid ${tipoSoftware.color}40`,
+                                    maxWidth: '120px',
+                                    fontSize: '0.75rem'
+                                  }}>
                                     <span className="me-1">{tipoSoftware.icon}</span>
-                                    {tipoSoftware.label}
+                                    {tipoSoftware.label.split(' - ')[0]}
                                   </div>
                                 )}
-                                <span className={`badge rounded-pill ${r.stato === 'aperta' ? 'bg-success' : 'bg-secondary'}`}>
-                                  {r.stato}
+                                <span className={`badge rounded-pill fw-semibold ${r.stato === 'aperta' ? 'bg-success' : 'bg-secondary'}`} style={{ fontSize: '0.75rem' }}>
+                                  {r.stato.toUpperCase()}
                                 </span>
                               </div>
                               
@@ -551,23 +692,31 @@ function Home() {
                                     src={r.immagine} 
                                     alt={r.titolo}
                                     className="img-fluid rounded-3 w-100"
-                                    style={{ height: '150px', objectFit: 'cover' }}
+                                    style={{ height: '140px', objectFit: 'cover', border: '1px solid rgba(0,0,0,0.1)' }}
                                   />
                                 </div>
                               )}
                               
-                              <h5 className="card-title fw-bold mb-2">{r.titolo}</h5>
-                              <p className="card-text text-muted mb-3" style={{ height: '60px', overflow: 'hidden' }}>
-                                {r.descrizione.length > 100 ? r.descrizione.substring(0, 100) + '...' : r.descrizione}
+                              <h5 className="card-title fw-bold mb-2 text-white text-truncate" style={{ fontSize: '1.1rem' }}>{r.titolo}</h5>
+                              <p className="card-text text-muted mb-3" style={{ 
+                                height: '48px', 
+                                overflow: 'hidden', 
+                                lineHeight: '1.3',
+                                fontSize: '0.9rem',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical'
+                              }}>
+                                {r.descrizione.length > 80 ? r.descrizione.substring(0, 80) + '...' : r.descrizione}
                               </p>
                               
                               <div className="richiesta-footer">
                                 <div className="d-flex justify-content-between align-items-center mb-2">
                                   <div className="d-flex align-items-center text-success">
                                     <FaEuroSign className="me-1" />
-                                    <strong>{r.budget}€</strong>
+                                    <strong className="fs-6">{r.budget}€</strong>
                                   </div>
-                                  <small className="text-muted">
+                                  <small className="text-muted fw-semibold">
                                     <FaUser className="me-1" />
                                     {r.cliente_username}
                                   </small>
@@ -604,7 +753,7 @@ function Home() {
           ) : (
             <div className="text-center py-5" data-aos="fade-up">
               <FaSearch size={64} className="text-muted mb-3" />
-              <h4>Nessun progetto pubblicato ancora</h4>
+              <h4 className="text-white">Nessun progetto pubblicato ancora</h4>
               <p className="text-muted">Sii il primo a pubblicare la tua idea!</p>
             </div>
           )}
@@ -612,11 +761,25 @@ function Home() {
       </section>
 
       {/* PRODOTTI IN EVIDENZA */}
-      <section className="py-5" id="prodotti">
+      <section className="py-5 bg-dark" id="prodotti">
         <div className="container">
           <div className="text-center mb-5" data-aos="fade-up">
-            <h2 className="display-4 fw-bold mb-3">Prodotti in Evidenza</h2>
-            <p className="lead text-muted">Soluzioni software pronte all'uso create dai nostri sviluppatori</p>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <div className="flex-grow-1">
+                <h2 className="display-4 fw-bold mb-3 text-white">Prodotti in Evidenza</h2>
+                <p className="lead text-light">Soluzioni software pronte all'uso create dai nostri sviluppatori</p>
+              </div>
+              <div className="d-flex align-items-center">
+                <div className="text-center me-4">
+                  <h3 className="mb-0 text-primary">{prodotti.length}</h3>
+                  <small className="text-light">disponibili</small>
+                </div>
+                <Link to="/prodotti-pronti" className="btn btn-warning btn-lg rounded-pill shadow px-4">
+                  <FaShoppingCart className="me-2" />
+                  Marketplace
+                </Link>
+              </div>
+            </div>
           </div>
           
           {prodotti.length > 0 ? (
@@ -627,16 +790,22 @@ function Home() {
                   return (
                     <div key={p.id} className="px-3">
                       <div className="prodotto-card">
-                        <div className="card border-0 shadow-lg rounded-4 h-100 overflow-hidden">
+                        <div className="card border-2 border-opacity-10 shadow-lg rounded-4 h-100 overflow-hidden card-hover">
                           <div className="card-body p-4">
                             <div className="d-flex align-items-center mb-3">
                               {categoriaProdotto && (
-                                <div className="badge rounded-pill me-2" style={{ backgroundColor: `${categoriaProdotto.color}20`, color: categoriaProdotto.color }}>
+                                <div className="badge rounded-pill me-2 fw-semibold text-truncate" style={{ 
+                                  backgroundColor: `${categoriaProdotto.color}25`, 
+                                  color: categoriaProdotto.color, 
+                                  border: `1px solid ${categoriaProdotto.color}40`,
+                                  maxWidth: '110px',
+                                  fontSize: '0.75rem'
+                                }}>
                                   <span className="me-1">{categoriaProdotto.icon}</span>
-                                  {categoriaProdotto.label}
+                                  {categoriaProdotto.label.split('/')[0]}
                                 </div>
                               )}
-                              <span className="badge bg-info rounded-pill">
+                              <span className="badge bg-info rounded-pill fw-semibold" style={{ fontSize: '0.75rem' }}>
                                 PRONTO
                               </span>
                             </div>
@@ -647,23 +816,31 @@ function Home() {
                                   src={p.immagine} 
                                   alt={p.titolo}
                                   className="img-fluid rounded-3 w-100"
-                                  style={{ height: '150px', objectFit: 'cover' }}
+                                  style={{ height: '140px', objectFit: 'cover', border: '1px solid rgba(0,0,0,0.1)' }}
                                 />
                               </div>
                             )}
                             
-                            <h5 className="card-title fw-bold mb-2">{p.titolo}</h5>
-                            <p className="card-text text-muted mb-3" style={{ height: '60px', overflow: 'hidden' }}>
-                              {p.descrizione.length > 100 ? p.descrizione.substring(0, 100) + '...' : p.descrizione}
+                            <h5 className="card-title fw-bold mb-2 text-white text-truncate" style={{ fontSize: '1.1rem' }}>{p.titolo}</h5>
+                            <p className="card-text text-muted mb-3" style={{ 
+                              height: '48px', 
+                              overflow: 'hidden', 
+                              lineHeight: '1.3',
+                              fontSize: '0.9rem',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical'
+                            }}>
+                              {p.descrizione.length > 80 ? p.descrizione.substring(0, 80) + '...' : p.descrizione}
                             </p>
                             
                             <div className="prodotto-footer">
                               <div className="d-flex justify-content-between align-items-center mb-2">
                                 <div className="d-flex align-items-center text-success">
                                   <FaEuroSign className="me-1" />
-                                  <strong>{p.prezzo}€</strong>
+                                  <strong className="fs-6">{p.prezzo}€</strong>
                                 </div>
-                                <small className="text-muted">
+                                <small className="text-muted fw-semibold">
                                   <FaUser className="me-1" />
                                   {p.fornitore_username}
                                 </small>
@@ -691,11 +868,31 @@ function Home() {
           ) : (
             <div className="text-center py-5" data-aos="fade-up">
               <FaShoppingCart size={64} className="text-muted mb-3" />
-              <h4>Nessun prodotto disponibile ancora</h4>
+              <h4 className="text-white">Nessun prodotto disponibile ancora</h4>
               <p className="text-muted">I nostri sviluppatori stanno preparando soluzioni innovative!</p>
               <Link to="/prodotti-pronti" className="btn btn-primary rounded-pill px-4 py-2 mt-3">
                 Esplora Marketplace <FaArrowRight className="ms-2" />
               </Link>
+            </div>
+          )}
+          
+          {/* Call to Action per Marketplace */}
+          {prodotti.length > 0 && (
+            <div className="text-center mt-5" data-aos="fade-up">
+              <div className="bg-light rounded-4 p-4 border border-warning border-opacity-25">
+                <h4 className="fw-bold text-white mb-2">
+                  <FaShoppingCart className="text-warning me-2" />
+                  Esplora Tutto il Marketplace
+                </h4>
+                <p className="text-muted mb-3">
+                  Scopri centinaia di soluzioni software pronte all'uso create dai migliori sviluppatori
+                </p>
+                <Link to="/prodotti-pronti" className="btn btn-warning btn-lg rounded-pill px-5 shadow">
+                  <FaEye className="me-2" />
+                  Sfoglia Tutti i Prodotti
+                  <FaArrowRight className="ms-2" />
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -705,8 +902,8 @@ function Home() {
       <section className="py-5">
         <div className="container">
           <div className="text-center mb-5" data-aos="fade-up">
-            <h2 className="display-4 fw-bold mb-3">Cosa Dicono di Noi</h2>
-            <p className="lead text-muted">Le storie di successo della nostra community</p>
+            <h2 className="display-4 fw-bold mb-3 text-white">Cosa Dicono di Noi</h2>
+            <p className="lead text-light">Le storie di successo della nostra community</p>
           </div>
           
           <div data-aos="fade-up">
@@ -854,15 +1051,15 @@ function Home() {
             <div className="col-lg-2">
               <h5 className="fw-bold mb-3">Supporto</h5>
               <ul className="list-unstyled">
-                <li className="mb-2"><a href="#" className="text-white-50 text-decoration-none">Centro Aiuto</a></li>
-                <li className="mb-2"><a href="#" className="text-white-50 text-decoration-none">Contatti</a></li>
-                <li className="mb-2"><a href="#" className="text-white-50 text-decoration-none">FAQ</a></li>
+                <li className="mb-2"><Link to="/scopo-del-sito" className="text-white-50 text-decoration-none">Scopo del Sito</Link></li>
+                <li className="mb-2"><Link to="/contatti" className="text-white-50 text-decoration-none">Contatti</Link></li>
+                <li className="mb-2"><Link to="/faq" className="text-white-50 text-decoration-none">FAQ</Link></li>
               </ul>
             </div>
             <div className="col-lg-2">
               <h5 className="fw-bold mb-3">Legale</h5>
               <ul className="list-unstyled">
-                <li className="mb-2"><Link to="/privacy" className="text-white-50 text-decoration-none">Privacy Policy</Link></li>
+                <li className="mb-2"><Link to="/privacy-policy" className="text-white-50 text-decoration-none">Privacy Policy</Link></li>
                 <li className="mb-2"><a href="#" className="text-white-50 text-decoration-none">Termini</a></li>
                 <li className="mb-2"><a href="#" className="text-white-50 text-decoration-none">Cookie</a></li>
               </ul>
@@ -870,7 +1067,7 @@ function Home() {
             <div className="col-lg-2">
               <h5 className="fw-bold mb-3">Azienda</h5>
               <ul className="list-unstyled">
-                <li className="mb-2"><a href="#" className="text-white-50 text-decoration-none">Chi Siamo</a></li>
+                <li className="mb-2"><Link to="/chi-siamo" className="text-white-50 text-decoration-none">Chi Siamo</Link></li>
                 <li className="mb-2"><a href="#" className="text-white-50 text-decoration-none">Carriere</a></li>
                 <li className="mb-2"><a href="#" className="text-white-50 text-decoration-none">Partner</a></li>
               </ul>
@@ -902,161 +1099,155 @@ function Home() {
       )}
 
       {/* CSS INLINE PER LA SEZIONE COME FUNZIONA E HERO */}
-      <style>{`
-        /* HERO SECTION CON IMMAGINE DI SFONDO */
-        .hero-section {
-          position: relative;
-          overflow: hidden;
-          height: 80vh;
-          min-height: 600px;
-          max-height: 800px;
-        }
-        
-        .hero-background {
-          background-image: url('/sito_web.png');
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
-          filter: brightness(0.8);
-        }
-        
-        .hero-overlay {
-          background: linear-gradient(135deg, rgba(78,115,223,0.6) 0%, rgba(78,115,223,0.4) 50%, rgba(220,53,69,0.5) 100%);
-        }
-        
-        .text-gradient {
-          background: linear-gradient(135deg, #fff 0%, #ffd700 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        
-        .hero-title {
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .floating-cards .floating-card {
-          animation: float 6s ease-in-out infinite;
-        }
-        
-        .floating-cards .floating-card:nth-child(2) {
-          animation-delay: -2s;
-        }
-        
-        .floating-cards .floating-card:nth-child(3) {
-          animation-delay: -4s;
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        
-        /* RESPONSIVE HERO */
-        @media (max-width: 768px) {
+      <style>
+        {`
+          .home-page {
+            overflow-x: hidden;
+          }
+          
+          /* Menu Moderno Overlay */
+          .nav-link-modern {
+            color: white !important;
+            text-decoration: none !important;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid transparent;
+          }
+          
+          .nav-link-modern:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            color: #ffc107 !important;
+          }
+          
+          .mobile-nav-link {
+            padding: 12px 20px !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin: 4px 0;
+          }
+          
+          .mobile-nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(10px);
+          }
+          
+          .mobile-menu-overlay {
+            backdrop-filter: blur(20px);
+            border-radius: 0 0 20px 20px;
+          }
+          
+          /* Hero Section */
           .hero-section {
-            height: auto;
-            min-height: 70vh;
-            max-height: none;
+            position: relative;
+            height: 55vh;
+            overflow: hidden;
           }
           
-          .hero-content {
+          .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: opacity 1s ease-in-out;
+          }
+          
+          .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 2rem 0 !important;
+            color: white;
           }
           
-          .hero-title {
-            font-size: 2.5rem !important;
-          }
-          
-          .floating-cards {
-            display: none;
-          }
-          
-          .hero-stats .col-4 {
+          .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
             margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
           }
-        }
-        
-        /* SEZIONE COME FUNZIONA */
-        .how-it-works-section {
-          background: white;
-          border-radius: 20px;
-          padding: 2rem;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-          transition: transform 0.3s ease;
-        }
-        
-        .how-it-works-section:hover {
-          transform: translateY(-5px);
-        }
-        
-        .step-number-modern {
-          font-family: 'Arial', sans-serif;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-          transition: all 0.3s ease;
-        }
-        
-        .step-number-modern:hover {
-          transform: scale(1.1);
-        }
-        
-        .icon-wrapper {
-          background: linear-gradient(45deg, rgba(78,115,223,0.1), rgba(78,115,223,0.05)) !important;
-        }
-        
-        .feature-card {
-          transition: all 0.3s ease;
-          border: 1px solid rgba(0,0,0,0.05);
-        }
-        
-        .feature-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
-        }
-        
-        .steps-container .step-item:not(:last-child)::after {
-          content: '';
-          position: absolute;
-          left: 25px;
-          top: 50px;
-          width: 2px;
-          height: 60px;
-          background: linear-gradient(to bottom, #e9ecef, transparent);
-          z-index: 0;
-        }
-        
-        .steps-container {
-          position: relative;
-        }
-        
-        .step-item {
-          position: relative;
-          z-index: 1;
-        }
-        
-        .bg-light {
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-        }
-        
-        @media (max-width: 768px) {
-          .how-it-works-section {
-            padding: 1.5rem;
+          
+          .hero-content p {
+            font-size: 1.2rem;
             margin-bottom: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
           }
           
-          .step-number-modern {
-            width: 40px !important;
-            height: 40px !important;
-            font-size: 1rem !important;
+          .photo-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 5;
           }
           
-          .icon-wrapper {
-            width: 60px !important;
-            height: 60px !important;
+          .photo-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
           }
-        }
-      `}</style>
+          
+          .photo-indicator.active {
+            background: white;
+            transform: scale(1.2);
+          }
+          
+          .hover-effect {
+            transition: all 0.3s ease;
+          }
+          
+          .hover-effect:hover {
+            background-color: rgba(255,255,255,0.2) !important;
+            backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+          }
+          
+          @media (max-width: 768px) {
+            .hero-content h1 {
+              font-size: 2.5rem;
+            }
+            .hero-content p {
+              font-size: 1rem;
+            }
+          }
+          
+          /* Card Navbar Hover Effects */
+          .card-body a:hover {
+            color: #ffc107 !important;
+            transform: translateY(-1px);
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+          }
+          
+          /* Navbar trasparente */
+          .card-body .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+          }
+          
+          .card-body .btn-outline-light:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: #ffc107;
+            color: #ffc107 !important;
+          }
+        `}
+      </style>
     </div>
   );
 }

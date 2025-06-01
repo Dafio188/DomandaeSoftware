@@ -1,13 +1,16 @@
-// Configurazione API automatica per sviluppo e produzione
+// Configurazione API per sviluppo locale
 const isDevelopment = import.meta.env.MODE === 'development';
 
-// URL del backend in base all'ambiente
-export const API_BASE_URL = isDevelopment 
-  ? 'http://localhost:8001'  // Sviluppo locale
-  : import.meta.env.VITE_API_URL || 'https://domanda-backend-production.railway.app'; // Produzione
+// FORZA BACKEND LOCALE per sviluppo
+export const API_BASE_URL = 'http://localhost:8001';  // Sempre backend locale Docker
 
 // Base path per le API
 export const API_BASE = `${API_BASE_URL}/api/`;
+
+console.log('🔧 API Configuration:');
+console.log('- Environment:', import.meta.env.MODE);
+console.log('- API Base URL:', API_BASE_URL);
+console.log('- API Base:', API_BASE);
 
 // Configurazione axios predefinita
 export const apiConfig = {

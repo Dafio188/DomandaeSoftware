@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getAllRichieste } from '../services/api';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { 
   FaSearch, FaFilter, FaSort, FaEye, FaEuroSign, FaCalendar, 
   FaUser, FaLayerGroup, FaChevronLeft, FaChevronRight,
-  FaImage, FaExclamationTriangle, FaSpinner, FaArrowLeft
+  FaImage, FaExclamationTriangle, FaSpinner, FaArrowLeft,
+  FaHandshake, FaTimes
 } from 'react-icons/fa';
 
 function RichiestePage() {
@@ -27,6 +29,13 @@ function RichiestePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
 
+  // Stati per modal offerta
+  const [showModalOfferta, setShowModalOfferta] = useState(false);
+  const [richiestaSelezionata, setRichiestaSelezionata] = useState(null);
+  const [descrizione, setDescrizione] = useState('');
+  const [prezzo, setPrezzo] = useState('');
+  const [success, setSuccess] = useState('');
+
   // Categorie software
   const categorieSoftware = [
     { value: 'crm', label: 'CRM', icon: '👥' },
@@ -47,19 +56,81 @@ function RichiestePage() {
     const loadRichieste = async () => {
       try {
         setLoading(true);
+        console.log('🔄 Caricamento richieste...');
+        console.log('Token disponibile:', !!token);
+        
         const data = await getAllRichieste(token);
-        setRichieste(data);
-        setRichiesteFiltered(data);
+        console.log('📊 Dati ricevuti:', data);
+        console.log('📊 Numero richieste:', data?.length || 0);
+        
+        setRichieste(data || []);
+        setRichiesteFiltered(data || []);
+        setError('');
       } catch (err) {
-        setError('Errore nel caricamento delle richieste');
-        console.error('Errore:', err);
+        console.error('❌ Errore nel caricamento delle richieste:', err);
+        setError(`Errore nel caricamento delle richieste: ${err.message}`);
+        setRichieste([]);
+        setRichiesteFiltered([]);
       } finally {
         setLoading(false);
+        console.log('✅ Caricamento completato');
       }
     };
 
     loadRichieste();
   }, [token]);
+
+  // Gestione invio offerta
+  const handleSubmitOfferta = async (e) => {
+    e.preventDefault();
+    setSuccess(''); 
+    setError('');
+    
+    try {
+      await axios.post('/api/offerte/', {
+        richiesta: richiestaSelezionata.id,
+        fornitore: user.id,
+        descrizione,
+        prezzo
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setSuccess('🎉 Offerta inviata con successo! Il cliente riceverà una notifica e potrà valutare la tua proposta.');
+      setDescrizione(''); 
+      setPrezzo('');
+      setShowModalOfferta(false);
+      setRichiestaSelezionata(null);
+      
+      // Mostra un alert di successo
+      setTimeout(() => {
+        alert('✅ OFFERTA INVIATA!\n\nLa tua offerta è stata inviata con successo al cliente.\n\nRiceverai una notifica quando il cliente prenderà una decisione.');
+      }, 500);
+      
+    } catch (err) {
+      setError("Errore nell'invio dell'offerta: " + (err.response?.data?.detail || err.message));
+    }
+  };
+
+  // Gestione apertura modal offerta
+  const handleFaiOfferta = (richiesta) => {
+    setRichiestaSelezionata(richiesta);
+    setShowModalOfferta(true);
+    setDescrizione('');
+    setPrezzo('');
+    setError('');
+    setSuccess('');
+  };
+
+  // Gestione chiusura modal offerta
+  const handleCloseModalOfferta = () => {
+    setShowModalOfferta(false);
+    setRichiestaSelezionata(null);
+    setDescrizione('');
+    setPrezzo('');
+    setError('');
+    setSuccess('');
+  };
 
   // Applica filtri
   useEffect(() => {
@@ -387,18 +458,33 @@ function RichiestePage() {
                             {new Date(richiesta.data_creazione).toLocaleDateString('it-IT')}
                           </small>
                           
-                          {user?.ruolo === 'fornitore' && richiesta.stato === 'aperta' ? (
-                            <Link 
-                              to="/dashboard-fornitore" 
-                              className="btn btn-primary btn-sm rounded-pill"
-                            >
-                              <FaEye className="me-1" />
-                              Fai Offerta
-                            </Link>
+                          {/* Debug info - rimuovere dopo test */}
+                          {console.log('Debug Richiesta:', {
+                            id: richiesta.id,
+                            stato: richiesta.stato,
+                            userRuolo: user?.ruolo,
+                            showButton: user?.ruolo === 'fornitore' && richiesta.stato === 'aperta'
+                          })}
+                          
+                          {user?.ruolo === 'fornitore' ? (
+                            richiesta.stato === 'aperta' ? (
+                              <button 
+                                className="btn btn-primary btn-sm rounded-pill"
+                                onClick={() => handleFaiOfferta(richiesta)}
+                              >
+                                <FaHandshake className="me-1" />
+                                Fai Offerta
+                              </button>
+                            ) : (
+                              <span className="btn btn-outline-warning btn-sm rounded-pill disabled">
+                                <FaHandshake className="me-1" />
+                                {richiesta.stato === 'assegnata' ? 'Assegnata' : 'Completata'}
+                              </span>
+                            )
                           ) : (
                             <span className="btn btn-outline-secondary btn-sm rounded-pill disabled">
                               <FaEye className="me-1" />
-                              Visualizza
+                              {user ? 'Solo Fornitori' : 'Login Richiesto'}
                             </span>
                           )}
                         </div>
@@ -475,6 +561,133 @@ function RichiestePage() {
           </div>
         )}
       </div>
+
+      {/* MODAL OFFERTA */}
+      {showModalOfferta && richiestaSelezionata && (
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1">
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg rounded-4">
+              <div className="modal-header bg-primary bg-gradient text-white border-0 rounded-top-4">
+                <div>
+                  <h4 className="modal-title mb-1">
+                    <FaHandshake className="me-3" />
+                    Fai un'offerta
+                  </h4>
+                  <p className="mb-0 opacity-90">Proponi la tua soluzione per: {richiestaSelezionata.titolo}</p>
+                </div>
+                <button 
+                  type="button" 
+                  className="btn-close btn-close-white" 
+                  onClick={handleCloseModalOfferta}
+                ></button>
+              </div>
+              <div className="modal-body p-4">
+                {/* Messaggio di successo */}
+                {success && (
+                  <div className="alert alert-success alert-dismissible fade show rounded-4 mb-4" role="alert">
+                    <strong>{success}</strong>
+                    <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
+                  </div>
+                )}
+
+                {/* Messaggio di errore */}
+                {error && (
+                  <div className="alert alert-danger alert-dismissible fade show rounded-4 mb-4" role="alert">
+                    <strong>{error}</strong>
+                    <button type="button" className="btn-close" onClick={() => setError('')}></button>
+                  </div>
+                )}
+
+                {/* Info richiesta */}
+                <div className="card bg-light bg-gradient border-0 rounded-4 mb-4">
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-8">
+                        <h6 className="text-primary fw-bold mb-2">{richiestaSelezionata.titolo}</h6>
+                        <p className="text-muted mb-2" style={{ fontSize: '0.9rem' }}>
+                          {richiestaSelezionata.descrizione.length > 150 
+                            ? richiestaSelezionata.descrizione.substring(0, 150) + '...'
+                            : richiestaSelezionata.descrizione
+                          }
+                        </p>
+                      </div>
+                      <div className="col-md-4 text-md-end">
+                        <div className="mb-2">
+                          <small className="text-muted">Budget cliente</small>
+                          <div className="h5 text-success mb-0">
+                            <FaEuroSign className="me-1" />
+                            {richiestaSelezionata.budget}€
+                          </div>
+                        </div>
+                        <small className="text-muted">
+                          <FaUser className="me-1" />
+                          {richiestaSelezionata.cliente_username}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmitOfferta}>
+                  <div className="mb-4">
+                    <label className="form-label fw-bold">La tua proposta dettagliata</label>
+                    <textarea 
+                      className="form-control" 
+                      rows="6"
+                      placeholder="Descrivi la tua soluzione, metodologia di lavoro, tempistiche e cosa include il prezzo..."
+                      value={descrizione} 
+                      onChange={e => setDescrizione(e.target.value)} 
+                      required 
+                    />
+                    <div className="form-text">
+                      💡 Suggerimento: Sii specifico su cosa offri, i tempi di consegna e eventuali garanzie
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <label className="form-label fw-bold">Il tuo prezzo</label>
+                    <div className="input-group input-group-lg">
+                      <span className="input-group-text bg-success text-white">
+                        <FaEuroSign />
+                      </span>
+                      <input 
+                        type="number" 
+                        className="form-control" 
+                        placeholder="Inserisci il tuo prezzo" 
+                        value={prezzo} 
+                        onChange={e => setPrezzo(e.target.value)} 
+                        required 
+                      />
+                    </div>
+                    <div className="form-text">
+                      💰 Il cliente ha un budget di {richiestaSelezionata.budget}€
+                    </div>
+                  </div>
+                  
+                  <div className="d-flex gap-3">
+                    <button 
+                      type="button" 
+                      className="btn btn-outline-secondary btn-lg rounded-pill"
+                      onClick={handleCloseModalOfferta}
+                    >
+                      <FaTimes className="me-2" />
+                      Annulla
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary btn-lg flex-fill rounded-pill shadow"
+                      disabled={!descrizione || !prezzo}
+                    >
+                      <FaHandshake className="me-2" />
+                      Invia Offerta
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .bg-gradient-light {
