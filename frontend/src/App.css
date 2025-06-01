@@ -43,6 +43,50 @@ body {
   padding: 2em;
 }
 
+/* Stili per le card delle categorie software */
+.categoria-card .card {
+  background: #ffffff !important;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+}
+
+.categoria-card .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+
+.categoria-card .card-body {
+  background: #ffffff !important;
+}
+
+.categoria-card h5 {
+  color: #2c3e50 !important;
+  font-weight: 700 !important;
+}
+
+.categoria-card p {
+  color: #6c757d !important;
+}
+
+.categoria-card .text-muted {
+  color: #6c757d !important;
+}
+
+.categoria-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.categoria-card .card-body > * {
+  position: relative;
+  z-index: 2;
+}
+
 .read-the-docs {
   color: #888;
 }

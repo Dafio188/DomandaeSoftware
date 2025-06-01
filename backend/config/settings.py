@@ -3,7 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-REPLACE_ME'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-domanda-software-dev-key-2024-very-long-secret-key-for-development')
 DEBUG = True
 ALLOWED_HOSTS = ['*']
 
@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'recensioni',
     'prodotti',
     'testimonianze',
+    'faq',
 ]
 
 MIDDLEWARE = [
@@ -59,19 +60,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'domanda_software'),
-        'USER': os.environ.get('DB_USER', 'domanda'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'domanda_pw'),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        'OPTIONS': {
-            'options': '-c default_transaction_isolation=serializable'
-        },
+# Database - Uso PostgreSQL per Docker, SQLite per sviluppo locale
+if os.environ.get('PRODUCTION', False) or os.environ.get('DB_HOST'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'domanda_software'),
+            'USER': os.environ.get('DB_USER', 'domanda'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'domanda_pw'),
+            'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
     }
-}
+else:
+    # SQLite per sviluppo locale
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -97,6 +105,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -123,6 +132,23 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
+# Configurazioni specifiche per l'admin Django
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8001',
+    'http://127.0.0.1:8001',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
+# Configurazioni CSRF per sviluppo
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# Configurazioni sessione
+SESSION_COOKIE_AGE = 86400  # 24 ore
+SESSION_SAVE_EVERY_REQUEST = True
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -136,11 +162,12 @@ EMAIL_HOST_PASSWORD = 'fgts kiuf rkub qujc'
 DEFAULT_FROM_EMAIL = 'recupero.gestionale@gmail.com'
 EMAIL_SUBJECT_PREFIX = '[Gestionale Software] '
 
-# Aggiunte per HTTPS e sicurezza (in produzione)
+# Aggiunte per HTTPS e sicurezza (solo in produzione vera)
 PRODUCTION = os.environ.get('PRODUCTION', False)
+DOCKER_ENV = os.environ.get('DB_HOST', False)  # Rileva ambiente Docker
 
-if PRODUCTION:
-    # Sicurezza HTTPS
+if PRODUCTION and not DOCKER_ENV:
+    # Sicurezza HTTPS (solo in produzione vera, non Docker sviluppo)
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -162,9 +189,12 @@ if PRODUCTION:
     # ALLOWED_HOSTS specifici
     ALLOWED_HOSTS = ['tuodominio.com', 'www.tuodominio.com']
 else:
-    # Mantieni impostazioni sviluppo
+    # Mantieni impostazioni sviluppo (locale e Docker)
     DEBUG = True
     ALLOWED_HOSTS = ['*']
+    # Non forzare HTTPS in sviluppo
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 # Password Hashing più sicuro
 PASSWORD_HASHERS = [

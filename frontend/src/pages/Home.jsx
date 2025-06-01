@@ -25,61 +25,143 @@ function Home() {
   // Stati per menu mobile
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Sistema foto dinamico
+  // Sistema foto dinamico - rilevamento automatico
   const [heroImage, setHeroImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
-  // Sistema dinamico per caricare tutte le foto dalla cartella
   const [allHeroImages, setAllHeroImages] = useState([]);
   
-  // Carica dinamicamente tutte le immagini dalla cartella foto_home
-  useEffect(() => {
-    const loadImages = async () => {
-      try {
-        // Carica tutti i file dalla cartella foto_home
-        const imageModules = import.meta.glob('/foto_home/*.(png|jpg|jpeg|webp)', { eager: true });
-        
-        const imageArray = Object.keys(imageModules).map((path, index) => ({
-          src: path,
-          alt: `Domanda & Software - Immagine ${index + 1}`
-        }));
-        
-        console.log('Immagini caricate dinamicamente:', imageArray);
-        setAllHeroImages(imageArray);
+  // Funzione per rilevare automaticamente tutte le immagini
+  const detectHeroImages = async () => {
+    try {
+      console.log('🔍 Rilevamento automatico immagini hero...');
+      
+      // Lista di possibili nomi di file da cercare (solo immagini hero)
+      const possibleImages = [
+        // Pattern con underscore (originali)
+        'sfondo_home.png', 'sfondo_home.jpg', 'sfondo_home.jpeg', 'sfondo_home.webp',
+        'sfondo_home_2.png', 'sfondo_home_2.jpg', 'sfondo_home_2.jpeg', 'sfondo_home_2.webp',
+        'sfondo_home_3.png', 'sfondo_home_3.jpg', 'sfondo_home_3.jpeg', 'sfondo_home_3.webp',
+        'sfondo_home_4.png', 'sfondo_home_4.jpg', 'sfondo_home_4.jpeg', 'sfondo_home_4.webp',
+        'sfondo_home_5.png', 'sfondo_home_5.jpg', 'sfondo_home_5.jpeg', 'sfondo_home_5.webp',
+        'sfondo_home_6.png', 'sfondo_home_6.jpg', 'sfondo_home_6.jpeg', 'sfondo_home_6.webp',
+        // Pattern senza underscore (nuovi)
+        'sfondo_home1.png', 'sfondo_home1.jpg', 'sfondo_home1.jpeg', 'sfondo_home1.webp',
+        'sfondo_home2.png', 'sfondo_home2.jpg', 'sfondo_home2.jpeg', 'sfondo_home2.webp',
+        'sfondo_home3.png', 'sfondo_home3.jpg', 'sfondo_home3.jpeg', 'sfondo_home3.webp',
+        'sfondo_home4.png', 'sfondo_home4.jpg', 'sfondo_home4.jpeg', 'sfondo_home4.webp',
+        'sfondo_home5.png', 'sfondo_home5.jpg', 'sfondo_home5.jpeg', 'sfondo_home5.webp',
+        'sfondo_home6.png', 'sfondo_home6.jpg', 'sfondo_home6.jpeg', 'sfondo_home6.webp',
+        // Altri pattern
+        'hero_1.png', 'hero_1.jpg', 'hero_1.jpeg', 'hero_1.webp',
+        'hero_2.png', 'hero_2.jpg', 'hero_2.jpeg', 'hero_2.webp',
+        'hero_3.png', 'hero_3.jpg', 'hero_3.jpeg', 'hero_3.webp',
+        'hero_4.png', 'hero_4.jpg', 'hero_4.jpeg', 'hero_4.webp',
+        'hero_5.png', 'hero_5.jpg', 'hero_5.jpeg', 'hero_5.webp',
+        'home_1.png', 'home_1.jpg', 'home_1.jpeg', 'home_1.webp',
+        'home_2.png', 'home_2.jpg', 'home_2.jpeg', 'home_2.webp',
+        'home_3.png', 'home_3.jpg', 'home_3.jpeg', 'home_3.webp',
+        'background_1.png', 'background_1.jpg', 'background_1.jpeg', 'background_1.webp',
+        'background_2.png', 'background_2.jpg', 'background_2.jpeg', 'background_2.webp',
+        'background_3.png', 'background_3.jpg', 'background_3.jpeg', 'background_3.webp'
+      ];
+      
+      // Lista di file da escludere (loghi, icone, ecc.)
+      const excludePatterns = [
+        /logo/i,           // Qualsiasi file con "logo" nel nome
+        /icon/i,           // Qualsiasi file con "icon" nel nome
+        /favicon/i,        // Favicon
+        /thumbnail/i,      // Miniature
+        /thumb/i,          // Miniature
+        /preview/i,        // Anteprime
+        /avatar/i,         // Avatar
+        /profile/i,        // Immagini profilo
+        /banner/i,         // Banner (se non sono hero)
+        /tecnobridge/i     // Specifico per il tuo logo
+      ];
+      
+      const validImages = [];
+      
+      // Testa ogni possibile immagine
+      for (const imageName of possibleImages) {
+        try {
+          // Controlla se il nome del file è nella lista di esclusione
+          const shouldExclude = excludePatterns.some(pattern => pattern.test(imageName));
+          if (shouldExclude) {
+            console.log(`🚫 Escluso file: ${imageName} (corrisponde a pattern di esclusione)`);
+            continue;
+          }
+          
+          const imagePath = `/foto_home/${imageName}`;
+          
+          // Crea un elemento img per testare se l'immagine esiste
+          const img = new Image();
+          
+          const imageExists = await new Promise((resolve) => {
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+            img.src = imagePath;
+            
+            // Timeout dopo 2 secondi
+            setTimeout(() => resolve(false), 2000);
+          });
+          
+          if (imageExists) {
+            validImages.push({
+              src: imagePath,
+              alt: `Domanda & Software - ${imageName.replace(/\.(png|jpg|jpeg|webp)$/i, '').replace(/_/g, ' ')}`
+            });
+            console.log(`✅ Trovata immagine hero: ${imagePath}`);
+          }
+        } catch (error) {
+          // Ignora errori per immagini non trovate
+        }
+      }
+      
+      if (validImages.length > 0) {
+        console.log(`🎉 Rilevate ${validImages.length} immagini hero automaticamente!`);
+        setAllHeroImages(validImages);
         
         // Imposta la prima immagine random
-        if (imageArray.length > 0) {
-          const randomIndex = Math.floor(Math.random() * imageArray.length);
-          setCurrentImageIndex(randomIndex);
-          setHeroImage(imageArray[randomIndex]);
-          console.log(`Caricata foto iniziale: ${imageArray[randomIndex].src}`);
-        }
-      } catch (error) {
-        console.error('Errore caricamento immagini:', error);
-        // Fallback alle immagini hardcoded
+        const randomIndex = Math.floor(Math.random() * validImages.length);
+        setCurrentImageIndex(randomIndex);
+        setHeroImage(validImages[randomIndex]);
+        console.log(`📸 Immagine iniziale: ${validImages[randomIndex].src}`);
+      } else {
+        console.warn('⚠️ Nessuna immagine hero trovata, uso fallback');
+        // Fallback alle immagini di default
         const fallbackImages = [
-          { src: '/foto_home/sfondo_home.png', alt: 'Domanda & Software - Marketplace' },
-          { src: '/foto_home/sfondo_home_2.png', alt: 'Domanda & Software - Sviluppatori' },
-          { src: '/foto_home/sfondo_home_3.png', alt: 'Domanda & Software - Progetti' }
+          { src: '/foto_home/sfondo_home.png', alt: 'Domanda & Software - Marketplace' }
         ];
         setAllHeroImages(fallbackImages);
         setCurrentImageIndex(0);
         setHeroImage(fallbackImages[0]);
       }
-    };
-    
-    loadImages();
+    } catch (error) {
+      console.error('❌ Errore nel rilevamento automatico:', error);
+      // Fallback in caso di errore
+      const fallbackImages = [
+        { src: '/foto_home/sfondo_home.png', alt: 'Domanda & Software - Marketplace' }
+      ];
+      setAllHeroImages(fallbackImages);
+      setCurrentImageIndex(0);
+      setHeroImage(fallbackImages[0]);
+    }
+  };
+  
+  // Inizializza il rilevamento automatico delle immagini
+  useEffect(() => {
+    detectHeroImages();
   }, []);
 
   // Rotazione automatica foto con intervalli random
   useEffect(() => {
-    if (allHeroImages.length === 0) return; // Non iniziare se non ci sono immagini
+    if (allHeroImages.length <= 1) return; // Non ruotare se c'è solo un'immagine
     
     const getRandomInterval = () => Math.floor(Math.random() * 5000) + 8000; // 8-13 secondi random
     
     const scheduleNextImage = () => {
       const interval = getRandomInterval();
-      console.log(`Prossima foto tra ${interval/1000} secondi`);
+      console.log(`⏰ Prossima foto tra ${interval/1000} secondi`);
       
       setTimeout(() => {
         setCurrentImageIndex(prev => {
@@ -90,7 +172,7 @@ function Home() {
           } while (nextIndex === prev && allHeroImages.length > 1);
           
           setHeroImage(allHeroImages[nextIndex]);
-          console.log(`Cambiata a foto: ${allHeroImages[nextIndex].src}`);
+          console.log(`🔄 Cambiata a foto: ${allHeroImages[nextIndex].src}`);
           return nextIndex;
         });
         scheduleNextImage(); // Programma la prossima rotazione
@@ -396,21 +478,21 @@ function Home() {
               <div key={index} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={index * 100}>
                 <div className="categoria-card h-100">
                   <div className="card border-2 border-opacity-10 rounded-4 shadow-lg h-100 overflow-hidden card-hover">
-                    <div className="card-body p-3 position-relative d-flex flex-column justify-content-between" style={{ minHeight: '180px' }}>
+                    <div className="card-body p-4 position-relative d-flex flex-column justify-content-between" style={{ minHeight: '200px' }}>
                       <div>
                         <div className="d-flex align-items-center mb-3">
-                          <div className="categoria-icon me-3 flex-shrink-0" style={{ color: cat.color, fontSize: '2.5rem' }}>
+                          <div className="categoria-icon me-3 flex-shrink-0" style={{ color: cat.color, fontSize: '3rem' }}>
                             {cat.icon}
                           </div>
                           <div className="flex-grow-1">
-                            <h5 className="fw-bold mb-1 text-white" style={{ fontSize: '1.3rem', lineHeight: '1.2' }}>{cat.title}</h5>
-                            <p className="text-muted mb-0" style={{ fontSize: '0.95rem', lineHeight: '1.3' }}>{cat.desc}</p>
+                            <h5 className="fw-bold mb-2 text-dark" style={{ fontSize: '1.5rem', lineHeight: '1.2' }}>{cat.title}</h5>
+                            <p className="text-muted mb-0" style={{ fontSize: '1.1rem', lineHeight: '1.4' }}>{cat.desc}</p>
                           </div>
                         </div>
                       </div>
                       <div className="d-flex justify-content-between align-items-center mt-auto">
-                        <small className="text-muted fw-semibold" style={{ fontSize: '0.9rem' }}>{cat.projects} progetti attivi</small>
-                        <FaArrowRight style={{ color: cat.color }} size={18} />
+                        <span className="text-muted fw-semibold" style={{ fontSize: '1rem' }}>{cat.projects} progetti attivi</span>
+                        <FaArrowRight style={{ color: cat.color }} size={20} />
                       </div>
                       <div className="categoria-overlay" style={{ background: `linear-gradient(135deg, ${cat.color}15, ${cat.color}08)` }}></div>
                     </div>

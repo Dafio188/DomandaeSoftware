@@ -8,14 +8,23 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database_backups:/backups
     ports:
       - "5432:5432"
     restart: always
     command: postgres -c listen_addresses='*' -c log_statement=all
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U domanda -d domanda_software"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   backend:
     build: ./backend
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py migrate &&
+             python init_data.py &&
+             python manage.py runserver 0.0.0.0:8000"
     environment:
       - DEBUG=1
       - DJANGO_SECRET_KEY=supersecretkey
@@ -25,10 +34,16 @@ services:
       - DB_PASSWORD=domanda_pw
       - DB_HOST=db
       - DB_PORT=5432
+      - PRODUCTION=true
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8001:8000"
+    volumes:
+      - ./backend/media:/app/media
+      - ./backend/static:/app/static
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
@@ -36,6 +51,31 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    restart: unless-stopped
+
+  # Servizio per backup automatico del database
+  db-backup:
+    image: postgres:15
+    depends_on:
+      - db
+    environment:
+      POSTGRES_DB: domanda_software
+      POSTGRES_USER: domanda
+      POSTGRES_PASSWORD: domanda_pw
+      PGPASSWORD: domanda_pw
+    volumes:
+      - ./database_backups:/backups
+    command: >
+      sh -c "
+      while true; do
+        sleep 3600;
+        echo 'Creando backup database...';
+        pg_dump -h db -U domanda -d domanda_software > /backups/backup_$$(date +%Y%m%d_%H%M%S).sql;
+        echo 'Backup completato';
+        find /backups -name '*.sql' -mtime +7 -delete;
+      done"
+    restart: unless-stopped
 
 volumes:
-  postgres_data: 
+  postgres_data:
+    driver: local 

@@ -14,4 +14,5 @@ urlpatterns = [
     path('api/recensioni/', include('recensioni.urls')),
     path('api/prodotti-pronti/', include('prodotti.urls')),
     path('api/testimonianze/', include('testimonianze.urls')),
+    path('api/faq/', include('faq.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
