@@ -15,7 +15,7 @@ function PasswordReset() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8001/api/utenti/password-reset/', {
+      const response = await axios.post('http://localhost:8001/api/auth/password-reset/', {
         email: email
       });
       setMessage(response.data.message);

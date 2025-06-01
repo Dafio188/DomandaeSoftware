@@ -36,7 +36,7 @@ function PasswordResetConfirm() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8001/api/utenti/password-reset-confirm/', {
+      const response = await axios.post('http://localhost:8001/api/auth/password-reset-confirm/', {
         uid: uid,
         token: token,
         new_password: newPassword
