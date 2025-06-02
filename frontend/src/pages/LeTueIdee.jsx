@@ -58,10 +58,12 @@ function LeTueIdee() {
 
   const caricaIdee = async () => {
     try {
-      const response = await axios.get('/api/idee/', {
+      const response = await axios.get('/api/richieste/', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setIdee(response.data);
+      // Filtra solo le richieste dell'utente corrente
+      const ideeUtente = response.data.filter(r => r.cliente === user.id);
+      setIdee(ideeUtente);
       setLoading(false);
     } catch (err) {
       setError('Errore nel caricamento delle idee');
@@ -77,9 +79,12 @@ function LeTueIdee() {
     setError('');
     
     try {
-      await axios.post('/api/idee/', {
-        testo: nuovaIdea.trim(),
-        categoria
+      await axios.post('/api/richieste/', {
+        titolo: `Idea ${categoria}: ${nuovaIdea.substring(0, 50)}...`,
+        descrizione: nuovaIdea.trim(),
+        tipo_software: 'altro', // Le idee sono generalmente "altro"
+        budget: 0, // Budget default per le idee
+        is_prodotto_acquistato: false
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -99,13 +104,10 @@ function LeTueIdee() {
 
   const votaIdea = async (ideaId, voto) => {
     try {
-      await axios.post(`/api/idee/${ideaId}/vota/`, {
-        voto
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      caricaIdee(); // Ricarica per aggiornare i voti
+      // Per ora disabilitiamo la votazione finché non implementiamo un sistema di voti
+      console.log(`Voto ${voto} per idea ${ideaId} - Feature da implementare`);
+      setError('Feature votazione in arrivo!');
+      setTimeout(() => setError(''), 3000);
     } catch (err) {
       setError('Errore nella votazione');
       setTimeout(() => setError(''), 3000);

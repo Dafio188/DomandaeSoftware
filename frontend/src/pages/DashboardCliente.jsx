@@ -287,7 +287,7 @@ function DashboardCliente() {
                       </div>
                     </div>
                     <div className="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                      <div className="d-flex justify-content-lg-end gap-2">
+                      <div className="d-flex justify-content-lg-end gap-2 flex-wrap">
                         <button 
                           className="btn btn-primary rounded-pill px-4"
                           onClick={() => setCurrentStep(currentStep === 1 ? 2 : 1)}
@@ -301,6 +301,13 @@ function DashboardCliente() {
                         >
                           <FaShoppingCart className="me-2" />
                           Prodotti Pronti
+                        </Link>
+                        <Link 
+                          to="/le-tue-idee"
+                          className="btn btn-outline-warning rounded-pill px-4"
+                        >
+                          <FaLightbulb className="me-2" />
+                          Le Tue Idee
                         </Link>
                       </div>
                     </div>

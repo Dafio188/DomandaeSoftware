@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import AcquistoModal from '../components/AcquistoModal';
-import { FaUserTie, FaUser, FaShieldAlt, FaLock, FaEuroSign, FaStar, FaHandshake, FaArrowRight, FaMoneyBillWave, FaComments, FaHeadset, FaUserShield, FaRocket, FaLightbulb, FaCode, FaChartLine, FaGlobe, FaMobile, FaDesktop, FaCloud, FaCogs, FaSearch, FaHeart, FaCheckCircle, FaBolt, FaTrophy, FaPlay, FaQuoteLeft, FaShoppingCart, FaEye, FaAward, FaUsers, FaBars, FaTimes, FaHome, FaInfoCircle, FaEnvelope, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import { FaUserTie, FaUser, FaShieldAlt, FaLock, FaEuroSign, FaStar, FaHandshake, FaArrowRight, FaMoneyBillWave, FaComments, FaHeadset, FaUserShield, FaRocket, FaLightbulb, FaCode, FaChartLine, FaGlobe, FaMobile, FaDesktop, FaCloud, FaCogs, FaSearch, FaHeart, FaCheckCircle, FaBolt, FaTrophy, FaPlay, FaQuoteLeft, FaShoppingCart, FaEye, FaAward, FaUsers, FaBars, FaTimes, FaHome, FaInfoCircle, FaEnvelope, FaSignInAlt, FaUserPlus, FaArrowLeft, FaClock } from 'react-icons/fa';
 import Slider from 'react-slick';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -217,7 +217,6 @@ function Home() {
     axios.get('/api/richieste/')
       .then(res => {
         setRichieste(res.data);
-        setStats(prev => ({ ...prev, richieste: res.data.length }));
       });
       
     // Carica prodotti pronti
@@ -229,13 +228,28 @@ function Home() {
         console.log('Errore caricamento prodotti:', err);
       });
       
-    // Simula statistiche (in un'app reale verrebbero da API)
-    setStats(prev => ({ 
-      ...prev, 
-      fornitori: 150, 
-      progetti: 287,
-      soddisfazione: 98 
-    }));
+    // Carica statistiche reali dal backend
+    const loadStats = async () => {
+      try {
+        const response = await axios.get('/api/stats/home/');
+        setStats(response.data);
+        console.log('📊 Statistiche caricate dal backend:', response.data);
+      } catch (error) {
+        console.warn('⚠️ Errore caricamento statistiche, uso dati di fallback:', error);
+        // Fallback con dati di default
+        setStats({
+          ore_media_offerta: 18,
+          pagamenti_sicuri: 100,
+          sviluppatori_attivi: 150,
+          soddisfazione_clienti: 94,
+          richieste_aperte: richieste.length || 12,
+          progetti_totali: 67,
+          last_updated: new Date().toISOString()
+        });
+      }
+    };
+    
+    loadStats();
   }, []);
 
   // Slider settings per richieste
@@ -449,18 +463,33 @@ function Home() {
           </div>
         </div>
         
-        {/* Indicatori foto cliccabili */}
-        <div className="photo-indicators">
-          {allHeroImages.map((_, index) => (
-            <div
-              key={index}
-              className={`photo-indicator ${index === currentImageIndex ? 'active' : ''}`}
-              onClick={() => {
-                setCurrentImageIndex(index);
-                setHeroImage(allHeroImages[index]);
-              }}
-            />
-          ))}
+        {/* NUOVI CONTROLLI FRECCE FLOATING - SENZA PALLINI */}
+        <div className="hero-navigation">
+          {/* Freccia Sinistra */}
+          <button 
+            className="hero-nav-arrow hero-nav-left"
+            onClick={() => {
+              const newIndex = currentImageIndex === 0 ? allHeroImages.length - 1 : currentImageIndex - 1;
+              setCurrentImageIndex(newIndex);
+              setHeroImage(allHeroImages[newIndex]);
+            }}
+            aria-label="Immagine precedente"
+          >
+            <FaArrowLeft />
+          </button>
+          
+          {/* Freccia Destra */}
+          <button 
+            className="hero-nav-arrow hero-nav-right"
+            onClick={() => {
+              const newIndex = currentImageIndex === allHeroImages.length - 1 ? 0 : currentImageIndex + 1;
+              setCurrentImageIndex(newIndex);
+              setHeroImage(allHeroImages[newIndex]);
+            }}
+            aria-label="Immagine successiva"
+          >
+            <FaArrowRight />
+          </button>
         </div>
       </section>
 
@@ -576,158 +605,247 @@ function Home() {
         </div>
       </section>
 
-      {/* COME FUNZIONA */}
-      <section className="py-5 bg-dark">
+      {/* COME FUNZIONA - TIMELINE INTERATTIVA */}
+      <section className="py-5 bg-dark position-relative overflow-hidden">
         <div className="container">
           <div className="text-center mb-5" data-aos="fade-up">
             <h2 className="display-4 fw-bold mb-3 text-white">Come Funziona</h2>
-            <p className="lead text-light">Semplice, veloce e sicuro. In 3 passi trasformi la tua idea in realtà</p>
+            <p className="lead text-light">Semplice, veloce e sicuro. Scopri il percorso verso il successo</p>
           </div>
           
-          <div className="row g-5">
-            {/* LATO CLIENTI */}
-            <div className="col-lg-6" data-aos="fade-right">
-              <div className="how-it-works-section h-100">
-                <div className="section-header text-center mb-4">
-                  <div className="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '80px', height: '80px' }}>
-                    <FaUser size={32} className="text-primary" />
-                  </div>
-                  <h3 className="fw-bold text-primary mb-2">Per i Clienti</h3>
-                  <p className="text-muted">Dalla idea al software funzionante</p>
-                </div>
-                
-                <div className="steps-container">
-                  <div className="step-item d-flex align-items-start mb-4">
-                    <div className="step-number-modern bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-4 flex-shrink-0" style={{ width: '50px', height: '50px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                      1
-                    </div>
-                    <div className="step-content">
-                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Pubblica la tua idea</h5>
-                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Descrivi dettagliatamente il software che hai in mente, il budget e i tempi di realizzazione desiderati.</p>
-                    </div>
-                  </div>
-                  
-                  <div className="step-item d-flex align-items-start mb-4">
-                    <div className="step-number-modern bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-4 flex-shrink-0" style={{ width: '50px', height: '50px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                      2
-                    </div>
-                    <div className="step-content">
-                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Ricevi offerte qualificate</h5>
-                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Sviluppatori esperti verificati ti invieranno proposte personalizzate con tempi e costi dettagliati.</p>
-                    </div>
-                  </div>
-                  
-                  <div className="step-item d-flex align-items-start">
-                    <div className="step-number-modern bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-4 flex-shrink-0" style={{ width: '50px', height: '50px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                      3
-                    </div>
-                    <div className="step-content">
-                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Scegli e collabora</h5>
-                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Seleziona l'offerta migliore e inizia a collaborare con pagamenti sicuri e comunicazione supervisionata.</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="text-center mt-4">
-                  <Link to="/register" className="btn btn-primary btn-lg rounded-pill px-4">
-                    <FaRocket className="me-2" />
-                    Inizia come Cliente
-                  </Link>
-                </div>
-              </div>
-            </div>
+          {/* TIMELINE INTERATTIVA */}
+          <div className="timeline-container" data-aos="fade-up">
+            {/* Timeline Path */}
+            <div className="timeline-path"></div>
             
-            {/* LATO FORNITORI */}
-            <div className="col-lg-6" data-aos="fade-left">
-              <div className="how-it-works-section h-100">
-                <div className="section-header text-center mb-4">
-                  <div className="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '80px', height: '80px' }}>
-                    <FaUserTie size={32} className="text-success" />
-                  </div>
-                  <h3 className="fw-bold text-success mb-2">Per i Fornitori</h3>
-                  <p className="text-muted">Dalle competenze ai guadagni</p>
-                </div>
-                
-                <div className="steps-container">
-                  <div className="step-item d-flex align-items-start mb-4">
-                    <div className="step-number-modern bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-4 flex-shrink-0" style={{ width: '50px', height: '50px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                      1
+            <div className="row g-0">
+              {/* LATO CLIENTI */}
+              <div className="col-lg-6">
+                <div className="timeline-side timeline-left">
+                  <div className="timeline-header">
+                    <div className="timeline-icon-main bg-primary">
+                      <FaUser size={32} className="text-white" />
                     </div>
-                    <div className="step-content">
-                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Esplora le opportunità</h5>
-                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Naviga tra le richieste di progetti e trova quelli che corrispondono perfettamente alle tue competenze.</p>
+                    <h3 className="fw-bold text-primary mb-2">Per i Clienti</h3>
+                    <p className="text-muted">Dalla idea al software funzionante</p>
+                  </div>
+                  
+                  <div className="timeline-steps">
+                    <div className="timeline-step" data-step="1">
+                      <div className="timeline-step-connector"></div>
+                      <div className="timeline-step-content">
+                        <div className="step-number">1</div>
+                        <div className="step-card">
+                          <div className="step-icon">
+                            <FaLightbulb />
+                          </div>
+                          <h5 className="step-title">Pubblica la tua idea</h5>
+                          <p className="step-description">
+                            Descrivi dettagliatamente il software che hai in mente, 
+                            il budget e i tempi di realizzazione desiderati.
+                          </p>
+                          <div className="step-highlight">
+                            <span className="badge bg-primary">Gratuito</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="timeline-step" data-step="2">
+                      <div className="timeline-step-connector"></div>
+                      <div className="timeline-step-content">
+                        <div className="step-number">2</div>
+                        <div className="step-card">
+                          <div className="step-icon">
+                            <FaComments />
+                          </div>
+                          <h5 className="step-title">Ricevi offerte qualificate</h5>
+                          <p className="step-description">
+                            Sviluppatori esperti verificati ti invieranno proposte 
+                            personalizzate con tempi e costi dettagliati.
+                          </p>
+                          <div className="step-highlight">
+                            <span className="badge bg-warning">Entro 24h</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="timeline-step" data-step="3">
+                      <div className="timeline-step-connector"></div>
+                      <div className="timeline-step-content">
+                        <div className="step-number">3</div>
+                        <div className="step-card">
+                          <div className="step-icon">
+                            <FaHandshake />
+                          </div>
+                          <h5 className="step-title">Scegli e collabora</h5>
+                          <p className="step-description">
+                            Seleziona l'offerta migliore e inizia a collaborare con 
+                            pagamenti sicuri e comunicazione supervisionata.
+                          </p>
+                          <div className="step-highlight">
+                            <span className="badge bg-success">Sicuro al 100%</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="step-item d-flex align-items-start mb-4">
-                    <div className="step-number-modern bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-4 flex-shrink-0" style={{ width: '50px', height: '50px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                      2
+                  <div className="timeline-cta">
+                    <Link to="/register" className="btn btn-primary btn-lg rounded-pill px-4">
+                      <FaRocket className="me-2" />
+                      Inizia come Cliente
+                    </Link>
+                  </div>
+                </div>
+              </div>
+              
+              {/* LATO FORNITORI */}
+              <div className="col-lg-6">
+                <div className="timeline-side timeline-right">
+                  <div className="timeline-header">
+                    <div className="timeline-icon-main bg-success">
+                      <FaUserTie size={32} className="text-white" />
                     </div>
-                    <div className="step-content">
-                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Invia la tua proposta</h5>
-                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Presenta la tua offerta professionale con tempi di consegna, costi competitivi e metodologia di lavoro.</p>
+                    <h3 className="fw-bold text-success mb-2">Per i Fornitori</h3>
+                    <p className="text-muted">Dalle competenze ai guadagni</p>
+                  </div>
+                  
+                  <div className="timeline-steps">
+                    <div className="timeline-step" data-step="1">
+                      <div className="timeline-step-connector"></div>
+                      <div className="timeline-step-content">
+                        <div className="step-number">1</div>
+                        <div className="step-card">
+                          <div className="step-icon">
+                            <FaSearch />
+                          </div>
+                          <h5 className="step-title">Esplora le opportunità</h5>
+                          <p className="step-description">
+                            Naviga tra le richieste di progetti e trova quelli che 
+                            corrispondono perfettamente alle tue competenze.
+                          </p>
+                          <div className="step-highlight">
+                            <span className="badge bg-info">Filtri Smart</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="timeline-step" data-step="2">
+                      <div className="timeline-step-connector"></div>
+                      <div className="timeline-step-content">
+                        <div className="step-number">2</div>
+                        <div className="step-card">
+                          <div className="step-icon">
+                            <FaTrophy />
+                          </div>
+                          <h5 className="step-title">Invia la tua proposta</h5>
+                          <p className="step-description">
+                            Presenta la tua offerta professionale con tempi di consegna, 
+                            costi competitivi e metodologia di lavoro.
+                          </p>
+                          <div className="step-highlight">
+                            <span className="badge bg-warning">Portfolio incluso</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="timeline-step" data-step="3">
+                      <div className="timeline-step-connector"></div>
+                      <div className="timeline-step-content">
+                        <div className="step-number">3</div>
+                        <div className="step-card">
+                          <div className="step-icon">
+                            <FaMoneyBillWave />
+                          </div>
+                          <h5 className="step-title">Sviluppa e guadagna</h5>
+                          <p className="step-description">
+                            Una volta accettata l'offerta, sviluppa il progetto e 
+                            ricevi il pagamento garantito al completamento.
+                          </p>
+                          <div className="step-highlight">
+                            <span className="badge bg-success">Pagamento garantito</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="step-item d-flex align-items-start">
-                    <div className="step-number-modern bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-4 flex-shrink-0" style={{ width: '50px', height: '50px', fontSize: '1.2rem', fontWeight: 'bold' }}>
-                      3
-                    </div>
-                    <div className="step-content">
-                      <h5 className="fw-bold mb-2" style={{ fontSize: '1.1rem', textAlign: 'center' }}>Sviluppa e guadagna</h5>
-                      <p className="text-muted mb-0" style={{ fontSize: '0.9rem', lineHeight: '1.4', textAlign: 'center' }}>Una volta accettata l'offerta, sviluppa il progetto e ricevi il pagamento garantito al completamento.</p>
-                    </div>
+                  <div className="timeline-cta">
+                    <Link to="/register" className="btn btn-success btn-lg rounded-pill px-4">
+                      <FaCode className="me-2" />
+                      Inizia come Fornitore
+                    </Link>
                   </div>
-                </div>
-                
-                <div className="text-center mt-4">
-                  <Link to="/register" className="btn btn-success btn-lg rounded-pill px-4">
-                    <FaCode className="me-2" />
-                    Inizia come Fornitore
-                  </Link>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* SEZIONE VANTAGGI AGGIUNTIVA */}
-          <div className="row mt-5 pt-5">
-            <div className="col-12" data-aos="fade-up">
-              <div className="text-center mb-4">
-                <h4 className="fw-bold text-white">Perché scegliere Domanda&Software?</h4>
-              </div>
-              <div className="row g-4">
-                <div className="col-md-3 text-center">
-                  <div className="feature-card bg-white rounded-4 p-4 h-100 shadow-sm">
-                    <FaShieldAlt size={32} className="text-warning mb-3" />
-                    <h6 className="fw-bold">Sicurezza Garantita</h6>
-                    <small className="text-muted">Pagamenti protetti con sistema escrow</small>
+          {/* STATISTICHE ANIMATE */}
+          <div className="row mt-5 pt-5" data-aos="fade-up">
+            <div className="col-12">
+              <div className="stats-container">
+                <div className="row g-4">
+                  <div className="col-md-3 text-center">
+                    <div className="stat-card">
+                      <div className="stat-icon">
+                        <FaBolt className="text-warning" />
+                      </div>
+                      <div className="stat-number" data-count={stats.ore_media_offerta || 18}>{stats.ore_media_offerta || 18}</div>
+                      <div className="stat-label">Ore medie per la prima offerta</div>
+                    </div>
+                  </div>
+                  <div className="col-md-3 text-center">
+                    <div className="stat-card">
+                      <div className="stat-icon">
+                        <FaShieldAlt className="text-success" />
+                      </div>
+                      <div className="stat-number" data-count={stats.pagamenti_sicuri || 100}>{stats.pagamenti_sicuri || 100}</div>
+                      <div className="stat-label">% Pagamenti sicuri</div>
+                    </div>
+                  </div>
+                  <div className="col-md-3 text-center">
+                    <div className="stat-card">
+                      <div className="stat-icon">
+                        <FaUsers className="text-primary" />
+                      </div>
+                      <div className="stat-number" data-count={stats.sviluppatori_attivi || 150}>{stats.sviluppatori_attivi || 150}</div>
+                      <div className="stat-label">+ Sviluppatori attivi</div>
+                    </div>
+                  </div>
+                  <div className="col-md-3 text-center">
+                    <div className="stat-card">
+                      <div className="stat-icon">
+                        <FaTrophy className="text-info" />
+                      </div>
+                      <div className="stat-number" data-count={stats.soddisfazione_clienti || 94}>{stats.soddisfazione_clienti || 94}</div>
+                      <div className="stat-label">% Clienti soddisfatti</div>
+                    </div>
                   </div>
                 </div>
-                <div className="col-md-3 text-center">
-                  <div className="feature-card bg-white rounded-4 p-4 h-100 shadow-sm">
-                    <FaCheckCircle size={32} className="text-success mb-3" />
-                    <h6 className="fw-bold">Qualità Verificata</h6>
-                    <small className="text-muted">Sviluppatori e progetti controllati</small>
+                {stats.last_updated && (
+                  <div className="text-center mt-3">
+                    <small className="text-white-50">
+                      <FaClock className="me-1" />
+                      Dati aggiornati: {new Date(stats.last_updated).toLocaleString('it-IT')}
+                    </small>
                   </div>
-                </div>
-                <div className="col-md-3 text-center">
-                  <div className="feature-card bg-white rounded-4 p-4 h-100 shadow-sm">
-                    <FaHeadset size={32} className="text-info mb-3" />
-                    <h6 className="fw-bold">Supporto 24/7</h6>
-                    <small className="text-muted">Assistenza dedicata in ogni fase</small>
-                  </div>
-                </div>
-                <div className="col-md-3 text-center">
-                  <div className="feature-card bg-white rounded-4 p-4 h-100 shadow-sm">
-                    <FaBolt size={32} className="text-primary mb-3" />
-                    <h6 className="fw-bold">Tempi Rapidi</h6>
-                    <small className="text-muted">Trova il partner giusto in 24h</small>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
+        </div>
+        
+        {/* Background Decorations */}
+        <div className="timeline-bg-decoration timeline-bg-left">
+          <FaRocket size={100} className="text-primary opacity-5" />
+        </div>
+        <div className="timeline-bg-decoration timeline-bg-right">
+          <FaCode size={100} className="text-success opacity-5" />
         </div>
       </section>
 
@@ -1265,46 +1383,115 @@ function Home() {
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
           }
           
-          .photo-indicators {
+          /* NUOVI INDICATORI PROGRESS BAR */
+          .photo-progress-container {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
             z-index: 5;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 16px 24px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
           }
           
-          .photo-indicator {
-            width: 12px;
-            height: 12px;
+          .photo-progress-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+          }
+          
+          .photo-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+          }
+          
+          .photo-counter {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+          }
+          
+          .photo-counter .divider {
+            opacity: 0.7;
+          }
+          
+          .photo-thumbnails {
+            display: flex;
+            gap: 8px;
+          }
+          
+          .photo-thumbnail {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.4);
             cursor: pointer;
             transition: all 0.3s ease;
           }
           
-          .photo-indicator.active {
-            background: white;
+          .photo-thumbnail:hover {
+            background: rgba(255, 255, 255, 0.7);
             transform: scale(1.2);
           }
           
-          .hover-effect {
-            transition: all 0.3s ease;
+          .photo-thumbnail.active {
+            background: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.6);
+            transform: scale(1.3);
           }
           
-          .hover-effect:hover {
-            background-color: rgba(255,255,255,0.2) !important;
-            backdrop-filter: blur(10px);
-            transform: translateY(-2px);
-          }
-          
+          /* Responsive per progress container */
           @media (max-width: 768px) {
-            .hero-content h1 {
-              font-size: 2.5rem;
+            .photo-progress-container {
+              bottom: 15px;
+              padding: 12px 18px;
+              border-radius: 16px;
             }
-            .hero-content p {
-              font-size: 1rem;
+            
+            .photo-progress-bar {
+              width: 150px;
+            }
+            
+            .photo-counter {
+              font-size: 0.8rem;
+            }
+            
+            .photo-thumbnail {
+              width: 6px;
+              height: 6px;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            .photo-progress-container {
+              bottom: 10px;
+              padding: 10px 16px;
+              border-radius: 14px;
+            }
+            
+            .photo-progress-bar {
+              width: 120px;
+              height: 3px;
+            }
+            
+            .photo-thumbnails {
+              gap: 6px;
             }
           }
           
@@ -1327,6 +1514,487 @@ function Home() {
             background-color: rgba(255,255,255,0.2);
             border-color: #ffc107;
             color: #ffc107 !important;
+          }
+          
+          .hover-effect {
+            transition: all 0.3s ease;
+          }
+          
+          .hover-effect:hover {
+            background-color: rgba(255,255,255,0.2) !important;
+            backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+          }
+          
+          @media (max-width: 768px) {
+            .hero-content h1 {
+              font-size: 2.5rem;
+            }
+            .hero-content p {
+              font-size: 1rem;
+            }
+          }
+          
+          /* ===== CONTROLLI FRECCE FLOATING - CLEAN ===== */
+          .hero-navigation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 5;
+          }
+          
+          .hero-nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 10;
+          }
+          
+          .hero-nav-arrow:hover {
+            background: rgba(0, 123, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.4);
+          }
+          
+          .hero-nav-arrow:active {
+            transform: translateY(-50%) scale(0.95);
+          }
+          
+          .hero-nav-left {
+            left: 30px;
+          }
+          
+          .hero-nav-right {
+            right: 30px;
+          }
+          
+          /* RESPONSIVE DESIGN FRECCE */
+          @media (max-width: 992px) {
+            .hero-nav-arrow {
+              width: 50px;
+              height: 50px;
+              font-size: 18px;
+            }
+            
+            .hero-nav-left {
+              left: 20px;
+            }
+            
+            .hero-nav-right {
+              right: 20px;
+            }
+          }
+          
+          @media (max-width: 768px) {
+            .hero-nav-arrow {
+              width: 45px;
+              height: 45px;
+              font-size: 16px;
+            }
+            
+            .hero-nav-left {
+              left: 15px;
+            }
+            
+            .hero-nav-right {
+              right: 15px;
+            }
+          }
+          
+          .hero-dots {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            padding: 12px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            pointer-events: all;
+          }
+          
+          .hero-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+          }
+          
+          .hero-dot:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: scale(1.2);
+          }
+          
+          .hero-dot.active {
+            background: #007bff;
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.6);
+            transform: scale(1.3);
+          }
+          
+          /* ===== TIMELINE INTERATTIVA STYLES ===== */
+          .timeline-container {
+            position: relative;
+            padding: 60px 0;
+          }
+          
+          .timeline-path {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 80%;
+            background: linear-gradient(to bottom, #007bff, #28a745);
+            border-radius: 2px;
+            z-index: 1;
+          }
+          
+          .timeline-side {
+            padding: 0 40px;
+            position: relative;
+          }
+          
+          .timeline-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 3;
+          }
+          
+          .timeline-icon-main {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+          }
+          
+          .timeline-icon-main::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: pulse 2s infinite;
+          }
+          
+          @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.1; }
+            100% { transform: scale(1.2); opacity: 0; }
+          }
+          
+          .timeline-steps {
+            position: relative;
+            z-index: 2;
+          }
+          
+          .timeline-step {
+            margin-bottom: 40px;
+            position: relative;
+          }
+          
+          .timeline-step-connector {
+            position: absolute;
+            left: 25px;
+            top: 50px;
+            bottom: -40px;
+            width: 2px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+          }
+          
+          .timeline-step:last-child .timeline-step-connector {
+            display: none;
+          }
+          
+          .timeline-step-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+          }
+          
+          .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+            position: relative;
+            z-index: 3;
+          }
+          
+          .timeline-right .step-number {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+          }
+          
+          .step-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            flex: 1;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+          }
+          
+          .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 1);
+          }
+          
+          .step-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            color: #007bff;
+            font-size: 24px;
+          }
+          
+          .timeline-right .step-icon {
+            color: #28a745;
+          }
+          
+          .step-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #2c3e50;
+          }
+          
+          .step-description {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #6c757d;
+            margin-bottom: 15px;
+          }
+          
+          .step-highlight {
+            margin-top: 10px;
+          }
+          
+          .step-highlight .badge {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+          }
+          
+          .timeline-cta {
+            text-align: center;
+            margin-top: 40px;
+          }
+          
+          .timeline-cta .btn {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+          }
+          
+          .timeline-cta .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+          }
+          
+          /* STATISTICHE ANIMATE */
+          .stats-container {
+            margin-top: 60px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          
+          .stat-card {
+            padding: 30px 20px;
+            text-align: center;
+          }
+          
+          .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+          }
+          
+          .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            display: block;
+            line-height: 1;
+            margin-bottom: 10px;
+          }
+          
+          .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+          }
+          
+          /* DECORAZIONI BACKGROUND */
+          .timeline-bg-decoration {
+            position: absolute;
+            opacity: 0.05;
+            pointer-events: none;
+          }
+          
+          .timeline-bg-left {
+            top: 20%;
+            left: 5%;
+            animation: float 6s ease-in-out infinite;
+          }
+          
+          .timeline-bg-right {
+            bottom: 20%;
+            right: 5%;
+            animation: float 6s ease-in-out infinite reverse;
+          }
+          
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+          
+          /* RESPONSIVE DESIGN */
+          @media (max-width: 992px) {
+            .timeline-path {
+              left: 30px;
+              width: 2px;
+              height: auto;
+              top: 120px;
+              bottom: 60px;
+              transform: none;
+              background: linear-gradient(to bottom, #007bff 50%, #28a745 50%);
+            }
+            
+            .timeline-side {
+              padding: 0 20px 40px 70px;
+            }
+            
+            .timeline-header {
+              margin-bottom: 30px;
+            }
+            
+            .timeline-right {
+              padding-top: 40px;
+            }
+            
+            .timeline-right .timeline-header h3 {
+              color: #28a745 !important;
+            }
+            
+            .hero-nav-arrow {
+              width: 50px;
+              height: 50px;
+              font-size: 18px;
+            }
+            
+            .hero-nav-left {
+              left: 20px;
+            }
+            
+            .hero-nav-right {
+              right: 20px;
+            }
+            
+            .hero-dots {
+              bottom: 20px;
+              padding: 8px 16px;
+              gap: 8px;
+            }
+            
+            .hero-dot {
+              width: 10px;
+              height: 10px;
+            }
+          }
+          
+          @media (max-width: 768px) {
+            .timeline-side {
+              padding: 0 15px 30px 60px;
+            }
+            
+            .step-card {
+              padding: 20px;
+            }
+            
+            .step-number {
+              width: 40px;
+              height: 40px;
+              font-size: 1rem;
+            }
+            
+            .step-title {
+              font-size: 1rem;
+            }
+            
+            .step-description {
+              font-size: 0.85rem;
+            }
+            
+            .stats-container {
+              padding: 30px 20px;
+            }
+            
+            .stat-number {
+              font-size: 2.5rem;
+            }
+            
+            .stat-icon {
+              font-size: 2.5rem;
+            }
           }
         `}
       </style>

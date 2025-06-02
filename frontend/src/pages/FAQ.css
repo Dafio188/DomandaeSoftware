@@ -81,12 +81,23 @@
   padding: 25px 30px;
   cursor: pointer;
   background: white;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   border-bottom: 1px solid rgba(0,0,0,0.05);
+  color: #333;
 }
 
 .faq-question:hover {
-  background: rgba(102,126,234,0.05);
+  background: rgba(102,126,234,0.08);
+  color: #333;
+}
+
+.faq-question h5 {
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.faq-question:hover h5 {
+  color: #667eea;
 }
 
 .faq-toggle {
@@ -109,6 +120,7 @@
   padding: 0 30px 25px;
   background: rgba(102,126,234,0.02);
   animation: slideDown 0.3s ease;
+  color: #555;
 }
 
 @keyframes slideDown {

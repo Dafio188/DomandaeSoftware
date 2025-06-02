@@ -4,8 +4,6 @@ import {
   FaPhone, 
   FaMapMarkerAlt, 
   FaClock,
-  FaUser,
-  FaUserTie,
   FaHeadset,
   FaPaperPlane,
   FaQuestionCircle,
@@ -111,9 +109,9 @@ function Contatti() {
       </div>
 
       <div className="container py-5">
-        <div className="row g-5">
+        <div className="row g-5 contatti-layout">
           {/* Modulo di Contatto */}
-          <div className="col-lg-8">
+          <div className="col-lg-8 order-1">
             <div className="card border-0 shadow-lg rounded-4">
               <div className="card-header bg-primary bg-gradient text-white border-0 rounded-top-4">
                 <div className="d-flex align-items-center">
@@ -253,25 +251,21 @@ function Contatti() {
           </div>
 
           {/* Informazioni di Contatto */}
-          <div className="col-lg-4">
-            <div className="sticky-top" style={{ top: '20px' }}>
+          <div className="col-lg-4 order-2 order-lg-2">
+            <div className="contatti-sidebar">
               {/* Contatti Diretti */}
-              <div className="card border-0 shadow-lg rounded-4 mb-4">
+              <div className="card border-0 shadow-lg rounded-4 mb-4 bg-white bg-opacity-75">
                 <div className="card-header bg-success bg-gradient text-white border-0 rounded-top-4">
-                  <h5 className="mb-0">
-                    <FaHeadset className="me-2" />
+                  <h5 className="mb-0 text-center">
                     Contatti Diretti
                   </h5>
                 </div>
                 <div className="card-body p-4">
                   <div className="contact-item mb-3">
-                    <div className="d-flex align-items-center">
-                      <div className="contact-icon bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                        <FaEnvelope className="text-primary" />
-                      </div>
-                      <div>
+                    <div className="text-center">
+                      <div className="contact-info">
                         <h6 className="fw-bold mb-1">Email Generale</h6>
-                        <a href="mailto:info@domandaesoftware.it" className="text-decoration-none">
+                        <a href="mailto:info@domandaesoftware.it" className="text-decoration-none contact-email">
                           info@domandaesoftware.it
                         </a>
                       </div>
@@ -279,13 +273,10 @@ function Contatti() {
                   </div>
 
                   <div className="contact-item mb-3">
-                    <div className="d-flex align-items-center">
-                      <div className="contact-icon bg-success bg-opacity-10 rounded-circle p-3 me-3">
-                        <FaUser className="text-success" />
-                      </div>
-                      <div>
+                    <div className="text-center">
+                      <div className="contact-info">
                         <h6 className="fw-bold mb-1">Supporto Clienti</h6>
-                        <a href="mailto:clienti@domandaesoftware.it" className="text-decoration-none">
+                        <a href="mailto:clienti@domandaesoftware.it" className="text-decoration-none contact-email">
                           clienti@domandaesoftware.it
                         </a>
                       </div>
@@ -293,13 +284,10 @@ function Contatti() {
                   </div>
 
                   <div className="contact-item mb-3">
-                    <div className="d-flex align-items-center">
-                      <div className="contact-icon bg-warning bg-opacity-10 rounded-circle p-3 me-3">
-                        <FaUserTie className="text-warning" />
-                      </div>
-                      <div>
+                    <div className="text-center">
+                      <div className="contact-info">
                         <h6 className="fw-bold mb-1">Supporto Fornitori</h6>
-                        <a href="mailto:fornitori@domandaesoftware.it" className="text-decoration-none">
+                        <a href="mailto:fornitori@domandaesoftware.it" className="text-decoration-none contact-email">
                           fornitori@domandaesoftware.it
                         </a>
                       </div>
@@ -307,13 +295,10 @@ function Contatti() {
                   </div>
 
                   <div className="contact-item">
-                    <div className="d-flex align-items-center">
-                      <div className="contact-icon bg-info bg-opacity-10 rounded-circle p-3 me-3">
-                        <FaWhatsapp className="text-info" />
-                      </div>
-                      <div>
+                    <div className="text-center">
+                      <div className="contact-info">
                         <h6 className="fw-bold mb-1">WhatsApp Business</h6>
-                        <a href="https://wa.me/393123456789" className="text-decoration-none" target="_blank" rel="noopener noreferrer">
+                        <a href="https://wa.me/393123456789" className="text-decoration-none contact-phone" target="_blank" rel="noopener noreferrer">
                           +39 312 345 6789
                         </a>
                       </div>

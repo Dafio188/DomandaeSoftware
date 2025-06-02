@@ -14,12 +14,13 @@ import {
   FaEnvelope,
   FaBars,
   FaTimes,
-  FaBell,
   FaCog,
   FaSignOutAlt,
   FaTachometerAlt,
   FaProjectDiagram,
-  FaStore
+  FaStore,
+  FaSearch,
+  FaHandshake
 } from 'react-icons/fa';
 import './UnifiedNavbar.css';
 
@@ -33,7 +34,6 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const [notifications, setNotifications] = useState(3); // Simulato
 
   // Determina il variant automaticamente se non specificato
   const getNavbarVariant = () => {
@@ -111,19 +111,57 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
     { path: '/', label: 'Home', icon: FaHome },
     { path: '/chi-siamo', label: 'Chi Siamo', icon: FaInfoCircle },
     { path: '/scopo-del-sito', label: 'Scopo del Sito', icon: FaRocket },
+    { path: '/richieste', label: 'Richieste', icon: FaSearch },
+    { path: '/prodotti-pronti', label: 'Prodotti', icon: FaStore },
     { path: '/faq', label: 'FAQ & Supporto', icon: FaQuestionCircle },
-    { path: '/contatti', label: 'Contatti', icon: FaEnvelope },
-    { path: '/prodotti-pronti', label: 'Prodotti', icon: FaStore }
+    { path: '/contatti', label: 'Contatti', icon: FaEnvelope }
   ];
 
   // Menu items per dashboard
   const dashboardMenuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: FaTachometerAlt },
-    { path: '/le-tue-idee', label: 'I Miei Progetti', icon: FaProjectDiagram },
+    { path: '/progetti', label: 'I Miei Progetti', icon: FaProjectDiagram },
     { path: '/prodotti-pronti', label: 'Prodotti', icon: FaStore }
   ];
 
-  const menuItems = currentVariant === 'dashboard' ? dashboardMenuItems : publicMenuItems;
+  // Menu items intelligente basato su autenticazione e ruolo
+  const getMenuItems = () => {
+    let items = [...publicMenuItems];
+    
+    // Se utente autenticato, aggiungi elementi specifici per ruolo
+    if (user) {
+      // Per i clienti: aggiungi "I Miei Progetti" e "Offerte Ricevute" dopo "Prodotti"
+      if (user.is_cliente) {
+        const prodottiIndex = items.findIndex(item => item.path === '/prodotti-pronti');
+        if (prodottiIndex !== -1) {
+          items.splice(prodottiIndex + 1, 0, 
+            {
+              path: '/progetti',
+              label: 'I Miei Progetti',
+              icon: FaProjectDiagram
+            },
+            {
+              path: '/le-mie-offerte-cliente',
+              label: 'Offerte Ricevute',
+              icon: FaHandshake
+            }
+          );
+        }
+      }
+      
+      // Per i fornitori: rimuovo il link "Le Mie Offerte" - ora tutto viene mostrato nella dashboard
+      if (user.is_fornitore) {
+        const prodottiIndex = items.findIndex(item => item.path === '/prodotti-pronti');
+        if (prodottiIndex !== -1) {
+          items.splice(prodottiIndex, 1);
+        }
+      }
+    }
+    
+    return currentVariant === 'dashboard' ? dashboardMenuItems : items;
+  };
+
+  const menuItems = getMenuItems();
 
   // Classi CSS dinamiche
   const getNavbarClasses = () => {
@@ -163,7 +201,6 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
             {/* Desktop Menu */}
             <div className="navbar-menu d-none d-lg-flex">
               {menuItems.map((item) => {
-                const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 
                 return (
@@ -172,7 +209,6 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
                     to={item.path}
                     className={`nav-link ${isActive ? 'active' : ''}`}
                   >
-                    <Icon className="nav-icon" />
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -194,14 +230,6 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
                 </div>
               ) : (
                 <div className="user-menu">
-                  {/* Notifiche */}
-                  <div className="notification-icon">
-                    <FaBell />
-                    {notifications > 0 && (
-                      <span className="notification-badge">{notifications}</span>
-                    )}
-                  </div>
-                  
                   {/* User Dropdown */}
                   <div className="user-dropdown">
                     <button 
@@ -227,7 +255,7 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
                         Dashboard
                       </Link>
                       <Link 
-                        to="/profilo" 
+                        to="/profilo-impostazioni" 
                         className="dropdown-item"
                         onClick={closeUserDropdown}
                       >
@@ -263,12 +291,29 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
-      <div className={`mobile-menu-overlay ${isMobileMenuOpen ? 'active' : ''}`}>
-        <div className="mobile-menu-content">
+      {/* Mobile Menu Drawer */}
+      <div className={`mobile-drawer-overlay ${isMobileMenuOpen ? 'active' : ''}`} onClick={toggleMobileMenu}>
+        <div className={`mobile-drawer ${isMobileMenuOpen ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
+          <div className="mobile-drawer-header">
+            <div className="drawer-brand">
+              <img 
+                src="/images/LOGO_TECNOBRIDGE.png" 
+                alt="TechnoBridge" 
+                className="drawer-logo"
+              />
+              <span className="drawer-title">TechnoBridge</span>
+            </div>
+            <button 
+              className="drawer-close"
+              onClick={toggleMobileMenu}
+              aria-label="Chiudi menu"
+            >
+              <FaTimes />
+            </button>
+          </div>
           
           {/* Mobile Menu Items */}
-          <div className="mobile-nav-items">
+          <div className="mobile-drawer-items">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -277,10 +322,10 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`mobile-nav-link ${isActive ? 'active' : ''}`}
+                  className={`drawer-nav-link ${isActive ? 'active' : ''}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <Icon className="mobile-nav-icon" />
+                  <Icon className="drawer-nav-icon" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -288,12 +333,12 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
           </div>
 
           {/* Mobile Auth Section */}
-          <div className="mobile-auth-section">
+          <div className="mobile-drawer-auth">
             {!user ? (
-              <div className="mobile-auth-buttons">
+              <div className="drawer-auth-buttons">
                 <Link 
                   to="/login" 
-                  className="btn btn-outline-light btn-lg w-100 mb-3"
+                  className="btn btn-outline-primary btn-lg w-100 mb-3"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <FaSignInAlt className="me-2" />
@@ -309,27 +354,21 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
                 </Link>
               </div>
             ) : (
-              <div className="mobile-user-section">
-                <div className="mobile-user-info">
-                  <div className="mobile-user-avatar">
+              <div className="drawer-user-section">
+                <div className="drawer-user-info">
+                  <div className="drawer-user-avatar">
                     {role === 'cliente' ? <FaUser /> : <FaUserTie />}
                   </div>
                   <div>
-                    <div className="mobile-user-name">{user.username}</div>
-                    <div className="mobile-user-role">{role}</div>
+                    <div className="drawer-user-name">{user.username}</div>
+                    <div className="drawer-user-role">{role}</div>
                   </div>
-                  {notifications > 0 && (
-                    <div className="mobile-notifications">
-                      <FaBell />
-                      <span className="notification-badge">{notifications}</span>
-                    </div>
-                  )}
                 </div>
                 
-                <div className="mobile-user-actions">
+                <div className="drawer-user-actions">
                   <Link 
-                    to="/profilo" 
-                    className="mobile-action-btn"
+                    to="/profilo-impostazioni" 
+                    className="drawer-action-btn"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <FaCog className="me-2" />
@@ -340,7 +379,7 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
                       handleLogout();
                       setIsMobileMenuOpen(false);
                     }} 
-                    className="mobile-action-btn logout"
+                    className="drawer-action-btn logout"
                   >
                     <FaSignOutAlt className="me-2" />
                     Logout
@@ -351,14 +390,6 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
           </div>
         </div>
       </div>
-
-      {/* Backdrop per mobile menu */}
-      {isMobileMenuOpen && (
-        <div 
-          className="mobile-menu-backdrop"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
     </>
   );
 }

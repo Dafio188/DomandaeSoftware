@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { getOfferteFornitore, getProgettiFornitore, getAllRichieste } from '../services/api';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { FaUser, FaEuroSign, FaCalendar, FaCheckCircle, FaTimesCircle, FaClock, FaLightbulb, FaTools, FaChartLine, FaHandshake, FaStar, FaBriefcase, FaPlus, FaEye, FaImage, FaTimes, FaMagic, FaRocket, FaInfoCircle, FaProjectDiagram, FaArrowLeft, FaArchive, FaSearch, FaArrowRight, FaUserTie } from 'react-icons/fa';
+import { FaUser, FaEuroSign, FaCalendar, FaCheckCircle, FaTimesCircle, FaClock, FaLightbulb, FaTools, FaChartLine, FaHandshake, FaStar, FaBriefcase, FaPlus, FaEye, FaImage, FaTimes, FaMagic, FaRocket, FaInfoCircle, FaProjectDiagram, FaArrowLeft, FaArchive, FaSearch, FaArrowRight, FaUserTie, FaEdit, FaArrowUp, FaQuestionCircle, FaEnvelope, FaCog } from 'react-icons/fa';
 
 function DashboardFornitore() {
   const { user, token } = useAuth();
@@ -250,6 +250,16 @@ function DashboardFornitore() {
     guadagnoTotale: progetti.filter(p => p.stato === 'completato').reduce((sum, p) => sum + (parseFloat(p.prezzo_finale) || 0), 0)
   };
 
+  // Filtra richieste escludendo quelle per cui ho già fatto un'offerta
+  const richiesteDisponibili = richieste.filter(richiesta => {
+    // Escludi richieste non aperte
+    if (richiesta.stato !== 'aperta') return false;
+    
+    // Escludi richieste per cui ho già fatto un'offerta
+    const hoGiaOfferto = offerte.some(offerta => offerta.richiesta === richiesta.id);
+    return !hoGiaOfferto;
+  });
+
   return (
     <div className="dashboard-fornitore min-vh-100" style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)' }}>
       <div className="container-fluid py-4">
@@ -276,7 +286,7 @@ function DashboardFornitore() {
                       </div>
                     </div>
                     <div className="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                      <div className="d-flex justify-content-lg-end gap-2">
+                      <div className="d-flex justify-content-lg-end gap-2 flex-wrap">
                         <Link to="/richieste" className="btn btn-primary rounded-pill px-4">
                           <FaSearch className="me-2" />
                           Trova Progetti
@@ -284,6 +294,10 @@ function DashboardFornitore() {
                         <Link to="/prodotti-pronti" className="btn btn-outline-warning rounded-pill px-4">
                           <FaStar className="me-2" />
                           Marketplace
+                        </Link>
+                        <Link to="/le-tue-idee" className="btn btn-outline-info rounded-pill px-4">
+                          <FaLightbulb className="me-2" />
+                          Le Tue Idee
                         </Link>
                       </div>
                     </div>
@@ -368,179 +382,255 @@ function DashboardFornitore() {
               </div>
             </div>
 
-            {/* SEZIONE RICHIESTE IN EVIDENZA - PRIORITÀ MASSIMA */}
-            <div className="row mt-4" data-section="richieste">
+            {/* 🤝 GESTIONE OFFERTE INVIATE - PRIORITÀ MASSIMA */}
+            <div className="row mt-4">
               <div className="col-12">
                 <div className="card border-0 shadow-lg rounded-4">
-                  <div className="card-header bg-gradient text-white border-0 rounded-top-4" 
-                       style={{ background: 'linear-gradient(135deg, #28a745, #20c997)' }}>
+                  <div className="card-header bg-info bg-gradient text-white border-0 rounded-top-4">
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
                         <h4 className="mb-1">
-                          <FaSearch className="me-3" />
-                          🎯 Richieste in Evidenza
+                          <FaHandshake className="me-3" />
+                          🤝 Gestione Offerte Inviate
                         </h4>
-                        <p className="mb-0 opacity-90">Le migliori opportunità per il tuo business</p>
+                        <p className="mb-0 opacity-90">Monitora e gestisci tutte le tue proposte inviate ai clienti</p>
                       </div>
-                      <div className="d-flex align-items-center">
-                        <div className="text-center me-3">
-                          <h3 className="mb-0">{richieste.filter(r => r.stato === 'aperta').length}</h3>
-                          <small className="opacity-75">disponibili</small>
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="text-center">
+                          <h5 className="mb-0">{offerte.length}</h5>
+                          <small className="opacity-75">totali</small>
                         </div>
-                        <Link to="/richieste" className="btn btn-light btn-lg rounded-pill shadow">
-                          <FaArrowRight className="me-2" />
-                          Esplora Tutte
-                        </Link>
+                        <div className="text-center">
+                          <h5 className="mb-0 text-warning">{offerte.filter(o => o.stato === 'in_attesa').length}</h5>
+                          <small className="opacity-75">in attesa</small>
+                        </div>
+                        <div className="text-center">
+                          <h5 className="mb-0 text-success">{offerte.filter(o => o.stato === 'accettata').length}</h5>
+                          <small className="opacity-75">accettate</small>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div className="card-body p-4">
-                    {richieste.filter(r => r.stato === 'aperta').length > 0 ? (
+                    {offerte.length > 0 ? (
                       <>
-                        <div className="row g-4">
-                          {richieste.filter(r => r.stato === 'aperta').slice(0, 6).map(richiesta => {
-                            const tipoSoftware = tipiSoftware.find(t => t.value === richiesta.tipo_software);
-                            return (
-                              <div key={richiesta.id} className="col-lg-4 col-md-6">
-                                <div className="card border-0 shadow-lg rounded-4 h-100 richiesta-card-enhanced">
-                                  {/* Immagine header se presente */}
-                                  {richiesta.immagine && (
-                                    <div className="position-relative">
-                                      <img 
-                                        src={richiesta.immagine} 
-                                        alt={richiesta.titolo}
-                                        className="card-img-top rounded-top-4"
-                                        style={{ height: '180px', objectFit: 'cover' }}
-                                      />
-                                      <div className="position-absolute top-0 end-0 m-3">
-                                        <span className="badge bg-success bg-gradient rounded-pill px-3 py-2 shadow">
-                                          🟢 APERTA
-                                        </span>
-                                      </div>
-                                    </div>
-                                  )}
-                                  
-                                  <div className="card-body p-4">
-                                    {/* Header con categoria */}
-                                    <div className="d-flex align-items-center justify-content-between mb-3">
-                                      {tipoSoftware && (
-                                        <span className="badge rounded-pill px-3 py-2 fw-semibold bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
-                                          {tipoSoftware.icon} {tipoSoftware.label.split(' - ')[0]}
-                                        </span>
-                                      )}
-                                      {!richiesta.immagine && (
-                                        <span className="badge bg-success bg-gradient rounded-pill px-3 py-2">
-                                          🟢 APERTA
-                                        </span>
-                                      )}
-                                    </div>
-                                    
-                                    {/* Titolo prominente */}
-                                    <h5 className="card-title fw-bold mb-3 text-primary" style={{ lineHeight: '1.3' }}>
-                                      {richiesta.titolo}
-                                    </h5>
-                                    
-                                    {/* Descrizione estesa */}
-                                    <p className="text-muted mb-4" style={{ 
-                                      lineHeight: '1.6',
-                                      height: '72px',
-                                      overflow: 'hidden',
-                                      display: '-webkit-box',
-                                      WebkitLineClamp: 3,
-                                      WebkitBoxOrient: 'vertical'
-                                    }}>
-                                      {richiesta.descrizione.length > 80 ? 
-                                        richiesta.descrizione.substring(0, 80) + '...' : 
-                                        richiesta.descrizione
-                                      }
-                                    </p>
-                                    
-                                    {/* Info grid dettagliata */}
-                                    <div className="row g-3 mb-4">
-                                      <div className="col-6">
-                                        <div className="d-flex align-items-center">
-                                          <div className="bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                                            <FaEuroSign className="text-success" />
-                                          </div>
-                                          <div>
-                                            <small className="text-muted d-block">Budget</small>
-                                            <strong className="text-success h6 mb-0">{richiesta.budget}€</strong>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="col-6">
-                                        <div className="d-flex align-items-center">
-                                          <div className="bg-info bg-opacity-10 rounded-circle p-2 me-3">
-                                            <FaUser className="text-info" />
-                                          </div>
-                                          <div>
-                                            <small className="text-muted d-block">Cliente</small>
-                                            <strong className="h6 mb-0" style={{ fontSize: '0.8rem' }}>{richiesta.cliente_username}</strong>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    
-                                    {/* Footer con azioni */}
-                                    <div className="border-top pt-3">
-                                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        {/* Filtri Rapidi */}
+                        <div className="row mb-4">
+                          <div className="col-12">
+                            <div className="card bg-light border-0 rounded-3">
+                              <div className="card-body py-3">
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <h6 className="fw-bold mb-0 text-dark">
+                                    <FaSearch className="me-2 text-primary" />
+                                    Filtri Rapidi
+                                  </h6>
+                                  <div className="btn-group" role="group">
+                                    <button type="button" className="btn btn-outline-primary btn-sm active">
+                                      Tutte ({offerte.length})
+                                    </button>
+                                    <button type="button" className="btn btn-outline-warning btn-sm">
+                                      In Attesa ({offerte.filter(o => o.stato === 'in_attesa').length})
+                                    </button>
+                                    <button type="button" className="btn btn-outline-success btn-sm">
+                                      Accettate ({offerte.filter(o => o.stato === 'accettata').length})
+                                    </button>
+                                    <button type="button" className="btn btn-outline-danger btn-sm">
+                                      Rifiutate ({offerte.filter(o => o.stato === 'rifiutata').length})
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Vista Card delle Offerte */}
+                        <div className="border-top pt-4">
+                          <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h6 className="fw-bold mb-0">
+                              <FaChartLine className="me-2 text-info" />
+                              Le Tue Offerte Recenti
+                            </h6>
+                          </div>
+                          
+                          <div className="row g-3">
+                            {offerte.map(offerta => (
+                              <div key={offerta.id} className="col-lg-6">
+                                <div className="card border-0 shadow-sm rounded-3 h-100 offerta-card-hover">
+                                  <div className="card-body">
+                                    {/* Header con titolo e stato */}
+                                    <div className="d-flex justify-content-between align-items-start mb-3">
+                                      <div className="flex-grow-1">
+                                        <h6 className="card-title fw-bold mb-1 text-primary">
+                                          {offerta.richiesta_titolo || `Richiesta #${offerta.richiesta}`}
+                                        </h6>
                                         <small className="text-muted">
-                                          <FaCalendar className="me-1" />
-                                          {new Date(richiesta.data_pubblicazione).toLocaleDateString('it-IT')}
+                                          <FaUser className="me-1" />
+                                          Cliente: <strong>{offerta.cliente_username}</strong>
                                         </small>
                                       </div>
-                                      
-                                      <div className="d-grid gap-2">
-                                        <button 
-                                          className="btn btn-primary btn-lg rounded-pill shadow"
-                                          onClick={() => {
-                                            setRichiestaId(richiesta.id);
-                                            setShowModalOfferta(true);
-                                            setRichiestaSelezionata(richiesta);
-                                          }}
-                                          title="Fai un'offerta per questa richiesta"
-                                        >
-                                          <FaHandshake className="me-2" />
-                                          Fai un'Offerta
-                                        </button>
-                                        <Link 
-                                          to="/richieste" 
-                                          className="btn btn-outline-secondary btn-sm rounded-pill"
-                                        >
-                                          <FaEye className="me-1" />
-                                          Vedi Dettagli
-                                        </Link>
+                                      <span className={`badge rounded-pill px-3 py-2 ${
+                                        offerta.stato === 'accettata' ? 'bg-success' :
+                                        offerta.stato === 'rifiutata' ? 'bg-danger' :
+                                        'bg-warning text-dark'
+                                      }`}>
+                                        {offerta.stato === 'accettata' && '✅ Accettata'}
+                                        {offerta.stato === 'rifiutata' && '❌ Rifiutata'}
+                                        {offerta.stato === 'in_attesa' && '🟡 In Attesa'}
+                                      </span>
+                                    </div>
+                                    
+                                    {/* Descrizione offerta */}
+                                    <div className="mb-3">
+                                      <small className="text-muted fw-bold d-block mb-1">La tua proposta:</small>
+                                      <p className="text-muted mb-0" style={{ 
+                                        fontSize: '0.85rem',
+                                        lineHeight: '1.4',
+                                        height: '40px',
+                                        overflow: 'hidden',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical'
+                                      }}>
+                                        {offerta.descrizione.length > 80 ? 
+                                          offerta.descrizione.substring(0, 80) + '...' : 
+                                          offerta.descrizione
+                                        }
+                                      </p>
+                                    </div>
+                                    
+                                    {/* Info prezzo e data */}
+                                    <div className="row g-2 mb-3">
+                                      <div className="col-6">
+                                        <div className="bg-success bg-opacity-10 rounded-3 p-2 text-center">
+                                          <FaEuroSign className="text-success mb-1" size={16} />
+                                          <div className="fw-bold text-success">{offerta.prezzo}€</div>
+                                          <small className="text-muted">La tua offerta</small>
+                                        </div>
+                                      </div>
+                                      <div className="col-6">
+                                        <div className="bg-info bg-opacity-10 rounded-3 p-2 text-center">
+                                          <FaCalendar className="text-info mb-1" size={16} />
+                                          <div className="fw-bold text-info" style={{ fontSize: '0.8rem' }}>
+                                            {new Date(offerta.data_offerta).toLocaleDateString('it-IT')}
+                                          </div>
+                                          <small className="text-muted">Data invio</small>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Azioni */}
+                                    <div className="border-top pt-3">
+                                      <div className="d-flex gap-2">
+                                        {offerta.stato === 'in_attesa' && (
+                                          <button 
+                                            className="btn btn-outline-warning btn-sm rounded-pill flex-grow-1"
+                                            title="Modifica offerta (se in attesa)"
+                                            disabled
+                                          >
+                                            <FaEdit className="me-1" />
+                                            Modifica
+                                          </button>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                        
-                        {/* Call to action se ci sono più richieste */}
-                        {richieste.filter(r => r.stato === 'aperta').length > 6 && (
-                          <div className="text-center mt-5 p-4 bg-light bg-gradient rounded-4">
-                            <h5 className="mb-3">🚀 Ci sono altre {richieste.filter(r => r.stato === 'aperta').length - 6} opportunità!</h5>
-                            <p className="text-muted mb-4">Esplora tutte le richieste per trovare il progetto perfetto per te</p>
-                            <Link to="/richieste" className="btn btn-success btn-lg rounded-pill px-5 shadow">
-                              <FaSearch className="me-2" />
-                              Esplora Tutte le Richieste
-                            </Link>
+                            ))}
                           </div>
-                        )}
+                        </div>
                       </>
                     ) : (
                       <div className="text-center py-5">
-                        <div className="bg-light bg-gradient rounded-circle mx-auto mb-4" style={{ width: '120px', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FaSearch size={48} className="text-muted opacity-50" />
+                        <div className="bg-info bg-opacity-10 rounded-circle mx-auto mb-4" style={{ width: '120px', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <FaHandshake size={48} className="text-info opacity-50" />
                         </div>
-                        <h5 className="text-muted mb-3">Nessuna richiesta disponibile al momento</h5>
-                        <p className="text-muted mb-4">Le nuove opportunità appariranno qui non appena pubblicate dai clienti!</p>
-                        <Link to="/richieste" className="btn btn-primary rounded-pill px-4">
+                        <h5 className="text-muted mb-3">Nessuna offerta inviata ancora</h5>
+                        <p className="text-muted mb-4">
+                          Inizia a inviare offerte competitive per le richieste dei clienti!<br />
+                          Le tue proposte appariranno qui con tutte le statistiche e la gestione completa.
+                        </p>
+                        <div className="d-flex gap-3 justify-content-center">
+                          <button 
+                            className="btn btn-info rounded-pill px-4"
+                            onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
+                          >
+                            <FaArrowUp className="me-2" />
+                            Vedi Richieste Sopra
+                          </button>
+                          <Link to="/richieste" className="btn btn-outline-info rounded-pill px-4">
+                            <FaSearch className="me-2" />
+                            Esplora Tutte le Richieste
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* RICHIESTE IN EVIDENZA - VERSIONE COMPATTA */}
+            <div className="row mt-4">
+              <div className="col-12">
+                <div className="card border-0 shadow-sm rounded-4">
+                  <div className="card-header bg-success bg-gradient text-white border-0 rounded-top-4">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h5 className="mb-0">
                           <FaSearch className="me-2" />
-                          Esplora Tutte le Richieste
+                          🎯 Richieste Aperte ({richiesteDisponibili.length})
+                        </h5>
+                      </div>
+                      <Link to="/richieste" className="btn btn-outline-light btn-sm rounded-pill">
+                        <FaArrowRight className="me-1" />
+                        Esplora Tutte
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="card-body p-3">
+                    {richiesteDisponibili.length > 0 ? (
+                      <div className="row g-3">
+                        {richiesteDisponibili.slice(0, 3).map(richiesta => (
+                          <div key={richiesta.id} className="col-lg-4">
+                            <div className="card border-0 bg-light rounded-3 h-100">
+                              <div className="card-body p-3">
+                                <h6 className="card-title fw-bold mb-2 text-primary">
+                                  {richiesta.titolo.length > 40 ? richiesta.titolo.substring(0, 40) + '...' : richiesta.titolo}
+                                </h6>
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                  <span className="fw-bold text-success">
+                                    <FaEuroSign className="me-1" />
+                                    {richiesta.budget}€
+                                  </span>
+                                  <small className="text-muted">
+                                    <FaUser className="me-1" />
+                                    {richiesta.cliente_username}
+                                  </small>
+                                </div>
+                                <button 
+                                  className="btn btn-primary btn-sm w-100 rounded-pill"
+                                  onClick={() => {
+                                    setRichiestaId(richiesta.id);
+                                    setShowModalOfferta(true);
+                                    setRichiestaSelezionata(richiesta);
+                                  }}
+                                >
+                                  <FaHandshake className="me-1" />
+                                  Fai Offerta
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-3">
+                        <h6 className="text-muted mb-2">Nessuna richiesta disponibile</h6>
+                        <Link to="/richieste" className="btn btn-primary btn-sm rounded-pill">
+                          <FaSearch className="me-1" />
+                          Esplora Richieste
                         </Link>
                       </div>
                     )}
@@ -812,90 +902,6 @@ function DashboardFornitore() {
                         </Link>
                       </div>
                     )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SEZIONE FAQ E SUPPORTO */}
-      <div className="row mt-4">
-        <div className="col-12">
-          <div className="card border-0 shadow-lg rounded-4">
-            <div className="card-header bg-warning bg-gradient text-dark border-0 rounded-top-4">
-              <div className="d-flex align-items-center">
-                <FaInfoCircle className="me-3" size={20} />
-                <div>
-                  <h5 className="mb-0">FAQ & Supporto Fornitori</h5>
-                  <small className="opacity-75">Domande frequenti e assistenza per sviluppatori</small>
-                </div>
-              </div>
-            </div>
-            <div className="card-body p-4">
-              <div className="row g-4">
-                <div className="col-lg-8">
-                  <h6 className="fw-bold mb-3 text-primary">
-                    <FaLightbulb className="me-2" />
-                    Domande Frequenti per Fornitori
-                  </h6>
-                  <div className="accordion" id="faqFornitoreAccordion">
-                    <div className="accordion-item border-0 mb-2 rounded-3">
-                      <h2 className="accordion-header">
-                        <button className="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faqF1">
-                          Come funziona il sistema di offerte?
-                        </button>
-                      </h2>
-                      <div id="faqF1" className="accordion-collapse collapse" data-bs-parent="#faqFornitoreAccordion">
-                        <div className="accordion-body">
-                          Visualizzi le richieste dei clienti, invii offerte competitive e, se accettate, inizi il progetto. I pagamenti sono garantiti al completamento.
-                        </div>
-                      </div>
-                    </div>
-                    <div className="accordion-item border-0 mb-2 rounded-3">
-                      <h2 className="accordion-header">
-                        <button className="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faqF2">
-                          Quando ricevo il pagamento?
-                        </button>
-                      </h2>
-                      <div id="faqF2" className="accordion-collapse collapse" data-bs-parent="#faqFornitoreAccordion">
-                        <div className="accordion-body">
-                          Il pagamento viene rilasciato automaticamente quando il cliente approva il lavoro completato. I fondi sono già garantiti in escrow.
-                        </div>
-                      </div>
-                    </div>
-                    <div className="accordion-item border-0 mb-2 rounded-3">
-                      <h2 className="accordion-header">
-                        <button className="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faqF3">
-                          Come posso aumentare le mie possibilità di successo?
-                        </button>
-                      </h2>
-                      <div id="faqF3" className="accordion-collapse collapse" data-bs-parent="#faqFornitoreAccordion">
-                        <div className="accordion-body">
-                          Completa il tuo profilo, pubblica prodotti di qualità, rispondi rapidamente alle richieste e mantieni una comunicazione professionale.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-lg-4">
-                  <div className="bg-light rounded-4 p-4 text-center">
-                    <FaUserTie size={48} className="text-warning mb-3" />
-                    <h6 className="fw-bold mb-3">Supporto Sviluppatori</h6>
-                    <p className="text-muted mb-3">
-                      Team dedicato per supportare i nostri fornitori
-                    </p>
-                    <div className="d-grid gap-2">
-                      <Link to="/faq" className="btn btn-warning rounded-pill">
-                        <FaInfoCircle className="me-2" />
-                        FAQ Complete
-                      </Link>
-                      <button className="btn btn-outline-warning rounded-pill">
-                        <FaUserTie className="me-2" />
-                        Supporto Tecnico
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1221,6 +1227,17 @@ function DashboardFornitore() {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+        
+        .offerta-card-hover {
+          transition: all 0.3s ease;
+          border: 1px solid rgba(0,0,0,0.08);
+        }
+        
+        .offerta-card-hover:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.15) !important;
+          border-color: rgba(13,110,253,0.25);
         }
       `}</style>
     </div>
