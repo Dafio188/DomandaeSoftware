@@ -133,14 +133,6 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Configurazioni specifiche per l'admin Django
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8001',
-    'http://127.0.0.1:8001',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-]
-
 # Configurazioni CSRF per sviluppo
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
@@ -203,4 +195,26 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-] 
+]
+
+# CSRF trusted origins per domini personalizzati
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8001',
+    'http://127.0.0.1:8001',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
+# Se hai un dominio personalizzato, aggiungilo
+domain_name = os.environ.get('DOMAIN_NAME')
+if domain_name:
+    CSRF_TRUSTED_ORIGINS.extend([
+        f'https://{domain_name}',
+        f'https://www.{domain_name}',
+        f'http://{domain_name}',
+        f'http://www.{domain_name}'
+    ])
+
+# Fallback per jwgamebibble.it
+if 'https://jwgamebibble.it' not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.extend(['https://jwgamebibble.it', 'https://www.jwgamebibble.it']) 
