@@ -25,6 +25,14 @@ if domain_name:
 # Rimuovi stringhe vuote
 ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
 
+# FALLBACK: Assicurati che jwgamebibble.it sia sempre incluso
+if 'jwgamebibble.it' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.extend(['jwgamebibble.it', 'www.jwgamebibble.it'])
+
+# Debug: mostra gli ALLOWED_HOSTS nei log
+print(f"DEBUG: ALLOWED_HOSTS = {ALLOWED_HOSTS}")
+print(f"DEBUG: DOMAIN_NAME = {domain_name}")
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -146,6 +154,13 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     f"https://{host}" for host in ALLOWED_HOSTS if host and host != 'localhost'
 ]
+
+# FALLBACK: Assicurati che jwgamebibble.it sia sempre nei trusted origins
+if 'https://jwgamebibble.it' not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.extend(['https://jwgamebibble.it', 'https://www.jwgamebibble.it'])
+
+# Debug: mostra i CSRF_TRUSTED_ORIGINS nei log
+print(f"DEBUG: CSRF_TRUSTED_ORIGINS = {CSRF_TRUSTED_ORIGINS}")
 
 # Security Settings per HTTPS produzione
 SECURE_BROWSER_XSS_FILTER = True
