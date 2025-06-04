@@ -272,6 +272,130 @@ docker-compose up -d
 - [ ] 📱 App mobile nativa
 - [ ] 🌐 Multi-tenancy
 
+## 📝 **CHANGELOG DETTAGLIATO**
+
+### **v2.1.0** - Dicembre 2024 🚀
+#### 🔧 **Bug Fixes Critici**
+- **RISOLTO**: Errore 400 Bad Request su creazione richieste
+  - Corretto endpoint `/api/idee/` → `/api/richieste/` in `LeTueIdee.jsx`
+  - Sostituito campo `categoria` con `tipo_software` 
+  - Aggiunto campo `is_prodotto_acquistato: false`
+- **RISOLTO**: Link "I Miei Progetti" puntava a pagina sbagliata
+  - Corretto da `/le-tue-idee` a `/progetti` in `UnifiedNavbar.jsx`
+- **RISOLTO**: Sezione offerte nascosta in dashboard fornitore
+
+#### ✨ **Nuove Funzionalità**
+- **NUOVO**: Pagina `Progetti.jsx` dedicata con:
+  - Lista progetti per ruolo (cliente/fornitore)
+  - Toggle progetti attivi/archiviati
+  - Filtri avanzati (stato, ricerca, ordinamento)
+  - Statistiche complete e real-time
+- **NUOVO**: Pulsanti "Le Tue Idee" in entrambe le dashboard
+- **NUOVO**: Sistema archiviazione progetti con storico completo
+
+#### 🎨 **Miglioramenti UX/UI**
+- **MIGLIORATO**: Dashboard fornitore completamente riorganizzata
+  - Sezione "Gestione Offerte" ora prioritaria e visibile
+  - Rimosse statistiche duplicate
+  - Layout più pulito e intuitivo
+- **MIGLIORATO**: Modal offerte con anteprima e validazioni
+- **MIGLIORATO**: Navigazione responsive su mobile
+
+#### 🔧 **Ottimizzazioni Backend**
+- **AGGIUNTO**: `perform_create()` in `RichiestaViewSet` con logging
+- **MIGLIORATO**: `RichiestaSerializer` con `read_only_fields`
+- **AGGIUNTO**: Sistema logging avanzato per debug
+- **OTTIMIZZATO**: Validazioni API più robuste
+
+#### 🗂️ **File Modificati/Creati**
+- ✅ `frontend/src/pages/Progetti.jsx` - **NUOVO**
+- ✅ `frontend/src/pages/LeTueIdee.jsx` - Corretti endpoint API
+- ✅ `frontend/src/pages/DashboardFornitore.jsx` - Riorganizzazione completa
+- ✅ `frontend/src/pages/DashboardCliente.jsx` - Aggiunto pulsante "Le Tue Idee"
+- ✅ `frontend/src/components/UnifiedNavbar.jsx` - Corretti link
+- ✅ `frontend/src/App.jsx` - Aggiunta route `/progetti`
+- ✅ `backend/richieste/views.py` - Logging e validazioni
+- ✅ `backend/richieste/serializers.py` - Campi read-only
+- 🗑️ `frontend/src/pages/LeMieOfferte.jsx` - **RIMOSSO** (duplicato)
+
+### **v2.0.0** - Novembre 2024
+- 🚀 Lancio versione completa con tutte le funzionalità core
+- 🎨 Design system completo Bootstrap 5
+- 🔐 Autenticazione JWT implementata
+- 📊 Dashboard cliente e fornitore base
+- 🛒 Marketplace prodotti pronti
+
+## 🛠️ **Per Sviluppatori**
+
+### **🔍 Debug e Testing**
+```bash
+# Verifica stato applicazione
+docker-compose ps
+
+# Logs in tempo reale
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Test API manuale
+curl -X GET http://localhost:8001/api/richieste/
+curl -X POST http://localhost:8001/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "test", "password": "admin123"}'
+
+# Accesso database
+docker-compose exec db psql -U postgres -d domanda_software
+
+# Reset completo (ATTENZIONE: cancella tutti i dati)
+docker-compose down -v && docker-compose up -d
+```
+
+### **📊 Monitoring e Performance**
+```bash
+# Utilizzo risorse containers
+docker stats
+
+# Spazio disco database
+docker-compose exec db du -sh /var/lib/postgresql/data/
+
+# Dimensione immagini Docker
+docker images | grep domanda
+
+# Cleanup immagini inutilizzate
+docker system prune -a
+```
+
+### **🔧 Sviluppo in Locale**
+```bash
+# Hot reload frontend (già attivo)
+# Modifica file in frontend/src/ → reload automatico
+
+# Nuove migrazioni database
+docker-compose exec backend python manage.py makemigrations
+docker-compose exec backend python manage.py migrate
+
+# Creazione superuser
+docker-compose exec backend python manage.py createsuperuser
+
+# Shell Django per debugging
+docker-compose exec backend python manage.py shell
+```
+
+### **📦 Build e Deploy**
+```bash
+# Build produzione
+docker-compose -f docker-compose.production.yml build
+
+# Deploy su Railway
+railway login
+railway link [project-id]
+railway up
+
+# Deploy su Webdock
+curl -fsSL https://raw.githubusercontent.com/Dafio188/DomandaeSoftware/main/scripts/deploy-webdock.sh -o deploy.sh
+chmod +x deploy.sh
+./deploy.sh tuodominio.com
+```
+
 ## 💰 Confronto Costi Deployment
 
 | Provider | Costo/mese | Setup | Controllo | SSL | Database | Raccomandato per |
