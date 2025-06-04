@@ -14,6 +14,17 @@ DEBUG = False
 # Hosts permessi per produzione
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
+# Se DOMAIN_NAME è presente, aggiungilo automaticamente agli ALLOWED_HOSTS
+domain_name = os.environ.get('DOMAIN_NAME')
+if domain_name:
+    if domain_name not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(domain_name)
+    if f'www.{domain_name}' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(f'www.{domain_name}')
+
+# Rimuovi stringhe vuote
+ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -130,6 +141,11 @@ CORS_ALLOWED_ORIGINS = [
     f"https://{host}" for host in ALLOWED_HOSTS if host and host != 'localhost'
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF Settings per HTTPS
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{host}" for host in ALLOWED_HOSTS if host and host != 'localhost'
+]
 
 # Security Settings per HTTPS produzione
 SECURE_BROWSER_XSS_FILTER = True
