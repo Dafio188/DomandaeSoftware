@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../config/api.js';
 
 function PasswordReset() {
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ function PasswordReset() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8001/api/auth/password-reset/', {
+      const response = await axios.post(`${API_BASE}auth/password-reset/`, {
         email: email
       });
       setMessage(response.data.message);

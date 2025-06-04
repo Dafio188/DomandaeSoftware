@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../config/api.js';
 import './Progetto.css';
 import { calcolaImporti } from '../utils/calcoli';
 import { 
@@ -65,8 +66,8 @@ function Progetto() {
     if (token && user) {
       console.log('✅ Token e user presenti, facendo richieste API...');
       
-      const progettoUrl = `http://localhost:8001/api/progetti/${id}/`;
-      const messaggiUrl = `http://localhost:8001/api/messaggi/?progetto=${id}`;
+      const progettoUrl = `${API_BASE}progetti/${id}/`;
+      const messaggiUrl = `${API_BASE}messaggi/?progetto=${id}`;
       
       Promise.all([
         axios.get(progettoUrl, {

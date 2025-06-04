@@ -1,6 +1,7 @@
-import { useParams } from 'react-router-dom';
+import React, { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../config/api.js';
 
 function ProdottoDettaglio() {
   const { id } = useParams();
@@ -14,7 +15,7 @@ function ProdottoDettaglio() {
     
     console.log('Caricamento prodotto ID:', id);
     
-    axios.get(`http://localhost:8001/api/prodotti-pronti/${id}/`)
+    axios.get(`${API_BASE}prodotti-pronti/${id}/`)
       .then(res => {
         console.log('Prodotto caricato:', res.data);
         setProdotto(res.data);

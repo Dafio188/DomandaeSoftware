@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../config/api.js';
 
 function PasswordResetConfirm() {
   const { uid, token } = useParams();
@@ -36,7 +37,7 @@ function PasswordResetConfirm() {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:8001/api/auth/password-reset-confirm/', {
+      const response = await axios.post(`${API_BASE}auth/password-reset-confirm/`, {
         uid: uid,
         token: token,
         new_password: newPassword
