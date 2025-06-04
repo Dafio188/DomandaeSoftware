@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { API_BASE } from '../config/api.js';
 import { 
   FaStar, 
   FaEuroSign, 
@@ -97,11 +98,11 @@ function ProdottiPronti() {
 
   const loadProdotti = async () => {
     try {
-      const res = await axios.get('/api/prodotti-pronti/');
+      const res = await axios.get(`${API_BASE}prodotti-pronti/`);
       setProdotti(res.data);
       setLoading(false);
-    } catch (err) {
-      setError('Errore nel caricamento dei prodotti');
+    } catch (error) {
+      console.error('Errore caricamento prodotti:', error);
       setLoading(false);
     }
   };

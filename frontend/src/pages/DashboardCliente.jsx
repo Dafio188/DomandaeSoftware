@@ -5,6 +5,7 @@ import { getRichiesteCliente, getProgettiCliente } from '../services/api';
 import AcquistoModal from '../components/AcquistoModal';
 import axios from 'axios';
 import { FaImage, FaTimes, FaEye, FaEuroSign, FaUser, FaCalendar, FaCheckCircle, FaTimesCircle, FaClock, FaLaptopCode, FaInfoCircle, FaMagic, FaRocket, FaLightbulb, FaArchive, FaShoppingCart, FaBox, FaArrowRight } from 'react-icons/fa';
+import { API_BASE } from '../config/api.js';
 
 function DashboardCliente() {
   const { user, token } = useAuth();
@@ -59,7 +60,7 @@ function DashboardCliente() {
       });
       
       // Carica prodotti pronti
-      axios.get('/api/prodotti-pronti/')
+      axios.get(`${API_BASE}prodotti-pronti/`)
         .then(res => {
           setProdotti(res.data);
         })
@@ -68,7 +69,7 @@ function DashboardCliente() {
         });
       
       // Carica progetti archiviati separatamente
-      axios.get('/api/progetti/archiviati/', {
+      axios.get(`${API_BASE}progetti/archiviati/`, {
         headers: { Authorization: `Bearer ${token}` }
       }).then(res => {
         setProgettiArchiviati(res.data.results || []);
@@ -78,7 +79,7 @@ function DashboardCliente() {
       });
       
       // Recupera le offerte per le richieste del cliente corrente usando il nuovo endpoint
-      axios.get(`/api/offerte/?cliente=${user.id}`, {
+      axios.get(`${API_BASE}offerte/?cliente=${user.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       }).then(res => {
         setOfferte(res.data);

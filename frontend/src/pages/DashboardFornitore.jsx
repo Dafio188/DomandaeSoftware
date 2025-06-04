@@ -4,6 +4,7 @@ import { getOfferteFornitore, getProgettiFornitore, getAllRichieste } from '../s
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { FaUser, FaEuroSign, FaCalendar, FaCheckCircle, FaTimesCircle, FaClock, FaLightbulb, FaTools, FaChartLine, FaHandshake, FaStar, FaBriefcase, FaPlus, FaEye, FaImage, FaTimes, FaMagic, FaRocket, FaInfoCircle, FaProjectDiagram, FaArrowLeft, FaArchive, FaSearch, FaArrowRight, FaUserTie, FaEdit, FaArrowUp, FaQuestionCircle, FaEnvelope, FaCog } from 'react-icons/fa';
+import { API_BASE } from '../config/api.js';
 
 function DashboardFornitore() {
   const { user, token } = useAuth();
@@ -69,7 +70,7 @@ function DashboardFornitore() {
       });
       
       // Carica progetti archiviati separatamente
-      axios.get('/api/progetti/archiviati/', {
+      axios.get(`${API_BASE}progetti/archiviati/`, {
         headers: { Authorization: `Bearer ${token}` }
       }).then(res => {
         setProgettiArchiviati(res.data.results || []);
@@ -80,7 +81,7 @@ function DashboardFornitore() {
       
       getAllRichieste(token).then(setRichieste);
       // Carica i prodotti pronti del fornitore
-      axios.get('/api/prodotti-pronti/')
+      axios.get(`${API_BASE}prodotti-pronti/`)
         .then(res => {
           console.log('Prodotti caricati:', res.data);
           console.log('User ID:', user.id);

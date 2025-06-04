@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaStar, FaQuoteLeft, FaQuoteRight, FaUser } from 'react-icons/fa';
 import Slider from 'react-slick';
+import { API_BASE } from '../config/api.js';
 
 function Testimonianze() {
   const [testimonianze, setTestimonianze] = useState([]);
@@ -13,8 +14,7 @@ function Testimonianze() {
     const fetchTestimonianze = async () => {
       setLoading(true);
       try {
-        // Usa l'URL relativo che sfrutta il proxy di nginx
-        const response = await axios.get('/api/testimonianze/');
+        const response = await axios.get(`${API_BASE}testimonianze/`);
         console.log('Testimonianze caricate:', response.data);
         
         if (response.data && response.data.length > 0) {

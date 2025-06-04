@@ -1,6 +1,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../config/api.js';
 import { Link } from 'react-router-dom';
 import { 
   FaHandshake, 
@@ -32,7 +33,7 @@ function LeMieOfferteCliente() {
       setLoading(true);
       
       // Carica le richieste del cliente
-      axios.get('/api/richieste/', {
+      axios.get(`${API_BASE}richieste/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => {
@@ -40,7 +41,7 @@ function LeMieOfferteCliente() {
         setRichieste(richiesteCliente);
         
         // Carica tutte le offerte per le richieste del cliente
-        return axios.get('/api/offerte/', {
+        return axios.get(`${API_BASE}offerte/`, {
           headers: { Authorization: `Bearer ${token}` }
         });
       })
@@ -91,7 +92,7 @@ function LeMieOfferteCliente() {
 
   const handleAccettaOfferta = async (offertaId) => {
     try {
-      await axios.patch(`/api/offerte/${offertaId}/`, 
+      await axios.patch(`${API_BASE}offerte/${offertaId}/`, 
         { stato: 'accettata' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -106,7 +107,7 @@ function LeMieOfferteCliente() {
 
   const handleRifiutaOfferta = async (offertaId) => {
     try {
-      await axios.patch(`/api/offerte/${offertaId}/`, 
+      await axios.patch(`${API_BASE}offerte/${offertaId}/`, 
         { stato: 'rifiutata' },
         { headers: { Authorization: `Bearer ${token}` } }
       );

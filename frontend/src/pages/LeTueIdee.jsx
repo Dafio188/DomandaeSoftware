@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE } from '../config/api.js';
 import axios from 'axios';
 import { 
   FaLightbulb, 
@@ -58,15 +59,16 @@ function LeTueIdee() {
 
   const caricaIdee = async () => {
     try {
-      const response = await axios.get('/api/richieste/', {
+      const response = await axios.get(`${API_BASE}richieste/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // Filtra solo le richieste dell'utente corrente
-      const ideeUtente = response.data.filter(r => r.cliente === user.id);
-      setIdee(ideeUtente);
+      
+      // Filtra le richieste per mostrare solo quelle del cliente loggato
+      const richiesteCliente = response.data.filter(richiesta => richiesta.cliente === user.id);
+      setIdee(richiesteCliente);
       setLoading(false);
-    } catch (err) {
-      setError('Errore nel caricamento delle idee');
+    } catch (error) {
+      console.error('Errore durante il caricamento delle richieste:', error);
       setLoading(false);
     }
   };
@@ -79,7 +81,7 @@ function LeTueIdee() {
     setError('');
     
     try {
-      await axios.post('/api/richieste/', {
+      await axios.post(`${API_BASE}richieste/`, {
         titolo: `Idea ${categoria}: ${nuovaIdea.substring(0, 50)}...`,
         descrizione: nuovaIdea.trim(),
         tipo_software: 'altro', // Le idee sono generalmente "altro"
@@ -120,6 +122,21 @@ function LeTueIdee() {
                        idea.autore_username.toLowerCase().includes(searchTerm.toLowerCase());
     return matchCategoria && matchSearch;
   });
+
+  // Funzione per eliminare una richiesta
+  const handleDeleteRichiesta = async (id) => {
+    if (window.confirm('Sei sicuro di voler eliminare questa richiesta?')) {
+      try {
+        await axios.delete(`${API_BASE}richieste/${id}/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // Ricarica le richieste dopo l'eliminazione
+        caricaIdee();
+      } catch (error) {
+        console.error('Errore durante l\'eliminazione:', error);
+      }
+    }
+  };
 
   if (!user) {
     return (

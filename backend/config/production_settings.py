@@ -155,13 +155,6 @@ CSRF_TRUSTED_ORIGINS = [
     f"https://{host}" for host in ALLOWED_HOSTS if host and host != 'localhost'
 ]
 
-# FALLBACK: Assicurati che jwgamebibble.it sia sempre nei trusted origins
-if 'https://jwgamebibble.it' not in CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS.extend(['https://jwgamebibble.it', 'https://www.jwgamebibble.it'])
-
-# Debug: mostra i CSRF_TRUSTED_ORIGINS nei log
-print(f"DEBUG: CSRF_TRUSTED_ORIGINS = {CSRF_TRUSTED_ORIGINS}")
-
 # Security Settings per HTTPS produzione
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True

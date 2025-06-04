@@ -10,6 +10,7 @@ import 'aos/dist/aos.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Testimonianze from '../components/Testimonianze';
+import { API_BASE } from '../config/api.js';
 
 function Home() {
   const { user, logout } = useAuth();
@@ -213,44 +214,34 @@ function Home() {
   useEffect(() => {
     AOS.init({ duration: 1200, once: true });
     
-    // Carica richieste
-    axios.get('/api/richieste/')
-      .then(res => {
-        setRichieste(res.data);
-      });
+    // Carica richieste recenti per utenti autenticati
+    if (user && user.tipo_utente === 'cliente') {
+      axios.get(`${API_BASE}richieste/`)
+        .then(res => {
+          const richiesteCliente = res.data.filter(r => r.cliente === user.id);
+          setRichiesteRecenti(richiesteCliente.slice(0, 3));
+        })
+        .catch(err => console.log('Errore caricamento richieste:', err));
       
-    // Carica prodotti pronti
-    axios.get('/api/prodotti-pronti/')
-      .then(res => {
-        setProdotti(res.data);
-      })
-      .catch(err => {
-        console.log('Errore caricamento prodotti:', err);
-      });
-      
-    // Carica statistiche reali dal backend
-    const loadStats = async () => {
+      axios.get(`${API_BASE}prodotti-pronti/`)
+        .then(res => {
+          setProdottiRecenti(res.data.slice(0, 3));
+        })
+        .catch(err => console.log('Errore caricamento prodotti:', err));
+    }
+
+    // Carica statistiche per la sezione home
+    const fetchStats = async () => {
       try {
-        const response = await axios.get('/api/stats/home/');
+        const response = await axios.get(`${API_BASE}stats/home/`);
         setStats(response.data);
-        console.log('📊 Statistiche caricate dal backend:', response.data);
       } catch (error) {
-        console.warn('⚠️ Errore caricamento statistiche, uso dati di fallback:', error);
-        // Fallback con dati di default
-        setStats({
-          ore_media_offerta: 18,
-          pagamenti_sicuri: 100,
-          sviluppatori_attivi: 150,
-          soddisfazione_clienti: 94,
-          richieste_aperte: richieste.length || 12,
-          progetti_totali: 67,
-          last_updated: new Date().toISOString()
-        });
+        console.log('Errore nel caricamento statistiche:', error);
       }
     };
     
-    loadStats();
-  }, []);
+    fetchStats();
+  }, [user]);
 
   // Slider settings per richieste
   const richiesteSliderSettings = {
