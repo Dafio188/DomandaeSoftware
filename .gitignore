@@ -89,4 +89,7 @@ RISOLUZIONE_*.md
 # Backup e temporanei
 *.bak
 *.tmp
-*.temp 
+*.temp
+
+# Database backups
+database_backups/ 
