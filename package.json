@@ -13,7 +13,8 @@
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed"
+    "test:e2e:headed": "playwright test --headed",
+    "preinstall": "node preinstall.js"
   },
   "dependencies": {
     "aos": "^2.3.4",

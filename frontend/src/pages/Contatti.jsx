@@ -18,7 +18,9 @@ import {
   FaInfoCircle,
   FaBuilding,
   FaGlobe,
-  FaWhatsapp
+  FaWhatsapp,
+  FaUser,
+  FaUserTie
 } from 'react-icons/fa';
 import './Contatti.css';
 
