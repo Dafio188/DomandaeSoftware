@@ -28,6 +28,7 @@ import {
   FaSearch
 } from 'react-icons/fa';
 import '../styles/MacStyle.css';
+import '../styles/DarkPage.css';
 
 function ProdottiPronti() {
   const { user, token } = useAuth();
@@ -261,7 +262,7 @@ function ProdottiPronti() {
 
   if (loading) {
     return (
-      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+      <div className="dark-page min-vh-100 d-flex align-items-center justify-content-center">
         <div className="text-center">
           <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }}>
             <span className="visually-hidden">Caricamento...</span>
@@ -273,7 +274,7 @@ function ProdottiPronti() {
   }
 
   return (
-    <div className="py-4">
+    <div className="dark-page py-4">
       {/* Header Hero - Mac Style */}
       <div className="row align-items-center mb-5">
         <div className="col-lg-8">

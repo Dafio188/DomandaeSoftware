@@ -17,7 +17,6 @@ import {
   FaCrown,
   FaComments,
   FaCheckCircle,
-  FaExclamationTriangle,
   FaLightbulb,
   FaArrowRight,
   FaPlay,
@@ -27,6 +26,7 @@ import {
   FaStar,
   FaTicketAlt
 } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import './ScopoDelSito.css';
 
@@ -37,35 +37,35 @@ function ScopoDelSito() {
     {
       tipo: 'sito_web',
       nome: 'Siti Web',
-      icon: <FaGlobe />,
+      icon: '/immagini icona homepage/03.png',
       esempi: ['Sito aziendale', 'Portfolio personale', 'Blog professionale', 'Landing page'],
       descrizione: 'Siti web responsive e moderni per la tua presenza online'
     },
     {
       tipo: 'app_mobile',
       nome: 'App Mobile',
-      icon: <FaMobile />,
+      icon: '/immagini icona homepage/02.png',
       esempi: ['App iOS/Android', 'App cross-platform', 'PWA', 'App aziendali'],
       descrizione: 'Applicazioni mobile native e cross-platform per ogni esigenza'
     },
     {
       tipo: 'ecommerce',
       nome: 'E-commerce',
-      icon: <FaStore />,
+      icon: '/immagini icona homepage/05.png',
       esempi: ['Negozio online', 'Marketplace', 'Catalogo prodotti', 'Sistema ordini'],
       descrizione: 'Piattaforme e-commerce complete per vendere online'
     },
     {
       tipo: 'gestionale',
       nome: 'Software Gestionali',
-      icon: <FaChartLine />,
+      icon: '/immagini icona homepage/04.png',
       esempi: ['CRM', 'ERP', 'Sistema HR', 'Gestione magazzino'],
       descrizione: 'Software per automatizzare e ottimizzare i processi aziendali'
     },
     {
       tipo: 'personalizzato',
       nome: 'Software Personalizzato',
-      icon: <FaCog />,
+      icon: '/immagini icona homepage/01.png',
       esempi: ['Tool specifici', 'Automazioni', 'Integrazioni API', 'Script'],
       descrizione: 'Soluzioni software su misura per le tue esigenze specifiche'
     }
@@ -134,30 +134,40 @@ function ScopoDelSito() {
   ];
 
   return (
-    <div className="min-vh-100 bg-gradient scopo-page">
-      <PageHeader 
-        title="Scopo del Sito"
-        subtitle="Comprendiamo esattamente come funziona la nostra piattaforma, cosa offriamo a clienti e sviluppatori, e come garantiamo sicurezza e qualità in ogni progetto."
-        badge="IL NOSTRO SCOPO"
-        icon={FaRocket}
-        theme="primary"
-      />
+    <div className="scopo-page">
+      {/* Hero Section */}
+      <div className="scopo-hero">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-10">
+              <div className="d-flex align-items-center justify-content-center mb-4 gap-3">
+                <div className="p-3 rounded-4" style={{ background: 'rgba(0,113,227,0.1)' }}>
+                  <FaRocket size={32} style={{ color: '#0071e3' }} />
+                </div>
+                <span className="mac-badge bg-primary text-white shadow-sm px-3">IL NOSTRO SCOPO</span>
+              </div>
+              <h1>Scopo del Sito</h1>
+              <p>
+                Comprendiamo esattamente come funziona la nostra piattaforma, cosa offriamo a clienti e 
+                sviluppatori, e come garantiamo sicurezza e qualità in ogni progetto.
+              </p>
+            </div>
+          </div>
 
-      <div className="container mb-5">
-        <div className="row justify-content-center text-center">
+          {/* User Type Toggle */}
+          <div className="row justify-content-center mt-4">
             <div className="col-lg-8">
-              {/* Toggle User Type */}
-              <div className="mac-glass-card p-3 d-inline-flex mb-4">
+              <div className="user-type-toggle d-flex justify-content-center">
                 <div className="btn-group" role="group">
                   <button 
-                    className={`btn rounded-pill px-4 ${activeUserType === 'cliente' ? 'btn-primary shadow-sm' : 'btn-link text-decoration-none text-muted'}`}
+                    className={`btn rounded-pill px-4 ${activeUserType === 'cliente' ? 'btn-primary shadow-sm' : 'btn-link text-decoration-none'}`}
                     onClick={() => setActiveUserType('cliente')}
                   >
                     <FaUser className="me-2" />
                     Sono un Cliente
                   </button>
                   <button 
-                    className={`btn rounded-pill px-4 ${activeUserType === 'fornitore' ? 'btn-primary shadow-sm' : 'btn-link text-decoration-none text-muted'}`}
+                    className={`btn rounded-pill px-4 ${activeUserType === 'fornitore' ? 'btn-primary shadow-sm' : 'btn-link text-decoration-none'}`}
                     onClick={() => setActiveUserType('fornitore')}
                   >
                     <FaUserTie className="me-2" />
@@ -166,35 +176,45 @@ function ScopoDelSito() {
                 </div>
               </div>
             </div>
+          </div>
         </div>
       </div>
 
-      <div className="container py-5">
-        {/* Tipi di Progetti Supportati */}
-        <div className="section mb-5">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold text-primary mb-3">
-              <FaCode className="me-3 text-info" />
+      {/* Tipi di Progetti */}
+      <div className="scopo-section">
+        <div className="container">
+          <div className="scopo-section-header">
+            <h2>
+              <FaCode style={{ color: '#0071e3' }} className="me-3" />
               Cosa Puoi Realizzare
             </h2>
-            <p className="lead text-light">Tipologie di software e progetti supportati dalla nostra piattaforma</p>
+            <p>Tipologie di software e progetti supportati dalla nostra piattaforma</p>
           </div>
-          
+
           <div className="row g-4">
             {tipiProgetto.map((tipo, index) => (
               <div key={index} className="col-lg-4 col-md-6">
                 <div className="project-type-card">
                   <div className="project-icon">
-                    {tipo.icon}
+                    <img 
+                      src={tipo.icon} 
+                      alt={tipo.nome}
+                      className="w-100 h-100"
+                      style={{ objectFit: 'contain', padding: '12px', borderRadius: '50%' }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.style.display = 'none';
+                      }}
+                    />
                   </div>
-                  <h5 className="fw-bold mb-3">{tipo.nome}</h5>
-                  <p className="text-muted mb-3">{tipo.descrizione}</p>
+                  <h5>{tipo.nome}</h5>
+                  <p>{tipo.descrizione}</p>
                   <div className="esempi-list">
-                    <h6 className="small fw-bold text-primary mb-2">Esempi:</h6>
+                    <h6>Esempi:</h6>
                     <ul className="list-unstyled">
                       {tipo.esempi.map((esempio, idx) => (
-                        <li key={idx} className="small text-muted mb-1">
-                          <FaArrowRight className="me-2 text-success" size={12} />
+                        <li key={idx}>
+                          <FaArrowRight style={{ color: '#30c56d' }} size={12} className="me-2" />
                           {esempio}
                         </li>
                       ))}
@@ -205,148 +225,159 @@ function ScopoDelSito() {
             ))}
           </div>
         </div>
+      </div>
 
-        {/* Processo Dettagliato */}
-        <div className="section mb-5">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold text-primary mb-3">
+      {/* Processo Dettagliato — Card Grid */}
+      <div className="scopo-section" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="container">
+          <div className="scopo-section-header">
+            <h2>
               {activeUserType === 'cliente' ? (
-                <>
-                  <FaUser className="me-3 text-success" />
-                  Come Funziona per i Clienti
-                </>
+                <><FaUser style={{ color: '#30c56d' }} className="me-3" />Come Funziona per i Clienti</>
               ) : (
-                <>
-                  <FaUserTie className="me-3 text-info" />
-                  Come Funziona per gli Sviluppatori
-                </>
+                <><FaUserTie style={{ color: '#0071e3' }} className="me-3" />Come Funziona per gli Sviluppatori</>
               )}
             </h2>
-            <p className="lead text-light">
+            <p>
               {activeUserType === 'cliente' 
                 ? 'Il processo completo per realizzare il tuo progetto software'
                 : 'Come trovare progetti interessanti e costruire la tua carriera freelance'
               }
             </p>
           </div>
-          
-          <div className="processo-timeline">
+
+          <div className="row g-4">
             {(activeUserType === 'cliente' ? processoCliente : processoFornitore).map((step, index) => (
-              <div key={index} className="processo-step">
-                <div className="step-connector"></div>
-                <div className="step-content">
-                  <div className="step-header">
-                    <div className="step-number">{step.step}</div>
-                    <div className="step-icon">
-                      {step.icon}
-                    </div>
+              <div key={index} className="col-lg-3 col-md-6">
+                <div className="process-card h-100" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="process-card-number">{step.step}</div>
+                  <div className="process-card-icon">
+                    {step.icon}
                   </div>
-                  <div className="step-body">
-                    <h4 className="fw-bold mb-3">{step.titolo}</h4>
-                    <p className="text-muted mb-4">{step.descrizione}</p>
-                    <div className="step-actions">
-                      <h6 className="small fw-bold text-primary mb-2">Azioni da compiere:</h6>
-                      <div className="row g-2">
-                        {step.azioni.map((azione, idx) => (
-                          <div key={idx} className="col-md-6">
-                            <div className="action-item">
-                              <FaCheckCircle className="me-2 text-success" size={14} />
-                              <span className="small">{azione}</span>
-                            </div>
-                          </div>
-                        ))}
+                  <h4 className="process-card-title">{step.titolo}</h4>
+                  <p className="process-card-desc">{step.descrizione}</p>
+                  <div className="process-card-actions">
+                    <h6>Azioni:</h6>
+                    {step.azioni.map((azione, idx) => (
+                      <div key={idx} className="process-card-action-item">
+                        <FaCheckCircle style={{ color: '#30c56d' }} size={12} className="flex-shrink-0 me-2 mt-1" />
+                        <span>{azione}</span>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
+      </div>
 
-        {/* Garanzie e Sicurezza */}
-        <div className="section mb-5">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold text-primary mb-3">
-              <FaShieldAlt className="me-3 text-success" />
+      {/* Garanzie e Sicurezza */}
+      <div className="scopo-section" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="container">
+          <div className="scopo-section-header">
+            <h2>
+              <FaShieldAlt style={{ color: '#30c56d' }} className="me-3" />
               Le Nostre Garanzie
             </h2>
-            <p className="lead text-light">Cosa ti garantiamo per una collaborazione sicura e di successo</p>
+            <p>Cosa ti garantiamo per una collaborazione sicura e di successo</p>
           </div>
-          
+
           <div className="row g-4">
+            {/* Per i Clienti */}
             <div className="col-lg-6">
-              <div className="garanzia-card cliente-garanzie">
+              <div className="garanzia-card">
                 <div className="garanzia-header">
-                  <FaUser size={30} className="text-success" />
-                  <h5 className="fw-bold">Per i Clienti</h5>
+                  <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(48,197,109,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                    <FaUser size={26} style={{ color: '#30c56d' }} />
+                  </div>
+                  <h5>Per i Clienti</h5>
                 </div>
-                <div className="garanzie-list">
+                <div className="garanzia-items">
                   <div className="garanzia-item">
-                    <FaShieldAlt className="text-success me-3" />
-                    <div>
-                      <h6 className="fw-bold mb-1">Pagamento Protetto</h6>
-                      <small className="text-muted">Paghi solo quando sei soddisfatto del lavoro ricevuto</small>
+                    <div className="garanzia-item-icon" style={{ background: 'rgba(48,197,109,0.12)', color: '#30c56d' }}>
+                      <FaShieldAlt />
+                    </div>
+                    <div className="garanzia-item-content">
+                      <h6>Pagamento Protetto</h6>
+                      <small>Paghi solo quando sei soddisfatto del lavoro ricevuto</small>
                     </div>
                   </div>
                   <div className="garanzia-item">
-                    <FaCrown className="text-warning me-3" />
-                    <div>
-                      <h6 className="fw-bold mb-1">Supervisione Admin</h6>
-                      <small className="text-muted">Ogni progetto è supervisionato per garantire qualità e rispetto degli accordi</small>
+                    <div className="garanzia-item-icon" style={{ background: 'rgba(255,193,7,0.12)', color: '#ffc107' }}>
+                      <FaCrown />
+                    </div>
+                    <div className="garanzia-item-content">
+                      <h6>Supervisione Admin</h6>
+                      <small>Ogni progetto è supervisionato per garantire qualità e rispetto degli accordi</small>
                     </div>
                   </div>
                   <div className="garanzia-item">
-                    <FaComments className="text-info me-3" />
-                    <div>
-                      <h6 className="fw-bold mb-1">Comunicazione Trasparente</h6>
-                      <small className="text-muted">Chat supervisionata per evitare malintesi e proteggere entrambe le parti</small>
+                    <div className="garanzia-item-icon" style={{ background: 'rgba(0,162,255,0.12)', color: '#00a2ff' }}>
+                      <FaComments />
+                    </div>
+                    <div className="garanzia-item-content">
+                      <h6>Comunicazione Trasparente</h6>
+                      <small>Chat supervisionata per evitare malintesi e proteggere entrambe le parti</small>
                     </div>
                   </div>
                   <div className="garanzia-item">
-                    <FaAward className="text-purple me-3" />
-                    <div>
-                      <h6 className="fw-bold mb-1">Sviluppatori Verificati</h6>
-                      <small className="text-muted">Solo professionisti con competenze certificate e portfolio verificato</small>
+                    <div className="garanzia-item-icon" style={{ background: 'rgba(111,66,193,0.12)', color: '#9b59b6' }}>
+                      <FaAward />
+                    </div>
+                    <div className="garanzia-item-content">
+                      <h6>Sviluppatori Verificati</h6>
+                      <small>Solo professionisti con competenze certificate e portfolio verificato</small>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            
+
+            {/* Per gli Sviluppatori */}
             <div className="col-lg-6">
-              <div className="garanzia-card fornitore-garanzie">
+              <div className="garanzia-card">
                 <div className="garanzia-header">
-                  <FaUserTie size={30} className="text-primary" />
-                  <h5 className="fw-bold">Per gli Sviluppatori</h5>
+                  <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(0,113,227,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+                    <FaUserTie size={26} style={{ color: '#0071e3' }} />
+                  </div>
+                  <h5>Per gli Sviluppatori</h5>
                 </div>
-                <div className="garanzie-list">
+                <div className="garanzia-items">
                   <div className="garanzia-item">
-                    <FaEuroSign className="text-success me-3" />
-                    <div>
-                      <h6 className="fw-bold mb-1">Pagamento Garantito</h6>
-                      <small className="text-muted">Una volta completato il lavoro, il pagamento è assicurato (100% del totale)</small>
+                    <div className="garanzia-item-icon" style={{ background: 'rgba(48,197,109,0.12)', color: '#30c56d' }}>
+                      <FaEuroSign />
+                    </div>
+                    <div className="garanzia-item-content">
+                      <h6>Pagamento Garantito</h6>
+                      <small>Una volta completato il lavoro, il pagamento è assicurato (100% del totale)</small>
                     </div>
                   </div>
                   <div className="garanzia-item">
-                    <FaBolt className="text-warning me-3" />
-                    <div>
-                      <h6 className="fw-bold mb-1">Progetti Pre-finanziati</h6>
-                      <small className="text-muted">I clienti depositano i fondi prima dell'inizio, eliminando il rischio di mancato pagamento</small>
+                    <div className="garanzia-item-icon" style={{ background: 'rgba(255,193,7,0.12)', color: '#ffc107' }}>
+                      <FaBolt />
+                    </div>
+                    <div className="garanzia-item-content">
+                      <h6>Progetti Pre-finanziati</h6>
+                      <small>I clienti depositano i fondi prima dell'inizio, eliminando il rischio di mancato pagamento</small>
                     </div>
                   </div>
                   <div className="garanzia-item">
-                    <FaHandshake className="text-info me-3" />
-                    <div>
-                      <h6 className="fw-bold mb-1">Clienti Verificati</h6>
-                      <small className="text-muted">Solo clienti seri con identità verificata e budget confermato</small>
+                    <div className="garanzia-item-icon" style={{ background: 'rgba(0,162,255,0.12)', color: '#00a2ff' }}>
+                      <FaHandshake />
+                    </div>
+                    <div className="garanzia-item-content">
+                      <h6>Clienti Verificati</h6>
+                      <small>Solo clienti seri con identità verificata e budget confermato</small>
                     </div>
                   </div>
                   <div className="garanzia-item">
-                    <FaStar className="text-warning me-3" />
-                    <div>
-                      <h6 className="fw-bold mb-1">Sistema di Reputazione</h6>
-                      <small className="text-muted">Costruisci la tua reputazione con recensioni verificate per attrarre clienti migliori</small>
+                    <div className="garanzia-item-icon" style={{ background: 'rgba(255,193,7,0.12)', color: '#ffc107' }}>
+                      <FaStar />
+                    </div>
+                    <div className="garanzia-item-content">
+                      <h6>Sistema di Reputazione</h6>
+                      <small>Costruisci la tua reputazione con recensioni verificate per attrarre clienti migliori</small>
                     </div>
                   </div>
                 </div>
@@ -354,82 +385,73 @@ function ScopoDelSito() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Commissioni e Costi */}
-        <div className="section mb-5">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold text-primary mb-3">
-              <FaEuroSign className="me-3 text-success" />
+      {/* Commissioni e Costi */}
+      <div className="scopo-section" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="container">
+          <div className="scopo-section-header">
+            <h2>
+              <FaEuroSign style={{ color: '#30c56d' }} className="me-3" />
               Commissioni e Costi
             </h2>
-            <p className="lead text-light">Trasparenza totale sui costi - nessuna sorpresa</p>
+            <p>Trasparenza totale sui costi — nessuna sorpresa</p>
           </div>
-          
+
           <div className="row g-4 justify-content-center">
             <div className="col-lg-8">
               <div className="pricing-card">
-                <div className="pricing-header">
-                  <h4 className="fw-bold text-center mb-4">
-                    <FaHeart className="text-danger me-2" />
+                <div className="pricing-header-area">
+                  <h4>
+                    <FaHeart style={{ color: '#ff3b30' }} className="me-2" />
                     Modello di Business Trasparente
                   </h4>
                 </div>
-                
-                <div className="row g-4">
-                  <div className="col-md-6">
-                    <div className="pricing-section cliente-pricing">
-                      <h6 className="fw-bold text-success mb-3">
-                        <FaUser className="me-2" />
-                        Per i Clienti
-                      </h6>
-                      <div className="pricing-details">
-                        <div className="pricing-item">
+                <div className="pricing-body">
+                  <div className="row g-4">
+                    <div className="col-md-6">
+                      <div className="pricing-col" style={{ borderColor: 'rgba(48,197,109,0.3)' }}>
+                        <h6 style={{ color: '#30c56d' }}>
+                          <FaUser className="me-2" />
+                          Per i Clienti
+                        </h6>
+                        <div className="pricing-row">
                           <span className="label">Commissione Piattaforma:</span>
-                          <span className="value text-primary fw-bold">+5%</span>
+                          <span className="value" style={{ color: '#0071e3' }}>+5%</span>
                         </div>
-                        <div className="pricing-item">
+                        <div className="pricing-row">
                           <span className="label">Esempio:</span>
                           <span className="value">Progetto 1000€ = Paghi 1050€</span>
                         </div>
                         <div className="pricing-note">
-                          <small className="text-muted">
-                            <FaCheckCircle className="text-success me-1" />
-                            Include: supervisione admin, garanzie, supporto, infrastruttura sicura
-                          </small>
+                          <FaCheckCircle style={{ color: '#30c56d' }} className="me-1" />
+                          Include: supervisione admin, garanzie, supporto, infrastruttura sicura
                         </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="col-md-6">
-                    <div className="pricing-section fornitore-pricing">
-                      <h6 className="fw-bold text-primary mb-3">
-                        <FaUserTie className="me-2" />
-                        Per gli Sviluppatori
-                      </h6>
-                      <div className="pricing-details">
-                        <div className="pricing-item">
+                    <div className="col-md-6">
+                      <div className="pricing-col" style={{ borderColor: 'rgba(0,113,227,0.3)' }}>
+                        <h6 style={{ color: '#0071e3' }}>
+                          <FaUserTie className="me-2" />
+                          Per gli Sviluppatori
+                        </h6>
+                        <div className="pricing-row">
                           <span className="label">Ricevi:</span>
-                          <span className="value text-success fw-bold">100%</span>
+                          <span className="value" style={{ color: '#30c56d' }}>100%</span>
                         </div>
-                        <div className="pricing-item">
+                        <div className="pricing-row">
                           <span className="label">Esempio:</span>
                           <span className="value">Progetto 1000€ = Ricevi 1000€</span>
                         </div>
                         <div className="pricing-note">
-                          <small className="text-muted">
-                            <FaCheckCircle className="text-success me-1" />
-                            Include: pagamento garantito, progetti pre-finanziati, supporto clienti
-                          </small>
+                          <FaCheckCircle style={{ color: '#30c56d' }} className="me-1" />
+                          Include: pagamento garantito, progetti pre-finanziati, supporto clienti
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="alert alert-info border-0 rounded-3 mt-4">
-                  <div className="d-flex align-items-center">
-                    <FaLightbulb className="text-info me-3" size={24} />
+                  <div className="pricing-info-banner">
+                    <FaLightbulb style={{ color: '#0071e3' }} size={20} className="flex-shrink-0 mt-1" />
                     <div>
                       <strong>Perché il 5%?</strong> La nostra commissione copre: infrastruttura sicura, 
                       supervisione professionale, supporto 24/7, garanzie sui pagamenti, 
@@ -441,77 +463,61 @@ function ScopoDelSito() {
             </div>
           </div>
 
+          {/* Ticket & Crediti */}
           <div className="row g-4 justify-content-center mt-4">
             <div className="col-lg-8">
               <div className="pricing-card">
-                <div className="pricing-header">
-                  <h4 className="fw-bold text-center mb-4">
-                    <FaTicketAlt className="text-warning me-2" />
+                <div className="pricing-header-area">
+                  <h4>
+                    <FaTicketAlt style={{ color: '#ff9500' }} className="me-2" />
                     Ticket & Crediti (anti-spam)
                   </h4>
                 </div>
-
-                <div className="alert alert-dark border-0 rounded-3 mb-4" style={{ background: 'rgba(0,0,0,0.25)', color: 'white' }}>
-                  <strong>I crediti non sostituiscono il pagamento del progetto.</strong> Servono solo a regolamentare l’invio delle offerte e ridurre lo spam.
-                </div>
-
-                <div className="row g-4">
-                  <div className="col-md-6">
-                    <div className="pricing-section cliente-pricing">
-                      <h6 className="fw-bold text-success mb-3">
-                        <FaUser className="me-2" />
-                        Cliente
-                      </h6>
-                      <div className="pricing-details">
-                        <div className="pricing-item">
+                <div className="pricing-body">
+                  <div className="p-3 mb-4 rounded-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <strong className="text-white">I crediti non sostituiscono il pagamento del progetto.</strong>
+                    <span style={{ color: '#86868b' }}> Servono solo a regolamentare l'invio delle offerte e ridurre lo spam.</span>
+                  </div>
+                  <div className="row g-4">
+                    <div className="col-md-6">
+                      <div className="pricing-col" style={{ borderColor: 'rgba(48,197,109,0.3)' }}>
+                        <h6 style={{ color: '#30c56d' }}>
+                          <FaUser className="me-2" />
+                          Cliente
+                        </h6>
+                        <div className="pricing-row">
                           <span className="label">Crediti richiesti:</span>
-                          <span className="value text-success fw-bold">No</span>
+                          <span className="value" style={{ color: '#30c56d' }}>No</span>
                         </div>
-                        <div className="pricing-item">
+                        <div className="pricing-row">
                           <span className="label">Pubblicare richiesta:</span>
                           <span className="value">Gratis</span>
                         </div>
                         <div className="pricing-note">
-                          <small className="text-muted">
-                            <FaCheckCircle className="text-success me-1" />
-                            Paghi solo quando confermi il deposito/garanzia per avviare il progetto
-                          </small>
+                          <FaCheckCircle style={{ color: '#30c56d' }} className="me-1" />
+                          Paghi solo quando confermi il deposito/garanzia per avviare il progetto
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="col-md-6">
-                    <div className="pricing-section fornitore-pricing">
-                      <h6 className="fw-bold text-primary mb-3">
-                        <FaUserTie className="me-2" />
-                        Fornitore
-                      </h6>
-                      <div className="pricing-details">
-                        <div className="pricing-item">
+                    <div className="col-md-6">
+                      <div className="pricing-col" style={{ borderColor: 'rgba(0,113,227,0.3)' }}>
+                        <h6 style={{ color: '#0071e3' }}>
+                          <FaUserTie className="me-2" />
+                          Fornitore
+                        </h6>
+                        <div className="pricing-row">
                           <span className="label">Inviare offerta:</span>
-                          <span className="value text-warning fw-bold">1 credito</span>
+                          <span className="value" style={{ color: '#ff9500' }}>1 credito</span>
                         </div>
-                        <div className="pricing-item">
+                        <div className="pricing-row">
                           <span className="label">Come ricarichi:</span>
                           <span className="value">Scegli un pacchetto e ricevi la causale bonifico</span>
                         </div>
                         <div className="pricing-note">
-                          <small className="text-muted">
-                            <FaCheckCircle className="text-success me-1" />
-                            Dopo il bonifico, un admin conferma e i crediti vengono accreditati
-                          </small>
+                          <FaCheckCircle style={{ color: '#30c56d' }} className="me-1" />
+                          I crediti acquistati non scadono mai
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="alert alert-info border-0 rounded-3 mt-4 mb-0">
-                  <div className="d-flex align-items-center">
-                    <FaLightbulb className="text-info me-3" size={24} />
-                    <div>
-                      <strong>Perché i ticket?</strong> Per aumentare la qualità delle offerte, ridurre spam e garantire che i fornitori investano su progetti realmente in target.
                     </div>
                   </div>
                 </div>
@@ -519,41 +525,21 @@ function ScopoDelSito() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Call to Action */}
-        <div className="section">
-          <div className="cta-card">
-            <div className="row align-items-center">
-              <div className="col-lg-8">
-                <h3 className="fw-bold mb-3">
-                  Pronto a Iniziare?
-                </h3>
-                <p className="lead mb-4">
-                  {activeUserType === 'cliente' 
-                    ? 'Pubblica il tuo progetto e ricevi offerte da sviluppatori qualificati in 24 ore'
-                    : 'Registrati come sviluppatore e inizia a lavorare su progetti interessanti e remunerativi'
-                  }
-                </p>
-                <div className="d-flex flex-wrap gap-3">
-                  <a href="/register" className="btn btn-primary btn-lg px-5 rounded-pill">
-                    <FaRocket className="me-2" />
-                    {activeUserType === 'cliente' ? 'Pubblica Progetto' : 'Diventa Fornitore'}
-                  </a>
-                  <a href="/chi-siamo" className="btn btn-outline-primary btn-lg px-4 rounded-pill">
-                    Scopri di Più
-                  </a>
-                </div>
-              </div>
-              <div className="col-lg-4 text-center">
-                <div className="cta-illustration">
-                  {activeUserType === 'cliente' ? (
-                    <FaUser size={80} className="text-success" />
-                  ) : (
-                    <FaUserTie size={80} className="text-primary" />
-                  )}
-                </div>
-              </div>
-            </div>
+      {/* CTA Finale */}
+      <div className="scopo-cta">
+        <div className="container">
+          <h3>Pronto a Iniziare?</h3>
+          <p>Unisciti a migliaia di clienti e sviluppatori che stanno già collaborando su SoftMatch.</p>
+          <div className="d-flex gap-3 justify-content-center flex-wrap">
+            <Link to="/register" className="btn btn-primary btn-lg">
+              <FaRocket className="me-2" />
+              Pubblica Progetto
+            </Link>
+            <Link to="/chi-siamo" className="btn btn-outline-light btn-lg">
+              Scopri di Più
+            </Link>
           </div>
         </div>
       </div>
@@ -561,4 +547,4 @@ function ScopoDelSito() {
   );
 }
 
-export default ScopoDelSito; 
+export default ScopoDelSito;
