@@ -42,19 +42,19 @@ function Progetto() {
   const { id } = useParams();
   const { user, token } = useAuth();
   const [progetto, setProgetto] = useState(null);
-  const [messaggi, setMessaggi] = useState([]);
-  const [testo, setTesto] = useState('');
-  const [recensione, setRecensione] = useState('');
-  const [voto, setVoto] = useState(5);
-  const [success, setSuccess] = useState('');
+  const [_messaggi, setMessaggi] = useState([]);
+  const [_testo, _setTesto] = useState('');
+  const [_recensione, _setRecensione] = useState('');
+  const [_voto, _setVoto] = useState(5);
+  const [_success, _setSuccess] = useState('');
   const [error, setError] = useState('');
-  const [newStep, setNewStep] = useState('');
+  const [_newStep, _setNewStep] = useState('');
   const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [showGuideModal, setShowGuideModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('deliverables');
-  const messagesEndRef = useRef(null);
-  const chatInputRef = useRef(null);
+  const [_sending, _setSending] = useState(false);
+  const [_showGuideModal, _setShowGuideModal] = useState(false);
+  const [_activeTab, _setActiveTab] = useState('deliverables');
+  const _messagesEndRef = useRef(null);
+  const _chatInputRef = useRef(null);
 
   // Caricamento dati progetto
   useEffect(() => {
@@ -128,8 +128,11 @@ function Progetto() {
     
     if (progetto?.offerta_prezzo) {
       const testPrezzo = parseFloat(progetto.offerta_prezzo);
-      const testCliente = (testPrezzo * 1.05).toFixed(2);
-      const testFornitore = (testPrezzo * 0.95).toFixed(2);
+      const feeRate = 0.05;
+      const feeMode = 'cliente';
+      const fee = testPrezzo * feeRate;
+      const testCliente = (feeMode === 'split' ? testPrezzo + fee / 2 : feeMode === 'cliente' ? testPrezzo + fee : testPrezzo).toFixed(2);
+      const testFornitore = (feeMode === 'split' ? testPrezzo - fee / 2 : feeMode === 'fornitore' ? testPrezzo - fee : testPrezzo).toFixed(2);
       
       console.log('Test manuale:', {
         testPrezzo,
@@ -196,7 +199,7 @@ importoFornitore: ${importoFornitore}`);
                   ) : (
                     <div>
                       <h4 className="text-primary">{importoFornitore}€</h4>
-                      <p>Importo che riceverai (5% commissione trattenuta)</p>
+                      <p>Importo che riceverai</p>
                     </div>
                   )}
                 </div>

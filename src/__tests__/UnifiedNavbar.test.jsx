@@ -41,14 +41,14 @@ describe('UnifiedNavbar', () => {
       expect(screen.getByRole('navigation')).toBeInTheDocument();
     });
 
-    test('mostra il logo TechnoBridge', () => {
+    test('mostra il logo SoftMatch', () => {
       render(
         <TestWrapper>
           <UnifiedNavbar />
         </TestWrapper>
       );
 
-      const logo = screen.getByAltText('TechnoBridge');
+      const logo = screen.getByAltText('SoftMatch');
       expect(logo).toBeInTheDocument();
     });
 

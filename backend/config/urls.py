@@ -3,9 +3,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+admin.site.site_header = 'SoftMatch Admin'
+admin.site.site_title = 'SoftMatch Admin'
+admin.site.index_title = 'Pannello di amministrazione'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # Include core URLs per statistiche
     path('api/auth/', include('utenti.urls')),
     path('api/richieste/', include('richieste.urls')),
     path('api/offerte/', include('offerte.urls')),
@@ -16,4 +19,5 @@ urlpatterns = [
     path('api/prodotti-pronti/', include('prodotti.urls')),
     path('api/testimonianze/', include('testimonianze.urls')),
     path('api/faq/', include('faq.urls')),
+    path('', include('core.urls')),  # Include core URLs per statistiche
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 

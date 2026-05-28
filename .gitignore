@@ -93,3 +93,7 @@ RISOLUZIONE_*.md
 
 # Database backups
 database_backups/ 
+*.sql
+*.tar.gz
+.planning/
+deploy_automated.bat

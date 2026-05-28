@@ -22,7 +22,8 @@ import {
   FaUser,
   FaUserTie
 } from 'react-icons/fa';
-import './Contatti.css';
+import PageHeader from '../components/PageHeader';
+import '../styles/MacStyle.css';
 
 function Contatti() {
   const [formData, setFormData] = useState({
@@ -68,7 +69,7 @@ function Contatti() {
         oggetto: '',
         messaggio: ''
       });
-    } catch (error) {
+    } catch {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -76,359 +77,214 @@ function Contatti() {
   };
 
   return (
-    <div className="min-vh-100 bg-gradient contatti-page">
-      {/* Hero Section */}
-      <div className="hero-section bg-primary text-white position-relative overflow-hidden">
-        <div className="container py-5 position-relative z-2">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center">
-              <h1 className="display-3 fw-bold mb-4">
-                <FaEnvelope className="me-3 text-warning" />
-                Contattaci
-              </h1>
-              <p className="lead mb-4 opacity-90">
-                Siamo qui per aiutarti! Che tu sia un <strong>cliente</strong> con un'idea innovativa o uno <strong>sviluppatore</strong> 
-                in cerca di nuove opportunità, il nostro team è pronto a supportarti.
-              </p>
-              <div className="d-flex flex-wrap justify-content-center gap-3">
-                <div className="feature-badge">
-                  <FaClock className="me-2" />
-                  Risposta in 24h
-                </div>
-                <div className="feature-badge">
-                  <FaHeadset className="me-2" />
-                  Supporto Dedicato
-                </div>
-                <div className="feature-badge">
-                  <FaShieldAlt className="me-2" />
-                  Assistenza Sicura
-                </div>
+    <div className="py-4">
+      {/* Hero Section - Mac Style */}
+      <PageHeader 
+        title="Siamo qui per te"
+        subtitle="Hai un'idea da realizzare o hai bisogno di supporto tecnico? Il nostro team è pronto a risponderti in meno di 24 ore."
+        badge="CONTATTI"
+        icon={FaEnvelope}
+        theme="warning"
+      />
+
+      <div className="row justify-content-center mb-5">
+        <div className="col-lg-8">
+            <div className="d-flex flex-wrap justify-content-center gap-3">
+              <div className="mac-glass-card px-3 py-2 d-flex align-items-center shadow-sm">
+                <FaClock className="text-success me-2" />
+                <span className="small fw-bold">Risposta in 24h</span>
+              </div>
+              <div className="mac-glass-card px-3 py-2 d-flex align-items-center shadow-sm">
+                <FaHeadset className="text-primary me-2" />
+                <span className="small fw-bold">Supporto Dedicato</span>
               </div>
             </div>
-          </div>
         </div>
-        <div className="hero-decoration"></div>
       </div>
 
-      <div className="container py-5">
-        <div className="row g-5 contatti-layout">
-          {/* Modulo di Contatto */}
-          <div className="col-lg-8 order-1">
-            <div className="card border-0 shadow-lg rounded-4">
-              <div className="card-header bg-primary bg-gradient text-white border-0 rounded-top-4">
-                <div className="d-flex align-items-center">
-                  <FaPaperPlane className="me-3" size={20} />
-                  <div>
-                    <h4 className="mb-0">Invia un Messaggio</h4>
-                    <small className="opacity-75">Compila il modulo e ti risponderemo al più presto</small>
-                  </div>
+      <div className="row g-5">
+          {/* Modulo di Contatto - Mac Style */}
+          <div className="col-lg-8">
+            <div className="mac-glass-card p-4">
+              <div className="d-flex align-items-center mb-4 pb-3 border-bottom">
+                <div className="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                  <FaPaperPlane className="text-primary" size={20} />
+                </div>
+                <div>
+                  <h4 className="mac-title mb-0">Invia un Messaggio</h4>
+                  <p className="mac-subtitle mb-0 small">Ti risponderemo il prima possibile</p>
                 </div>
               </div>
-              <div className="card-body p-4">
-                {submitStatus === 'success' && (
-                  <div className="alert alert-success border-0 rounded-3 mb-4">
-                    <div className="d-flex align-items-center">
-                      <FaCheckCircle className="me-3 text-success" size={24} />
-                      <div>
-                        <strong>Messaggio inviato con successo!</strong><br />
-                        <small>Ti risponderemo entro 24 ore all'indirizzo email fornito.</small>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
-                {submitStatus === 'error' && (
-                  <div className="alert alert-danger border-0 rounded-3 mb-4">
-                    <div className="d-flex align-items-center">
-                      <FaExclamationTriangle className="me-3 text-danger" size={24} />
-                      <div>
-                        <strong>Errore nell'invio del messaggio</strong><br />
-                        <small>Riprova più tardi o contattaci direttamente via email.</small>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              {submitStatus === 'success' && (
+                <div className="alert alert-success border-0 rounded-4 mb-4 bg-success bg-opacity-10 text-success">
+                  <FaCheckCircle className="me-2" />
+                  <strong>Messaggio inviato!</strong> Ti risponderemo entro 24 ore.
+                </div>
+              )}
 
-                <form onSubmit={handleSubmit}>
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <label className="form-label fw-bold">Nome e Cognome *</label>
-                      <input
-                        type="text"
-                        className="form-control form-control-lg"
-                        name="nome"
-                        value={formData.nome}
-                        onChange={handleInputChange}
-                        placeholder="Il tuo nome completo"
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label fw-bold">Email *</label>
-                      <input
-                        type="email"
-                        className="form-control form-control-lg"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="la-tua-email@esempio.com"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Tipo di Richiesta *</label>
-                    <select
-                      className="form-select form-select-lg"
-                      name="tipo"
-                      value={formData.tipo}
-                      onChange={handleInputChange}
-                      required
-                    >
-                      <option value="">Seleziona il tipo di richiesta...</option>
-                      {tipiRichiesta.map(tipo => (
-                        <option key={tipo.value} value={tipo.value}>
-                          {tipo.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label fw-bold">Oggetto *</label>
+              <form onSubmit={handleSubmit}>
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label mac-subtitle small text-uppercase fw-bold">Nome e Cognome</label>
                     <input
                       type="text"
-                      className="form-control form-control-lg"
-                      name="oggetto"
-                      value={formData.oggetto}
+                      className="form-control rounded-3 mac-input-field"
+                      name="nome"
+                      value={formData.nome}
                       onChange={handleInputChange}
-                      placeholder="Riassumi brevemente la tua richiesta"
+                      placeholder="es. Mario Rossi"
                       required
                     />
                   </div>
-
-                  <div className="mb-4">
-                    <label className="form-label fw-bold">Messaggio *</label>
-                    <textarea
-                      className="form-control"
-                      rows="6"
-                      name="messaggio"
-                      value={formData.messaggio}
+                  <div className="col-md-6">
+                    <label className="form-label mac-subtitle small text-uppercase fw-bold">Email</label>
+                    <input
+                      type="email"
+                      className="form-control rounded-3 mac-input-field"
+                      name="email"
+                      value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="Descrivi dettagliatamente la tua richiesta o domanda..."
+                      placeholder="es. info@softmatch.it"
                       required
-                    ></textarea>
-                    <small className="text-muted">
-                      Più dettagli fornisci, più accurata sarà la nostra risposta!
-                    </small>
+                    />
                   </div>
+                </div>
 
-                  <div className="d-flex justify-content-between align-items-center">
-                    <small className="text-muted">
-                      <FaShieldAlt className="me-1" />
-                      I tuoi dati sono protetti e non verranno condivisi con terzi
-                    </small>
-                    <button
-                      type="submit"
-                      className="btn btn-primary btn-lg rounded-pill px-4"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-                          Invio in corso...
-                        </>
-                      ) : (
-                        <>
-                          <FaPaperPlane className="me-2" />
-                          Invia Messaggio
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </form>
-              </div>
+                <div className="mt-3">
+                  <label className="form-label mac-subtitle small text-uppercase fw-bold">Tipo di Richiesta</label>
+                  <select
+                    className="form-select rounded-3 mac-input-field"
+                    name="tipo"
+                    value={formData.tipo}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Seleziona...</option>
+                    {tipiRichiesta.map(tipo => (
+                      <option key={tipo.value} value={tipo.value}>
+                        {tipo.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="mt-3">
+                  <label className="form-label mac-subtitle small text-uppercase fw-bold">Oggetto</label>
+                  <input
+                    type="text"
+                    className="form-control rounded-3 mac-input-field"
+                    name="oggetto"
+                    value={formData.oggetto}
+                    onChange={handleInputChange}
+                    placeholder="Riassumi brevemente la tua richiesta"
+                    required
+                  />
+                </div>
+
+                <div className="mt-3 mb-4">
+                  <label className="form-label mac-subtitle small text-uppercase fw-bold">Messaggio</label>
+                  <textarea
+                    className="form-control rounded-4 mac-input-field"
+                    name="messaggio"
+                    rows="5"
+                    value={formData.messaggio}
+                    onChange={handleInputChange}
+                    placeholder="Descrivi dettagliatamente la tua richiesta o domanda..."
+                    required
+                  ></textarea>
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn btn-primary btn-lg rounded-pill px-5 fw-bold w-100 shadow-sm"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? <><FaPaperPlane className="fa-spin me-2" /> Invio...</> : <><FaPaperPlane className="me-2" /> Invia Messaggio</>}
+                </button>
+              </form>
             </div>
           </div>
 
-          {/* Informazioni di Contatto */}
-          <div className="col-lg-4 order-2 order-lg-2">
-            <div className="contatti-sidebar">
-              {/* Contatti Diretti */}
-              <div className="card border-0 shadow-lg rounded-4 mb-4 bg-white bg-opacity-75">
-                <div className="card-header bg-success bg-gradient text-white border-0 rounded-top-4">
-                  <h5 className="mb-0 text-center">
-                    Contatti Diretti
-                  </h5>
+          {/* Sidebar Info - Mac Style Widgets */}
+          <div className="col-lg-4">
+            {/* Contatti Rapidi */}
+            <div className="mac-glass-card p-4 mb-4">
+              <h5 className="mac-title mb-4">Canali Diretti</h5>
+              
+              <div className="d-flex align-items-center mb-3">
+                <div className="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                  <FaEnvelope className="text-primary" size={14} />
                 </div>
-                <div className="card-body p-4">
-                  <div className="contact-item mb-3">
-                    <div className="text-center">
-                      <div className="contact-info">
-                        <h6 className="fw-bold mb-1">Email Generale</h6>
-                        <a href="mailto:info@domandaesoftware.it" className="text-decoration-none contact-email">
-                          info@domandaesoftware.it
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="contact-item mb-3">
-                    <div className="text-center">
-                      <div className="contact-info">
-                        <h6 className="fw-bold mb-1">Supporto Clienti</h6>
-                        <a href="mailto:clienti@domandaesoftware.it" className="text-decoration-none contact-email">
-                          clienti@domandaesoftware.it
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="contact-item mb-3">
-                    <div className="text-center">
-                      <div className="contact-info">
-                        <h6 className="fw-bold mb-1">Supporto Fornitori</h6>
-                        <a href="mailto:fornitori@domandaesoftware.it" className="text-decoration-none contact-email">
-                          fornitori@domandaesoftware.it
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="contact-item">
-                    <div className="text-center">
-                      <div className="contact-info">
-                        <h6 className="fw-bold mb-1">WhatsApp Business</h6>
-                        <a href="https://wa.me/393123456789" className="text-decoration-none contact-phone" target="_blank" rel="noopener noreferrer">
-                          +39 312 345 6789
-                        </a>
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <small className="mac-subtitle d-block x-small fw-bold text-uppercase">Email</small>
+                  <a href="mailto:info@softmatch.it" className="text-decoration-none text-dark small fw-bold">info@softmatch.it</a>
                 </div>
               </div>
 
-              {/* Informazioni Azienda */}
-              <div className="card border-0 shadow-lg rounded-4 mb-4">
-                <div className="card-header bg-info bg-gradient text-white border-0 rounded-top-4">
-                  <h5 className="mb-0">
-                    <FaBuilding className="me-2" />
-                    Informazioni Azienda
-                  </h5>
+              <div className="d-flex align-items-center mb-3">
+                <div className="bg-success bg-opacity-10 p-2 rounded-circle me-3">
+                  <FaWhatsapp className="text-success" size={14} />
                 </div>
-                <div className="card-body p-4">
-                  <div className="info-item mb-3">
-                    <div className="d-flex align-items-start">
-                      <FaMapMarkerAlt className="text-primary me-3 mt-1" />
-                      <div>
-                        <h6 className="fw-bold mb-1">Sede Legale</h6>
-                        <p className="mb-0 text-muted">
-                          Via dell'Innovazione, 123<br />
-                          20100 Milano (MI)<br />
-                          Italia
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="info-item mb-3">
-                    <div className="d-flex align-items-start">
-                      <FaClock className="text-success me-3 mt-1" />
-                      <div>
-                        <h6 className="fw-bold mb-1">Orari di Supporto</h6>
-                        <p className="mb-0 text-muted">
-                          Lun - Ven: 9:00 - 18:00<br />
-                          Sab: 9:00 - 13:00<br />
-                          Dom: Chiuso
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="info-item">
-                    <div className="d-flex align-items-start">
-                      <FaGlobe className="text-info me-3 mt-1" />
-                      <div>
-                        <h6 className="fw-bold mb-1">Dati Fiscali</h6>
-                        <p className="mb-0 text-muted">
-                          P.IVA: 12345678901<br />
-                          C.F.: 12345678901<br />
-                          REA: MI-1234567
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <small className="mac-subtitle d-block x-small fw-bold text-uppercase">WhatsApp</small>
+                  <a href="https://wa.me/393906600661" className="text-decoration-none text-dark small fw-bold" target="_blank" rel="noopener noreferrer">+39 390 6600661</a>
                 </div>
               </div>
 
-              {/* FAQ Rapide */}
-              <div className="card border-0 shadow-lg rounded-4">
-                <div className="card-header bg-warning bg-gradient text-dark border-0 rounded-top-4">
-                  <h5 className="mb-0">
-                    <FaQuestionCircle className="me-2" />
-                    FAQ Rapide
-                  </h5>
+              <div className="d-flex align-items-center">
+                <div className="bg-info bg-opacity-10 p-2 rounded-circle me-3">
+                  <FaClock className="text-info" size={14} />
                 </div>
-                <div className="card-body p-4">
-                  <div className="faq-item mb-3">
-                    <h6 className="fw-bold mb-1">Quanto tempo per una risposta?</h6>
-                    <p className="small text-muted mb-0">
-                      Rispondiamo entro 24 ore nei giorni lavorativi.
-                    </p>
-                  </div>
-
-                  <div className="faq-item mb-3">
-                    <h6 className="fw-bold mb-1">Posso chiamare direttamente?</h6>
-                    <p className="small text-muted mb-0">
-                      Preferiamo email/WhatsApp per tracciare meglio le richieste.
-                    </p>
-                  </div>
-
-                  <div className="faq-item">
-                    <h6 className="fw-bold mb-1">Supporto in altre lingue?</h6>
-                    <p className="small text-muted mb-0">
-                      Attualmente supportiamo Italiano e Inglese.
-                    </p>
-                  </div>
-
-                  <div className="text-center mt-4">
-                    <a href="/faq" className="btn btn-outline-warning rounded-pill">
-                      <FaQuestionCircle className="me-2" />
-                      Tutte le FAQ
-                    </a>
-                  </div>
+                <div>
+                  <small className="mac-subtitle d-block x-small fw-bold text-uppercase">Orari</small>
+                  <span className="text-dark small fw-bold">Lun-Ven 9:00 - 18:00</span>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Call to Action */}
-        <div className="row mt-5">
-          <div className="col-12">
-            <div className="card border-0 shadow-lg rounded-4 bg-gradient-primary text-white">
-              <div className="card-body p-5 text-center">
-                <FaRocket size={60} className="mb-4 text-warning" />
-                <h3 className="fw-bold mb-3">Non hai ancora un account?</h3>
-                <p className="lead mb-4">
-                  Unisciti alla nostra community di visionari e sviluppatori. È gratuito e ci vogliono solo 2 minuti!
+            {/* Sede e Dati - Mac Card */}
+            <div className="mac-glass-card p-4 mb-4">
+              <h5 className="mac-title mb-3">Dove Siamo</h5>
+              <div className="d-flex align-items-start mb-3">
+                <FaMapMarkerAlt className="text-danger me-2 mt-1" size={14} />
+                <p className="mac-subtitle small mb-0">
+                  Via dell'Innovazione, 123<br />
+                  20100 Milano (MI), Italia
                 </p>
-                <div className="d-flex flex-wrap justify-content-center gap-3">
-                  <a href="/register" className="btn btn-light btn-lg rounded-pill px-4">
-                    <FaUser className="me-2" />
-                    Registrati come Cliente
-                  </a>
-                  <a href="/register" className="btn btn-outline-light btn-lg rounded-pill px-4">
-                    <FaUserTie className="me-2" />
-                    Registrati come Fornitore
-                  </a>
-                </div>
+              </div>
+              <div className="d-flex align-items-center">
+                <FaGlobe className="text-primary me-2" size={14} />
+                <small className="mac-subtitle x-small">P.IVA: 12345678901</small>
+              </div>
+            </div>
+
+            {/* Social - Mac Card */}
+            <div className="mac-glass-card p-4">
+              <h5 className="mac-title mb-3 text-center">Seguici</h5>
+              <div className="d-flex justify-content-center gap-3">
+                <a href="#" className="bg-light p-3 rounded-circle text-primary hover-scale shadow-sm"><FaLinkedin size={20} /></a>
+                <a href="#" className="bg-light p-3 rounded-circle text-info hover-scale shadow-sm"><FaTwitter size={20} /></a>
+                <a href="#" className="bg-light p-3 rounded-circle text-danger hover-scale shadow-sm"><FaInstagram size={20} /></a>
               </div>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Bottom CTA - Mac Style */}
+        <div className="row mt-5 pt-5 pb-5">
+          <div className="col-12">
+            <div className="mac-glass-card p-5 text-center bg-primary bg-opacity-5 border-primary border-opacity-10">
+              <FaRocket size={48} className="text-primary opacity-25 mb-4" />
+              <h3 className="mac-title mb-3">Pronto a iniziare il tuo progetto?</h3>
+              <p className="mac-subtitle mb-4">Unisciti a noi e trasforma le tue idee in software di successo.</p>
+              <div className="d-flex justify-content-center gap-3">
+                <a href="/register" className="btn btn-primary rounded-pill px-4 fw-bold">Registrati ora</a>
+                <a href="/faq" className="btn btn-light rounded-pill px-4">Consulta FAQ</a>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
   );
 }

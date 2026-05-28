@@ -1,6 +1,6 @@
 # 🚀 **GUIDA DEPLOYMENT WEBDOCK VPS**
 
-Deployment completo di **"Domanda & Software"** su VPS Webdock con Docker, Nginx, PostgreSQL e SSL.
+Deployment completo di **"SoftMatch"** su VPS Webdock con Docker, Nginx, PostgreSQL e SSL.
 
 ---
 
@@ -27,7 +27,7 @@ Deployment completo di **"Domanda & Software"** su VPS Webdock con Docker, Nginx
    - **Location**: Copenhagen, Denmark (EU)
    - **OS**: Ubuntu 22.04 LTS
    - **Profile**: Epyc €4.30/mese (2 vCPU, 2GB RAM, 25GB NVMe)
-   - **Hostname**: domanda-software
+   - **Hostname**: softmatch
 
 ### **🔑 Accesso SSH**
 ```bash
@@ -260,4 +260,4 @@ Dopo il deployment avrai:
 - ✅ **Backup automatici** configurati
 - ✅ **Firewall** e sicurezza ottimizzati
 
-**🚀 Il tuo progetto "Domanda & Software" sarà completamente operativo e pronto per la produzione!** 
+**🚀 Il tuo progetto "SoftMatch" sarà completamente operativo e pronto per la produzione!** 

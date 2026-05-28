@@ -98,8 +98,8 @@ def create_users():
 def populate_faq():
     """Popola le FAQ di base"""
     try:
-        # Esegui lo script di popolamento FAQ esistente
-        exec(open('populate_faq.py').read())
+        import populate_faq as populate_faq_module
+        populate_faq_module.main()
         print("✅ FAQ popolate con successo")
     except Exception as e:
         print(f"❌ Errore popolamento FAQ: {e}")

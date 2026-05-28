@@ -1,4 +1,4 @@
-# 🧪 Test Suite - Domanda & Software
+# 🧪 Test Suite - SoftMatch
 
 Questa cartella contiene tutti i test automatici per l'applicazione frontend.
 

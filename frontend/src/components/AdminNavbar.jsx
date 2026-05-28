@@ -8,6 +8,8 @@ import {
   FaCog,
   FaChartBar,
   FaShieldAlt,
+  FaWallet,
+  FaClipboardList,
   FaBell,
   FaSignOutAlt,
   FaCrown,
@@ -23,17 +25,22 @@ function AdminNavbar() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications] = useState(5); // Simulato
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logoutUser();
     navigate('/login');
   };
 
+  const toggleUserDropdown = () => setIsUserDropdownOpen(!isUserDropdownOpen);
+
   const adminMenuItems = [
     { path: '/dashboard/admin', label: 'Dashboard', icon: FaTachometerAlt },
     { path: '/admin/utenti', label: 'Gestione Utenti', icon: FaUsers },
     { path: '/admin/progetti', label: 'Gestione Progetti', icon: FaProjectDiagram },
     { path: '/admin/statistiche', label: 'Statistiche', icon: FaChartBar },
+    { path: '/admin/contabilita', label: 'Contabilità', icon: FaWallet },
+    { path: '/admin/audit', label: 'Audit', icon: FaClipboardList },
     { path: '/admin/sicurezza', label: 'Sicurezza', icon: FaShieldAlt },
     { path: '/admin/impostazioni', label: 'Impostazioni', icon: FaCog }
   ];
@@ -80,13 +87,13 @@ function AdminNavbar() {
             {/* Admin Actions */}
             <div className="admin-actions d-none d-lg-flex">
               {/* Torna al sito */}
-              <Link to="/" className="admin-action-btn site-link">
+              <Link to="/" className="admin-action-btn site-link" title="Vai alla Home pubblica">
                 <FaHome className="me-2" />
-                Torna al Sito
+                Sito Pubblico
               </Link>
 
               {/* Notifiche Admin */}
-              <div className="admin-notification-icon">
+              <div className="admin-notification-icon ms-2">
                 <FaBell />
                 {notifications > 0 && (
                   <span className="admin-notification-badge">{notifications}</span>
@@ -94,32 +101,17 @@ function AdminNavbar() {
               </div>
               
               {/* Admin User Menu */}
-              <div className="admin-user-dropdown">
-                <button className="admin-user-button">
-                  <div className="admin-user-avatar">
-                    <FaCrown />
+              <div className="admin-user-dropdown-container d-flex align-items-center ms-3">
+                <div className="admin-user-profile me-2">
+                  <div className="admin-user-info text-end">
+                    <span className="admin-user-name d-block text-white" style={{fontSize: '0.9rem', fontWeight: 'bold'}}>{user?.username}</span>
+                    <span className="admin-user-role d-block text-warning" style={{fontSize: '0.7rem'}}>Administrator</span>
                   </div>
-                  <div className="admin-user-info">
-                    <span className="admin-user-name">{user?.username}</span>
-                    <span className="admin-user-role">Administrator</span>
-                  </div>
-                </button>
-                
-                <div className="admin-dropdown-menu">
-                  <Link to="/admin/profilo" className="admin-dropdown-item">
-                    <FaCog className="me-2" />
-                    Profilo Admin
-                  </Link>
-                  <Link to="/admin/impostazioni" className="admin-dropdown-item">
-                    <FaShieldAlt className="me-2" />
-                    Impostazioni Sistema
-                  </Link>
-                  <div className="admin-dropdown-divider"></div>
-                  <button onClick={handleLogout} className="admin-dropdown-item logout">
-                    <FaSignOutAlt className="me-2" />
-                    Logout
-                  </button>
                 </div>
+
+                <button onClick={handleLogout} className="btn btn-sm btn-outline-light rounded-pill px-3 py-1" title="Esci dal sistema">
+                  <FaSignOutAlt className="me-1" /> Logout
+                </button>
               </div>
             </div>
 
@@ -170,12 +162,6 @@ function AdminNavbar() {
                   <div className="admin-mobile-name">{user?.username}</div>
                   <div className="admin-mobile-role">Administrator</div>
                 </div>
-                {notifications > 0 && (
-                  <div className="admin-mobile-notifications">
-                    <FaBell />
-                    <span className="admin-notification-badge">{notifications}</span>
-                  </div>
-                )}
               </div>
               
               <div className="admin-mobile-actions">
@@ -186,14 +172,6 @@ function AdminNavbar() {
                 >
                   <FaHome className="me-2" />
                   Torna al Sito
-                </Link>
-                <Link 
-                  to="/admin/profilo" 
-                  className="admin-mobile-action"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <FaCog className="me-2" />
-                  Profilo Admin
                 </Link>
                 <button 
                   onClick={() => {
@@ -222,4 +200,4 @@ function AdminNavbar() {
   );
 }
 
-export default AdminNavbar; 
+export default AdminNavbar;

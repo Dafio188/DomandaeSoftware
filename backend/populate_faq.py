@@ -1,13 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-Script per popolare il database con FAQ di esempio
-Eseguire con: python populate_faq.py
+Script per popolare il database con FAQ di esempio - VERSIONE SICURA UNICODE
 """
 
 import os
 import sys
 import django
-from django.utils.text import slugify
 
 # Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -64,10 +63,14 @@ def create_faq_categories():
             slug=cat_data['slug'],
             defaults=cat_data
         )
-        if created:
-            print(f"✓ Creata categoria: {category.name}")
+        if not created:
+            # Aggiorna i dati esistenti per correggere eventuali errori di encoding
+            for key, value in cat_data.items():
+                setattr(category, key, value)
+            category.save()
+            print(f"--- Aggiornata categoria: {category.name}")
         else:
-            print(f"- Categoria già esistente: {category.name}")
+            print(f"--- Creata categoria: {category.name}")
         created_categories.append(category)
     
     return created_categories
@@ -75,29 +78,34 @@ def create_faq_categories():
 def create_faqs(categories):
     """Crea le FAQ per ogni categoria"""
     
+    # Pulizia preventiva per eliminare definitivamente i vecchi record corrotti
+    FAQ.objects.all().delete()
+    print("--- DATABASE FAQ RIPULITO ---")
+    
     # Trova un utente admin per assegnare come creatore
     admin_user = User.objects.filter(is_staff=True).first()
     
+    # Sequenze di escape Unicode per massima compatibilita'
     faqs_data = {
         'account': [
             {
                 'question': 'Come posso registrarmi sulla piattaforma?',
-                'answer': 'La registrazione è semplice e gratuita. Clicca su "Registrati" nella navbar, scegli se sei un Cliente o un Fornitore, compila il form con i tuoi dati e verifica la tua email. Per i Fornitori è richiesta una verifica aggiuntiva delle competenze.',
+                'answer': 'La registrazione \u00e8 semplice e gratuita. Clicca su "Registrati" nella navbar, scegli se sei un Cliente o un Fornitore, compila il form con i tuoi dati e verifica la tua email. Per i Fornitori \u00e8 richiesta una verifica aggiuntiva delle competenze.',
                 'order': 1
             },
             {
                 'question': 'Ho dimenticato la password, come posso recuperarla?',
-                'answer': 'Nella pagina di login, clicca su "Password dimenticata?", inserisci la tua email e riceverai un link per reimpostare la password. Il link è valido per 24 ore.',
+                'answer': 'Nella pagina di login, clicca su "Password dimenticata?", inserisci la tua email e riceverai un link per reimpostare la password. Il link \u00e8 valido per 24 ore.',
                 'order': 2
             },
             {
                 'question': 'Posso cambiare il mio tipo di account da Cliente a Fornitore?',
-                'answer': 'Sì, puoi richiedere il cambio di tipologia account contattando il nostro supporto. Dovrai completare il processo di verifica per diventare Fornitore.',
+                'answer': 'S\u00ec, puoi richiedere il cambio di tipologia account contattando il nostro supporto. Dovrai completare il processo di verifica per diventare Fornitore.',
                 'order': 3
             },
             {
                 'question': 'Come posso eliminare il mio account?',
-                'answer': 'Puoi eliminare il tuo account dalle impostazioni del profilo o contattando il supporto. Nota che questa azione è irreversibile e tutti i tuoi dati verranno cancellati.',
+                'answer': 'Puoi eliminare il tuo account dalle impostazioni del profilo o contattando il supporto. Nota che questa azione \u00e8 irreversibile e tutti i tuoi dati verranno cancellati.',
                 'order': 4
             }
         ],
@@ -109,12 +117,12 @@ def create_faqs(categories):
             },
             {
                 'question': 'Quanto tempo ci vuole per ricevere le prime offerte?',
-                'answer': 'Solitamente ricevi le prime offerte entro 24-48 ore dalla pubblicazione della richiesta. I Fornitori più attivi rispondono spesso entro poche ore.',
+                'answer': 'Solitamente ricevi le prime offerte entro 24-48 ore dalla pubblicazione della richiesta. I Fornitori pi\u00f9 attivi rispondono spesso entro poche ore.',
                 'order': 2
             },
             {
                 'question': 'Posso modificare una richiesta dopo averla pubblicata?',
-                'answer': 'Sì, puoi modificare la richiesta finché non hai accettato un\'offerta. Una volta iniziato il progetto, le modifiche devono essere concordate con il Fornitore.',
+                'answer': 'S\u00ec, puoi modificare la richiesta finch\u00e9 non hai accettato un\'offerta. Una volta iniziato il progetto, le modifiche devono essere concordate con il Fornitore.',
                 'order': 3
             },
             {
@@ -126,38 +134,43 @@ def create_faqs(categories):
         'pagamenti': [
             {
                 'question': 'I pagamenti sono sicuri?',
-                'answer': 'Assolutamente sì! Utilizziamo sistemi di pagamento certificati e crittografia bancaria. I fondi vengono trattenuti in escrow fino al completamento soddisfacente del progetto.',
+                'answer': 'Assolutamente s\u00ec! Utilizziamo sistemi di pagamento certificati e crittografia bancaria. I fondi vengono trattenuti in escrow fino al completamento soddisfacente del progetto.',
                 'order': 1
             },
             {
                 'question': 'Quando viene rilasciato il pagamento al Fornitore?',
-                'answer': 'Il pagamento viene rilasciato automaticamente quando approvi il lavoro completato. I fondi sono già garantiti in escrow dal momento dell\'accettazione dell\'offerta.',
+                'answer': 'Il pagamento viene rilasciato automaticamente quando approvi il lavoro completato. I fondi sono gi\u00e0 garantiti in escrow dal momento dell\'accettazione dell\'offerta.',
                 'order': 2
             },
             {
                 'question': 'Posso richiedere un rimborso?',
-                'answer': 'Sì, se il Fornitore non rispetta gli accordi o il lavoro non è soddisfacente, puoi richiedere un rimborso. Il nostro team valuterà la situazione e medierà.',
+                'answer': 'S\u00ec, se il Fornitore non rispetta gli accordi o il lavoro non \u00e8 soddisfacente, puoi richiedere un rimborso. Il nostro team valuter\u00e0 la situazione e medier\u00e0.',
                 'order': 3
             },
             {
                 'question': 'Quali metodi di pagamento accettate?',
                 'answer': 'Accettiamo carte di credito/debito, PayPal, bonifici bancari e altri metodi di pagamento sicuri. Tutti i pagamenti sono protetti da crittografia SSL.',
                 'order': 4
+            },
+            {
+                'question': 'Come viene garantita la sicurezza dei miei dati?',
+                'answer': 'Usiamo i pi\u00f9 alti standard di sicurezza web: la piattaforma \u00e8 protetta da protocolli HSTS, Content Security Policy (CSP) per prevenire attacchi malevoli e crittografia AES-256 per i dati sensibili. Effettuiamo backup orari del database per prevenire qualsiasi perdita di dati.',
+                'order': 5
             }
         ],
         'sviluppatori': [
             {
                 'question': 'Come vengono verificati gli sviluppatori?',
-                'answer': 'Ogni Fornitore passa attraverso un rigoroso processo di verifica: controllo identità, test tecnici, valutazione portfolio e verifica referenze professionali.',
+                'answer': 'Ogni Fornitore passa attraverso un rigoroso processo di verifica: controllo identit\u00e0, test tecnici, valutazione portfolio e verifica referenze professionali.',
                 'order': 1
             },
             {
-                'question': 'Come posso aumentare le mie possibilità di successo?',
-                'answer': 'Completa il tuo profilo, pubblica prodotti di qualità, rispondi rapidamente alle richieste, mantieni una comunicazione professionale e accumula recensioni positive.',
+                'question': 'Come posso aumentare le mie possibilit\u00e0 di successo?',
+                'answer': 'Completa il tuo profilo, pubblica prodotti di qualit\u00e0, rispondi rapidamente alle richieste, mantieni una comunicazione professionale e accumula recensioni positive.',
                 'order': 2
             },
             {
-                'question': 'Qual è la commissione della piattaforma?',
+                'question': 'Qual \u00e8 la commissione della piattaforma?',
                 'answer': 'La piattaforma trattiene una piccola commissione sui progetti completati. Le tariffe sono trasparenti e visibili nel tuo profilo Fornitore.',
                 'order': 3
             },
@@ -184,9 +197,14 @@ def create_faqs(categories):
                 'order': 3
             },
             {
-                'question': 'Il supporto è disponibile in altre lingue?',
+                'question': 'Il supporto \u00e8 disponibile in altre lingue?',
                 'answer': 'Attualmente supportiamo Italiano e Inglese. Stiamo lavorando per aggiungere altre lingue in base alle richieste degli utenti.',
                 'order': 4
+            },
+            {
+                'question': 'Posso usare SoftMatch come un\'applicazione sul mio cellulare?',
+                'answer': 'S\u00ec! SoftMatch \u00e8 una Progressive Web App (PWA). Puoi "installarla" sulla home del tuo smartphone direttamente dal browser (cliccando "Aggiungi a Home"). Questo ti permetter\u00e0 di accedere alla piattaforma con un tocco, senza barra del browser e con prestazioni velocissime.',
+                'order': 5
             }
         ]
     }
@@ -196,47 +214,33 @@ def create_faqs(categories):
         if category.slug in faqs_data:
             category_faqs = faqs_data[category.slug]
             for faq_data in category_faqs:
-                faq, created = FAQ.objects.get_or_create(
+                FAQ.objects.create(
                     category=category,
                     question=faq_data['question'],
-                    defaults={
-                        'answer': faq_data['answer'],
-                        'order': faq_data['order'],
-                        'created_by': admin_user
-                    }
+                    answer=faq_data['answer'],
+                    order=faq_data['order'],
+                    created_by=admin_user
                 )
-                if created:
-                    print(f"  ✓ Creata FAQ: {faq.question[:50]}...")
-                else:
-                    print(f"  - FAQ già esistente: {faq.question[:50]}...")
+                print(f"--- OK: Creata FAQ: {faq_data['question'][:50]}...")
 
 def main():
     """Funzione principale"""
-    print("🚀 Inizio popolamento database FAQ...")
-    print()
+    print("--- INIZIO POPOLAMENTO FAQ ---")
     
     # Crea le categorie
-    print("📁 Creazione categorie FAQ...")
+    print("--- Elaborazione Categorie ---")
     categories = create_faq_categories()
-    print()
     
     # Crea le FAQ
-    print("❓ Creazione FAQ...")
+    print("--- Elaborazione Domande ---")
     create_faqs(categories)
-    print()
     
     # Statistiche finali
     total_categories = FAQCategory.objects.count()
     total_faqs = FAQ.objects.count()
     
-    print("✅ Popolamento completato!")
-    print(f"📊 Statistiche:")
-    print(f"   - Categorie: {total_categories}")
-    print(f"   - FAQ: {total_faqs}")
-    print()
-    print("🌐 Ora puoi accedere alle FAQ tramite:")
-    print("   - API: http://localhost:8000/api/faq/")
-    print("   - Admin: http://localhost:8000/admin/faq/")
+    print("--- OPERAZIONE COMPLETATA ---")
+    print(f"Statistiche finali: {total_categories} categorie, {total_faqs} FAQ.")
 
 if __name__ == '__main__':
-    main() 
+    main()

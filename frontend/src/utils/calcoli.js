@@ -9,19 +9,31 @@ export const calcolaImporti = (offertaPrezzo) => {
   }
 
   const prezzo = parseFloat(offertaPrezzo);
-  const importoCliente = (prezzo * 1.05).toFixed(2); // +5% commissione
-  const importoFornitore = (prezzo * 0.95).toFixed(2); // -5% commissione
+  const feeRate = 0.05;
+  const feeMode = 'cliente';
+  const fee = prezzo * feeRate;
+
+  let importoCliente = prezzo;
+  let importoFornitore = prezzo;
+  if (feeMode === 'fornitore') {
+    importoFornitore = prezzo - fee;
+  } else if (feeMode === 'split') {
+    importoCliente = prezzo + fee / 2;
+    importoFornitore = prezzo - fee / 2;
+  } else {
+    importoCliente = prezzo + fee;
+  }
 
   console.log('💰 CALCOLI IMPORTI:', {
     prezzo_originale: offertaPrezzo,
     prezzo_numerico: prezzo,
-    importo_cliente: importoCliente,
-    importo_fornitore: importoFornitore
+    importo_cliente: importoCliente.toFixed(2),
+    importo_fornitore: importoFornitore.toFixed(2)
   });
 
   return {
     prezzo,
-    importoCliente,
-    importoFornitore
+    importoCliente: importoCliente.toFixed(2),
+    importoFornitore: importoFornitore.toFixed(2)
   };
 }; 

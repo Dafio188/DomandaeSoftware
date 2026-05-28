@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from .models import ProdottoPronto
 from .serializers import ProdottoProntoSerializer
 from progetti.models import Progetto
@@ -8,6 +9,8 @@ from richieste.models import Richiesta
 from offerte.models import Offerta
 from progetti.serializers import ProgettoSerializer
 import logging
+from django.conf import settings
+from core.audit import write_audit_event
 
 logger = logging.getLogger(__name__)
 
@@ -16,12 +19,28 @@ class ProdottoProntoViewSet(viewsets.ModelViewSet):
     serializer_class = ProdottoProntoSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def _assert_can_modify(self, request, prodotto: ProdottoPronto):
+        user = request.user
+        if not user.is_authenticated:
+            raise PermissionDenied("Autenticazione richiesta.")
+        if user.is_staff or user.is_superuser:
+            return
+        if getattr(user, 'ruolo', None) != 'fornitore':
+            raise PermissionDenied("Solo i fornitori possono modificare i prodotti.")
+        if prodotto.fornitore_id != user.id:
+            raise PermissionDenied("Non sei autorizzato a modificare questo prodotto.")
+
     def perform_create(self, serializer):
         serializer.save(fornitore=self.request.user)
 
     def create(self, request, *args, **kwargs):
         try:
-            logger.info(f"Create chiamato con dati: {request.data}")
+            logger.info(
+                "Create prodotto: user_id=%s ruolo=%s keys=%s",
+                getattr(request.user, 'id', None),
+                getattr(request.user, 'ruolo', None),
+                list(request.data.keys()),
+            )
             serializer = self.get_serializer(data=request.data)
             if not serializer.is_valid():
                 logger.error(f"Errore di validazione: {serializer.errors}")
@@ -29,13 +48,28 @@ class ProdottoProntoViewSet(viewsets.ModelViewSet):
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            logger.error(f"Errore imprevisto: {str(e)}")
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.exception("Errore imprevisto create prodotto")
+            if settings.DEBUG:
+                return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": "Errore interno del server"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get_queryset(self):
-        if self.request.user.is_authenticated and self.request.user.ruolo == 'fornitore':
-            return ProdottoPronto.objects.all()
-        return ProdottoPronto.objects.filter()  # tutti possono vedere
+        return ProdottoPronto.objects.all().order_by('-data_pubblicazione')
+
+    def update(self, request, *args, **kwargs):
+        prodotto = self.get_object()
+        self._assert_can_modify(request, prodotto)
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        prodotto = self.get_object()
+        self._assert_can_modify(request, prodotto)
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        prodotto = self.get_object()
+        self._assert_can_modify(request, prodotto)
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated], url_path='acquista')
     def acquista_prodotto(self, request, pk=None):
@@ -75,7 +109,8 @@ class ProdottoProntoViewSet(viewsets.ModelViewSet):
                 budget=float(prodotto.prezzo),
                 tipo_software='altro',  # Default per prodotti acquistati
                 stato='in_lavorazione',  # Direttamente in lavorazione
-                immagine=prodotto.immagine
+                immagine=prodotto.immagine,
+                is_prodotto_acquistato=True,
             )
 
             # Crea il progetto inverso direttamente (senza offerta)
@@ -93,12 +128,31 @@ class ProdottoProntoViewSet(viewsets.ModelViewSet):
                 offerta=offerta_fittizia,
                 cliente=request.user,
                 fornitore=prodotto.fornitore,
-                stato='in_corso',
+                stato='bozza',
                 bozza_fornitore_ok=True,  # Il prodotto è già pronto
-                # Note: aggiungerò tipo_progetto quando avrò le migrazioni
+                tipo_progetto='prodotto_acquistato',
             )
 
             logger.info(f"Progetto creato per acquisto prodotto: {progetto.id}")
+
+            write_audit_event(
+                action='prodotto.purchased',
+                request=request,
+                actor=request.user,
+                target_model='prodotti.ProdottoPronto',
+                target_id=prodotto.id,
+                progetto=progetto,
+                meta={'prezzo': str(prodotto.prezzo)},
+            )
+            write_audit_event(
+                action='progetto.created',
+                request=request,
+                actor=request.user,
+                target_model='progetti.Progetto',
+                target_id=progetto.id,
+                progetto=progetto,
+                meta={'tipo_progetto': progetto.tipo_progetto},
+            )
 
             return Response({
                 'success': True,
@@ -111,8 +165,8 @@ class ProdottoProntoViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            logger.error(f"Errore nell'acquisto prodotto: {str(e)}")
+            logger.exception("Errore nell'acquisto prodotto")
             return Response(
-                {'success': False, 'detail': f'Errore durante l\'acquisto: {str(e)}'}, 
+                {'success': False, 'detail': 'Errore durante l\'acquisto'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

@@ -21,6 +21,9 @@ class Transazione(models.Model):
     class Meta:
         verbose_name = 'Transazione'
         verbose_name_plural = 'Transazioni'
+        constraints = [
+            models.UniqueConstraint(fields=['progetto'], name='unique_transazione_per_progetto'),
+        ]
 
 class Messaggio(models.Model):
     # ... campi ...

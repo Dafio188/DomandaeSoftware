@@ -5,6 +5,7 @@ import { Navbar as RBNavbar, Nav, Container, Dropdown } from 'react-bootstrap';
 function Navbar() {
   const { user, role, logoutUser } = useAuth();
   const navigate = useNavigate();
+  const logoSrc = '/images/softmatch-logo.png?v=20260327-105709';
 
   const handleLogout = () => {
     logoutUser();
@@ -15,31 +16,22 @@ function Navbar() {
     <RBNavbar bg="primary" variant="dark" expand="lg">
       <Container fluid>
         <div className="d-flex align-items-center">
-          <RBNavbar.Brand as={Link} to="/" className="me-3">Domanda & Software</RBNavbar.Brand>
-          <div className="d-flex align-items-center">
-            <img 
-              src="/images/LOGO_TECNOBRIDGE.png" 
-              alt="TechnoBridge" 
-              style={{ 
-                height: '32px', 
+          <RBNavbar.Brand as={Link} to="/" className="me-3 d-flex align-items-center gap-2">
+            <img
+              src={logoSrc}
+              alt="SoftMatch"
+              style={{
+                height: '36px',
                 width: 'auto',
-                backgroundColor: 'white',
-                padding: '4px',
-                borderRadius: '6px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                borderRadius: '8px',
               }}
               onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'inline';
+                e.target.onerror = null;
+                e.target.src = '/images/softmatch-logo.svg';
               }}
             />
-            <span 
-              className="text-primary bg-white px-2 py-1 rounded fw-bold ms-2" 
-              style={{ fontSize: '0.7rem', display: 'none' }}
-            >
-              TechnoBridge
-            </span>
-          </div>
+            <span>SoftMatch</span>
+          </RBNavbar.Brand>
         </div>
         <RBNavbar.Toggle aria-controls="navbarNav" />
         <RBNavbar.Collapse id="navbarNav">

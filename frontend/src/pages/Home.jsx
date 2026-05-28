@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext';
 import AcquistoModal from '../components/AcquistoModal';
-import { FaUserTie, FaUser, FaShieldAlt, FaLock, FaEuroSign, FaStar, FaHandshake, FaArrowRight, FaMoneyBillWave, FaComments, FaHeadset, FaUserShield, FaRocket, FaLightbulb, FaCode, FaChartLine, FaGlobe, FaMobile, FaDesktop, FaCloud, FaCogs, FaSearch, FaHeart, FaCheckCircle, FaBolt, FaTrophy, FaPlay, FaQuoteLeft, FaShoppingCart, FaEye, FaAward, FaUsers, FaBars, FaTimes, FaHome, FaInfoCircle, FaEnvelope, FaSignInAlt, FaUserPlus, FaArrowLeft, FaClock } from 'react-icons/fa';
+import { FaUserTie, FaUser, FaShieldAlt, FaLock, FaEuroSign, FaStar, FaHandshake, FaArrowRight, FaMoneyBillWave, FaComments, FaHeadset, FaUserShield, FaRocket, FaLightbulb, FaCode, FaChartLine, FaGlobe, FaMobile, FaDesktop, FaCloud, FaCogs, FaSearch, FaHeart, FaCheckCircle, FaBolt, FaTrophy, FaPlay, FaQuoteLeft, FaShoppingCart, FaEye, FaAward, FaUsers, FaBars, FaTimes, FaHome, FaInfoCircle, FaEnvelope, FaSignInAlt, FaUserPlus, FaArrowLeft, FaClock, FaBrain } from 'react-icons/fa';
 import Slider from 'react-slick';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -13,7 +12,6 @@ import Testimonianze from '../components/Testimonianze';
 import { API_BASE } from '../config/api.js';
 
 function Home() {
-  const { user, logout } = useAuth();
   const [richieste, setRichieste] = useState([]);
   const [prodotti, setProdotti] = useState([]);
   const [activeGaranzia, setActiveGaranzia] = useState(null);
@@ -23,9 +21,6 @@ function Home() {
   const [showAcquistoModal, setShowAcquistoModal] = useState(false);
   const [prodottoSelezionato, setProdottoSelezionato] = useState(null);
 
-  // Stati per menu mobile
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
   // Sistema foto dinamico - rilevamento automatico
   const [heroImage, setHeroImage] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -109,11 +104,11 @@ function Home() {
           if (imageExists) {
             validImages.push({
               src: imagePath,
-              alt: `Domanda & Software - ${imageName.replace(/\.(png|jpg|jpeg|webp)$/i, '').replace(/_/g, ' ')}`
+              alt: `SoftMatch - ${imageName.replace(/\.(png|jpg|jpeg|webp)$/i, '').replace(/_/g, ' ')}`
             });
             console.log(`✅ Trovata immagine hero: ${imagePath}`);
           }
-        } catch (error) {
+        } catch {
           // Ignora errori per immagini non trovate
         }
       }
@@ -131,7 +126,7 @@ function Home() {
         console.warn('⚠️ Nessuna immagine hero trovata, uso fallback');
         // Fallback alle immagini di default
         const fallbackImages = [
-          { src: '/foto_home/sfondo_home.png', alt: 'Domanda & Software - Marketplace' }
+          { src: '/foto_home/sfondo_home.png', alt: 'SoftMatch - Marketplace' }
         ];
         setAllHeroImages(fallbackImages);
         setCurrentImageIndex(0);
@@ -141,7 +136,7 @@ function Home() {
       console.error('❌ Errore nel rilevamento automatico:', error);
       // Fallback in caso di errore
       const fallbackImages = [
-        { src: '/foto_home/sfondo_home.png', alt: 'Domanda & Software - Marketplace' }
+        { src: '/foto_home/sfondo_home.png', alt: 'SoftMatch - Marketplace' }
       ];
       setAllHeroImages(fallbackImages);
       setCurrentImageIndex(0);
@@ -213,35 +208,30 @@ function Home() {
 
   useEffect(() => {
     AOS.init({ duration: 1200, once: true });
-    
-    // Carica richieste recenti per utenti autenticati
-    if (user && user.tipo_utente === 'cliente') {
-      axios.get(`${API_BASE}richieste/`)
-        .then(res => {
-          const richiesteCliente = res.data.filter(r => r.cliente === user.id);
-          setRichiesteRecenti(richiesteCliente.slice(0, 3));
-        })
-        .catch(err => console.log('Errore caricamento richieste:', err));
-      
-      axios.get(`${API_BASE}prodotti-pronti/`)
-        .then(res => {
-          setProdottiRecenti(res.data.slice(0, 3));
-        })
-        .catch(err => console.log('Errore caricamento prodotti:', err));
-    }
 
-    // Carica statistiche per la sezione home
     const fetchStats = async () => {
       try {
+        const richiesteResponse = await axios.get(`${API_BASE}richieste/`);
+        const richiesteData = Array.isArray(richiesteResponse.data)
+          ? richiesteResponse.data
+          : (richiesteResponse.data?.results || []);
+        setRichieste(richiesteData);
+
+        const prodottiResponse = await axios.get(`${API_BASE}prodotti-pronti/`);
+        const prodottiData = Array.isArray(prodottiResponse.data)
+          ? prodottiResponse.data
+          : (prodottiResponse.data?.results || []);
+        setProdotti(prodottiData);
+
         const response = await axios.get(`${API_BASE}stats/home/`);
         setStats(response.data);
-      } catch (error) {
-        console.log('Errore nel caricamento statistiche:', error);
+      } catch {
+        return;
       }
     };
     
     fetchStats();
-  }, [user]);
+  }, []);
 
   // Slider settings per richieste
   const richiesteSliderSettings = {
@@ -329,18 +319,19 @@ function Home() {
 
   // Categorie software highlight
   const categorieHighlight = [
-    { icon: <FaCode />, title: "Sviluppo Software", desc: "Soluzioni custom su misura", projects: 45, color: "#4e73df" },
-    { icon: <FaMobile />, title: "App Mobile", desc: "iOS e Android nativi", projects: 23, color: "#e74a3b" },
-    { icon: <FaGlobe />, title: "Siti Web", desc: "Design moderni e responsivi", projects: 67, color: "#1cc88a" },
-    { icon: <FaCloud />, title: "Cloud Solutions", desc: "Soluzioni scalabili", projects: 18, color: "#36b9cc" },
-    { icon: <FaCogs />, title: "Automazione", desc: "Processi intelligenti", projects: 34, color: "#6f42c1" }
+    { iconSrc: "/immagini icona homepage/01.png", title: "Sviluppo Software", desc: "Soluzioni custom su misura", projects: 45, color: "#4e73df" },
+    { iconSrc: "/immagini icona homepage/02.png", title: "App Mobile", desc: "iOS e Android nativi", projects: 23, color: "#e74a3b" },
+    { iconSrc: "/immagini icona homepage/03.png", title: "Siti Web", desc: "Design moderni e responsivi", projects: 67, color: "#1cc88a" },
+    { iconSrc: "/immagini icona homepage/04.png", title: "Cloud Solutions", desc: "Soluzioni scalabili", projects: 18, color: "#36b9cc" },
+    { iconSrc: "/immagini icona homepage/05.png", title: "Automazione", desc: "Processi intelligenti", projects: 34, color: "#6f42c1" },
+    { iconSrc: "/immagini icona homepage/06.png", title: "Intelligenza Artificiale", desc: "Modelli e integrazioni AI", projects: 51, color: "#ffb703" }
   ];
 
   const testimonials = [
     {
       name: "Marco Rossi",
       role: "CEO, TechStart Srl",
-      text: "Grazie a D&S abbiamo trovato il partner perfetto per il nostro CRM. Risultato eccellente in tempi record!",
+      text: "Grazie a SoftMatch abbiamo trovato il partner perfetto per il nostro CRM. Risultato eccellente in tempi record!",
       rating: 5,
       avatar: "👨‍💼"
     },
@@ -354,7 +345,7 @@ function Home() {
     {
       name: "Alessandro Tech",
       role: "Sviluppatore Freelance", 
-      text: "Come fornitore, D&S mi ha aperto le porte a progetti interessanti. Clienti seri e pagamenti puntuali.",
+      text: "Come fornitore, SoftMatch mi ha aperto le porte a progetti interessanti. Clienti seri e pagamenti puntuali.",
       rating: 5,
       avatar: "👨‍🔧"
     }
@@ -378,13 +369,14 @@ function Home() {
       <section 
         className="hero-section position-relative overflow-hidden"
         style={{
-          height: '55vh',
-          minHeight: '450px',
-          maxHeight: '650px',
+          minHeight: '600px',
+          maxHeight: '900px',
           width: '100vw',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          display: 'flex',
+          alignItems: 'center'
         }}
       >
         {/* Immagine di sfondo widescreen */}
@@ -405,45 +397,57 @@ function Home() {
           />
         )}
         
-        {/* Overlay gradiente per leggibilità */}
+        {/* Overlay gradiente per leggibilità - RIDOTTO PER VISIBILITA IMMAGINE */}
         <div 
           className="position-absolute top-0 start-0 w-100 h-100"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2))',
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.2), rgba(0,0,0,0.1))',
             zIndex: 2
           }}
         />
         
         {/* CONTENUTO HERO CENTRATO */}
-        <div className="container-fluid position-relative" style={{ zIndex: 3, height: '100%' }}>
-          <div className="row align-items-center justify-content-center" style={{ height: '100%', paddingTop: '90px' }}>
+        <div className="container-fluid position-relative" style={{ zIndex: 3, minHeight: '100%' }}>
+          <div className="row align-items-center justify-content-center" style={{ minHeight: '600px', paddingTop: '140px', paddingBottom: '80px' }}>
             <div className="col-12 col-lg-10 d-flex justify-content-center align-items-center">
-              <div className="hero-main-card text-center" data-aos="fade-up" style={{ width: '100%', maxWidth: '800px' }}>
-                <div className="py-3 px-3">
-                  <h1 className="display-2 fw-bold mb-3 text-white" style={{ 
-                    textShadow: '3px 3px 8px rgba(0,0,0,0.9)',
-                    lineHeight: '1.1',
-                    marginBottom: '1.5rem'
+              <div className="hero-main-card" data-aos="fade-up" style={{ 
+                width: '100%', 
+                maxWidth: '900px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '30px',
+                padding: '50px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.2)'
+              }}>
+                <div className="text-center">
+                  <h1 className="display-1 fw-bold mb-4 text-white" style={{ 
+                    textShadow: '0 5px 15px rgba(0,0,0,0.4)',
+                    letterSpacing: '-0.04em',
+                    lineHeight: '1.05'
                   }}>
-                    Domanda & <span className="text-warning">Software</span>
+                    Connettiamo Visionari con i Migliori Sviluppatori
                   </h1>
                   
-                  <p className="lead mb-4 text-white fs-4" style={{ 
-                    textShadow: '2px 2px 6px rgba(0,0,0,0.9)',
-                    maxWidth: '700px',
-                    margin: '0 auto 2rem auto',
-                    lineHeight: '1.4'
+                  <p className="lead mb-5 text-white fs-3 opacity-90" style={{ 
+                    maxWidth: '800px',
+                    margin: '0 auto 3rem auto',
+                    fontWeight: '400',
+                    textShadow: '0 2px 10px rgba(0,0,0,0.3)'
                   }}>
-                    Il marketplace che connette <strong>visionari</strong> con i migliori <strong>sviluppatori</strong>. 
-                    Trasforma le tue idee in soluzioni software innovative.
+                    Trasforma le tue idee in soluzioni software innovative. <br/>
+                    Il marketplace leader per progetti digitali d'eccellenza.
                   </p>
                   
                   <div className="hero-cta d-flex flex-wrap gap-4 justify-content-center">
-                    <Link to="/register" className="btn btn-warning btn-lg rounded-pill px-5 py-3 shadow-lg fs-5 fw-bold">
+                    <Link to="/register" className="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-lg fs-5 fw-bold" style={{
+                      background: '#0071e3',
+                      border: 'none'
+                    }}>
                       <FaRocket className="me-2" />
                       Inizia Ora
                     </Link>
-                    <a href="#categorie" className="btn btn-outline-light btn-lg rounded-pill px-5 py-3 shadow border-2 fs-5">
+                    <a href="#come-funziona" className="btn btn-outline-light btn-lg rounded-pill px-5 py-3 shadow border-2 fs-5">
                       <FaPlay className="me-2" />
                       Scopri Come
                     </a>
@@ -498,28 +502,30 @@ function Home() {
               <div key={index} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={index * 100}>
                 <div className="categoria-card h-100">
                   <div className="card border-2 border-opacity-10 rounded-4 shadow-lg h-100 overflow-hidden card-hover">
-                    <div className="card-body p-4 position-relative d-flex flex-column justify-content-between" style={{ minHeight: '200px' }}>
-                      <div>
-                        <div className="d-flex align-items-center mb-3">
-                          <div className="categoria-icon me-3 flex-shrink-0" style={{ color: cat.color, fontSize: '3rem' }}>
-                            {cat.icon}
-                          </div>
-                          <div className="flex-grow-1">
-                            <h5 className="fw-bold mb-2 text-dark" style={{ fontSize: '1.5rem', lineHeight: '1.2' }}>{cat.title}</h5>
-                            <p className="text-muted mb-0" style={{ fontSize: '1.1rem', lineHeight: '1.4' }}>{cat.desc}</p>
-                          </div>
-                        </div>
+                    <div className="card-body p-4 position-relative categoria-card-body">
+                      <div className="categoria-icon-wrap">
+                        <img
+                          src={cat.iconSrc}
+                          alt={cat.title}
+                          className="categoria-img"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/images/sito_web.png';
+                          }}
+                        />
                       </div>
-                      <div className="d-flex justify-content-between align-items-center mt-auto">
-                        <span className="text-muted fw-semibold" style={{ fontSize: '1rem' }}>{cat.projects} progetti attivi</span>
-                        <FaArrowRight style={{ color: cat.color }} size={20} />
+                      <div className="categoria-text">
+                        <h5 className="categoria-title text-white mb-1">{cat.title}</h5>
+                        <div className="categoria-sub">{cat.projects} progetti attivi</div>
                       </div>
-                      <div className="categoria-overlay" style={{ background: `linear-gradient(135deg, ${cat.color}15, ${cat.color}08)` }}></div>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+          <div className="text-center mt-4">
+            <Link to="/categorie" className="text-primary fw-semibold">Vedi Tutte le Categorie</Link>
           </div>
 
           {/* LAYOUT ALTERNATIVO - Soluzione 2: Orizzontale (commentato)
@@ -596,247 +602,162 @@ function Home() {
         </div>
       </section>
 
-      {/* COME FUNZIONA - TIMELINE INTERATTIVA */}
-      <section className="py-5 bg-dark position-relative overflow-hidden">
+      {/* COME FUNZIONA */}
+      <section className="py-5 bg-dark hiw-section" id="come-funziona">
         <div className="container">
           <div className="text-center mb-5" data-aos="fade-up">
-            <h2 className="display-4 fw-bold mb-3 text-white">Come Funziona</h2>
-            <p className="lead text-light">Semplice, veloce e sicuro. Scopri il percorso verso il successo</p>
+            <h2 className="display-4 fw-bold mb-2 text-white">Come Funziona</h2>
           </div>
-          
-          {/* TIMELINE INTERATTIVA */}
-          <div className="timeline-container" data-aos="fade-up">
-            {/* Timeline Path */}
-            <div className="timeline-path"></div>
-            
-            <div className="row g-0">
-              {/* LATO CLIENTI */}
-              <div className="col-lg-6">
-                <div className="timeline-side timeline-left">
-                  <div className="timeline-header">
-                    <div className="timeline-icon-main bg-primary">
-                      <FaUser size={32} className="text-white" />
-                    </div>
-                    <h3 className="fw-bold text-primary mb-2">Per i Clienti</h3>
-                    <p className="text-muted">Dalla idea al software funzionante</p>
+
+          <div className="row g-5 align-items-start" data-aos="fade-up">
+            <div className="col-lg-6">
+              <div className="hiw-col hiw-col-clienti">
+                <h3 className="hiw-col-title hiw-col-title-clienti">Per i Clienti</h3>
+
+                <div className="hiw-step">
+                  <div className="hiw-step-rail">
+                    <div className="hiw-step-number hiw-step-number-clienti">1</div>
+                    <div className="hiw-step-line hiw-step-line-clienti"></div>
                   </div>
-                  
-                  <div className="timeline-steps">
-                    <div className="timeline-step" data-step="1">
-                      <div className="timeline-step-connector"></div>
-                      <div className="timeline-step-content">
-                        <div className="step-number">1</div>
-                        <div className="step-card">
-                          <div className="step-icon">
-                            <FaLightbulb />
-                          </div>
-                          <h5 className="step-title">Pubblica la tua idea</h5>
-                          <p className="step-description">
-                            Descrivi dettagliatamente il software che hai in mente, 
-                            il budget e i tempi di realizzazione desiderati.
-                          </p>
-                          <div className="step-highlight">
-                            <span className="badge bg-primary">Gratuito</span>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="hiw-step-body">
+                    <div className="hiw-step-title">Pubblica la tua idea</div>
+                    <div className="hiw-step-desc">
+                      Pubblica la tua idea e inizia una sfida: descrivi cosa vuoi realizzare e cosa ti serve,
+                      e contatta i migliori professionisti.
                     </div>
-                    
-                    <div className="timeline-step" data-step="2">
-                      <div className="timeline-step-connector"></div>
-                      <div className="timeline-step-content">
-                        <div className="step-number">2</div>
-                        <div className="step-card">
-                          <div className="step-icon">
-                            <FaComments />
-                          </div>
-                          <h5 className="step-title">Ricevi offerte qualificate</h5>
-                          <p className="step-description">
-                            Sviluppatori esperti verificati ti invieranno proposte 
-                            personalizzate con tempi e costi dettagliati.
-                          </p>
-                          <div className="step-highlight">
-                            <span className="badge bg-warning">Entro 24h</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="timeline-step" data-step="3">
-                      <div className="timeline-step-connector"></div>
-                      <div className="timeline-step-content">
-                        <div className="step-number">3</div>
-                        <div className="step-card">
-                          <div className="step-icon">
-                            <FaHandshake />
-                          </div>
-                          <h5 className="step-title">Scegli e collabora</h5>
-                          <p className="step-description">
-                            Seleziona l'offerta migliore e inizia a collaborare con 
-                            pagamenti sicuri e comunicazione supervisionata.
-                          </p>
-                          <div className="step-highlight">
-                            <span className="badge bg-success">Sicuro al 100%</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <Link to="/register" className="btn hiw-pill hiw-pill-clienti">
+                      Pubblica la tua idea
+                    </Link>
                   </div>
-                  
-                  <div className="timeline-cta">
-                    <Link to="/register" className="btn btn-primary btn-lg rounded-pill px-4">
-                      <FaRocket className="me-2" />
-                      Inizia come Cliente
+                </div>
+
+                <div className="hiw-step">
+                  <div className="hiw-step-rail">
+                    <div className="hiw-step-number hiw-step-number-clienti">2</div>
+                    <div className="hiw-step-line hiw-step-line-clienti"></div>
+                  </div>
+                  <div className="hiw-step-body">
+                    <div className="hiw-step-title">Ricevi offerte qualificate</div>
+                    <div className="hiw-step-desc">
+                      Ricevi offerte qualificate, ragionevoli e trasparenti. Confronta i profili,
+                      tempi e prezzi con serenità.
+                    </div>
+                    <a href="#richieste" className="btn hiw-pill hiw-pill-clienti">
+                      Ricevi offerte qualificate
+                    </a>
+                  </div>
+                </div>
+
+                <div className="hiw-step hiw-step-last">
+                  <div className="hiw-step-rail">
+                    <div className="hiw-step-number hiw-step-number-clienti">3</div>
+                  </div>
+                  <div className="hiw-step-body">
+                    <div className="hiw-step-title">Scegli e collabora</div>
+                    <div className="hiw-step-desc">
+                      Scegli il collaboratore ideale e segui i dettagli del lavoro, tutto in un unico posto.
+                      Pagamenti sicuri e consegna tracciata.
+                    </div>
+                    <Link to="/login" className="btn hiw-pill hiw-pill-clienti">
+                      Scegli e collabora
                     </Link>
                   </div>
                 </div>
               </div>
-              
-              {/* LATO FORNITORI */}
-              <div className="col-lg-6">
-                <div className="timeline-side timeline-right">
-                  <div className="timeline-header">
-                    <div className="timeline-icon-main bg-success">
-                      <FaUserTie size={32} className="text-white" />
-                    </div>
-                    <h3 className="fw-bold text-success mb-2">Per i Fornitori</h3>
-                    <p className="text-muted">Dalle competenze ai guadagni</p>
+            </div>
+
+            <div className="col-lg-6">
+              <div className="hiw-col hiw-col-fornitori">
+                <h3 className="hiw-col-title hiw-col-title-fornitori">Per i Fornitori</h3>
+
+                <div className="hiw-step">
+                  <div className="hiw-step-rail">
+                    <div className="hiw-step-number hiw-step-number-fornitori">1</div>
+                    <div className="hiw-step-line hiw-step-line-fornitori"></div>
                   </div>
-                  
-                  <div className="timeline-steps">
-                    <div className="timeline-step" data-step="1">
-                      <div className="timeline-step-connector"></div>
-                      <div className="timeline-step-content">
-                        <div className="step-number">1</div>
-                        <div className="step-card">
-                          <div className="step-icon">
-                            <FaSearch />
-                          </div>
-                          <h5 className="step-title">Esplora le opportunità</h5>
-                          <p className="step-description">
-                            Naviga tra le richieste di progetti e trova quelli che 
-                            corrispondono perfettamente alle tue competenze.
-                          </p>
-                          <div className="step-highlight">
-                            <span className="badge bg-info">Filtri Smart</span>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="hiw-step-body">
+                    <div className="hiw-step-title">Esplora le opportunità</div>
+                    <div className="hiw-step-desc">
+                      Esplora le opportunità e invia la tua proposta: se la combini con standard di qualità,
+                      aumenti le chance di successo.
                     </div>
-                    
-                    <div className="timeline-step" data-step="2">
-                      <div className="timeline-step-connector"></div>
-                      <div className="timeline-step-content">
-                        <div className="step-number">2</div>
-                        <div className="step-card">
-                          <div className="step-icon">
-                            <FaTrophy />
-                          </div>
-                          <h5 className="step-title">Invia la tua proposta</h5>
-                          <p className="step-description">
-                            Presenta la tua offerta professionale con tempi di consegna, 
-                            costi competitivi e metodologia di lavoro.
-                          </p>
-                          <div className="step-highlight">
-                            <span className="badge bg-warning">Portfolio incluso</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="timeline-step" data-step="3">
-                      <div className="timeline-step-connector"></div>
-                      <div className="timeline-step-content">
-                        <div className="step-number">3</div>
-                        <div className="step-card">
-                          <div className="step-icon">
-                            <FaMoneyBillWave />
-                          </div>
-                          <h5 className="step-title">Sviluppa e guadagna</h5>
-                          <p className="step-description">
-                            Una volta accettata l'offerta, sviluppa il progetto e 
-                            ricevi il pagamento garantito al completamento.
-                          </p>
-                          <div className="step-highlight">
-                            <span className="badge bg-success">Pagamento garantito</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <Link to="/richieste" className="btn hiw-pill hiw-pill-fornitori">
+                      Esplora le opportunità
+                    </Link>
                   </div>
-                  
-                  <div className="timeline-cta">
-                    <Link to="/register" className="btn btn-success btn-lg rounded-pill px-4">
-                      <FaCode className="me-2" />
-                      Inizia come Fornitore
+                </div>
+
+                <div className="hiw-step">
+                  <div className="hiw-step-rail">
+                    <div className="hiw-step-number hiw-step-number-fornitori">2</div>
+                    <div className="hiw-step-line hiw-step-line-fornitori"></div>
+                  </div>
+                  <div className="hiw-step-body">
+                    <div className="hiw-step-title">Invia la tua proposta</div>
+                    <div className="hiw-step-desc">
+                      Proponi una proposta chiara: tempi, costi e metodologia. Trasparenza e comunicazione
+                      portano risultati.
+                    </div>
+                    <Link to="/register" className="btn hiw-pill hiw-pill-fornitori">
+                      Invia la tua proposta
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="hiw-step hiw-step-last">
+                  <div className="hiw-step-rail">
+                    <div className="hiw-step-number hiw-step-number-fornitori">3</div>
+                  </div>
+                  <div className="hiw-step-body">
+                    <div className="hiw-step-title">Sviluppa e guadagna</div>
+                    <div className="hiw-step-desc">
+                      Sviluppa e guadagna: lavora con clienti reali, costruisci reputazione e ricevi pagamenti
+                      al completamento.
+                    </div>
+                    <Link to="/register" className="btn hiw-pill hiw-pill-fornitori">
+                      Sviluppa e guadagna
                     </Link>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
-          {/* STATISTICHE ANIMATE */}
-          <div className="row mt-5 pt-5" data-aos="fade-up">
-            <div className="col-12">
-              <div className="stats-container">
-                <div className="row g-4">
-                  <div className="col-md-3 text-center">
-                    <div className="stat-card">
-                      <div className="stat-icon">
-                        <FaBolt className="text-warning" />
-                      </div>
-                      <div className="stat-number" data-count={stats.ore_media_offerta || 18}>{stats.ore_media_offerta || 18}</div>
-                      <div className="stat-label">Ore medie per la prima offerta</div>
-                    </div>
-                  </div>
-                  <div className="col-md-3 text-center">
-                    <div className="stat-card">
-                      <div className="stat-icon">
-                        <FaShieldAlt className="text-success" />
-                      </div>
-                      <div className="stat-number" data-count={stats.pagamenti_sicuri || 100}>{stats.pagamenti_sicuri || 100}</div>
-                      <div className="stat-label">% Pagamenti sicuri</div>
-                    </div>
-                  </div>
-                  <div className="col-md-3 text-center">
-                    <div className="stat-card">
-                      <div className="stat-icon">
-                        <FaUsers className="text-primary" />
-                      </div>
-                      <div className="stat-number" data-count={stats.sviluppatori_attivi || 150}>{stats.sviluppatori_attivi || 150}</div>
-                      <div className="stat-label">+ Sviluppatori attivi</div>
-                    </div>
-                  </div>
-                  <div className="col-md-3 text-center">
-                    <div className="stat-card">
-                      <div className="stat-icon">
-                        <FaTrophy className="text-info" />
-                      </div>
-                      <div className="stat-number" data-count={stats.soddisfazione_clienti || 94}>{stats.soddisfazione_clienti || 94}</div>
-                      <div className="stat-label">% Clienti soddisfatti</div>
-                    </div>
-                  </div>
-                </div>
-                {stats.last_updated && (
-                  <div className="text-center mt-3">
-                    <small className="text-white-50">
-                      <FaClock className="me-1" />
-                      Dati aggiornati: {new Date(stats.last_updated).toLocaleString('it-IT')}
-                    </small>
-                  </div>
-                )}
+        </div>
+      </section>
+
+      {/* STATISTICHE */}
+      <section className="py-4 bg-dark">
+        <div className="container" data-aos="fade-up">
+          <div className="hiw-stats-strip">
+            <div className="hiw-stat">
+              <div className="hiw-stat-icon hiw-stat-icon-blue">
+                <FaBolt />
               </div>
+              <div className="hiw-stat-value">{stats.ore_media_offerta || 18}+</div>
+              <div className="hiw-stat-label">Average Offers</div>
+            </div>
+            <div className="hiw-stat">
+              <div className="hiw-stat-icon hiw-stat-icon-green">
+                <FaShieldAlt />
+              </div>
+              <div className="hiw-stat-value">{stats.pagamenti_sicuri || 100}%</div>
+              <div className="hiw-stat-label">Secure Payments</div>
+            </div>
+            <div className="hiw-stat">
+              <div className="hiw-stat-icon hiw-stat-icon-cyan">
+                <FaUsers />
+              </div>
+              <div className="hiw-stat-value">{stats.sviluppatori_attivi || 150}+</div>
+              <div className="hiw-stat-label">Active Devs</div>
+            </div>
+            <div className="hiw-stat">
+              <div className="hiw-stat-icon hiw-stat-icon-gold">
+                <FaTrophy />
+              </div>
+              <div className="hiw-stat-value">{stats.soddisfazione_clienti || 94}%</div>
+              <div className="hiw-stat-label">Client Satisfaction</div>
             </div>
           </div>
-        </div>
-        
-        {/* Background Decorations */}
-        <div className="timeline-bg-decoration timeline-bg-left">
-          <FaRocket size={100} className="text-primary opacity-5" />
-        </div>
-        <div className="timeline-bg-decoration timeline-bg-right">
-          <FaCode size={100} className="text-success opacity-5" />
         </div>
       </section>
 
@@ -1137,7 +1058,7 @@ function Home() {
       <section className="py-5 bg-light position-relative overflow-hidden">
         <div className="container position-relative z-2">
           <div className="text-center mb-5" data-aos="fade-up">
-            <h2 className="display-4 fw-bold mb-3">Garanzie D&S</h2>
+            <h2 className="display-4 fw-bold mb-3">Garanzie SoftMatch</h2>
             <p className="lead text-muted">La tua sicurezza è la nostra priorità</p>
           </div>
           
@@ -1222,7 +1143,18 @@ function Home() {
         <div className="container">
           <div className="row g-4">
             <div className="col-lg-4">
-              <h3 className="fw-bold mb-3">Domanda & Software</h3>
+              <div className="d-flex align-items-center gap-3 mb-3">
+                <img
+                  src="/images/softmatch-logo.png?v=20260327-105709"
+                  alt="SoftMatch"
+                  style={{ height: '47px', width: 'auto', borderRadius: '10px' }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/softmatch-logo.svg';
+                  }}
+                />
+                <h3 className="fw-bold mb-0">SoftMatch</h3>
+              </div>
               <p className="text-white-50 mb-3">
                 Il marketplace italiano che connette visionari e sviluppatori per creare il futuro digitale.
               </p>
@@ -1268,7 +1200,7 @@ function Home() {
           <div className="row align-items-center">
             <div className="col-md-6">
               <small className="text-white-50">
-                © {new Date().getFullYear()} Domanda & Software. Tutti i diritti riservati.
+                © {new Date().getFullYear()} SoftMatch. Tutti i diritti riservati.
               </small>
             </div>
             <div className="col-md-6 text-md-end">
@@ -1649,342 +1581,279 @@ function Home() {
             transform: scale(1.3);
           }
           
-          /* ===== TIMELINE INTERATTIVA STYLES ===== */
-          .timeline-container {
-            position: relative;
-            padding: 60px 0;
-          }
-          
-          .timeline-path {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 4px;
-            height: 80%;
-            background: linear-gradient(to bottom, #007bff, #28a745);
-            border-radius: 2px;
-            z-index: 1;
-          }
-          
-          .timeline-side {
-            padding: 0 40px;
-            position: relative;
-          }
-          
-          .timeline-header {
-            text-align: center;
-            margin-bottom: 40px;
-            position: relative;
-            z-index: 3;
-          }
-          
-          .timeline-icon-main {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
+          /* Categoria icon image */
+          .categoria-icon-wrap {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            position: relative;
+            padding-top: 10px;
           }
-          
-          .timeline-icon-main::after {
-            content: '';
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border: 2px solid currentColor;
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: pulse 2s infinite;
-          }
-          
-          @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.1); opacity: 0.1; }
-            100% { transform: scale(1.2); opacity: 0; }
-          }
-          
-          .timeline-steps {
-            position: relative;
-            z-index: 2;
-          }
-          
-          .timeline-step {
-            margin-bottom: 40px;
-            position: relative;
-          }
-          
-          .timeline-step-connector {
-            position: absolute;
-            left: 25px;
-            top: 50px;
-            bottom: -40px;
-            width: 2px;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
-          }
-          
-          .timeline-step:last-child .timeline-step-connector {
-            display: none;
-          }
-          
-          .timeline-step-content {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-          }
-          
-          .step-number {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
-            position: relative;
-            z-index: 3;
-          }
-          
-          .timeline-right .step-number {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
-          }
-          
-          .step-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            flex: 1;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-          }
-          
-          .step-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            background: rgba(255, 255, 255, 1);
-          }
-          
-          .step-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            color: #007bff;
-            font-size: 24px;
-          }
-          
-          .timeline-right .step-icon {
-            color: #28a745;
-          }
-          
-          .step-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #2c3e50;
-          }
-          
-          .step-description {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: #6c757d;
-            margin-bottom: 15px;
-          }
-          
-          .step-highlight {
-            margin-top: 10px;
-          }
-          
-          .step-highlight .badge {
-            font-size: 0.75rem;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-          }
-          
-          .timeline-cta {
-            text-align: center;
-            margin-top: 40px;
-          }
-          
-          .timeline-cta .btn {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            border: none;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-          }
-          
-          .timeline-cta .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-          }
-          
-          /* STATISTICHE ANIMATE */
-          .stats-container {
-            margin-top: 60px;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-          }
-          
-          .stat-card {
-            padding: 30px 20px;
-            text-align: center;
-          }
-          
-          .stat-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-          }
-          
-          .stat-number {
-            font-size: 3rem;
-            font-weight: 900;
-            color: white;
+
+          .categoria-img {
+            width: 270px;
+            height: 270px;
+            object-fit: contain;
+            border-radius: 22px;
+            background: transparent;
+            will-change: filter, transform;
             display: block;
-            line-height: 1;
-            margin-bottom: 10px;
           }
-          
-          .stat-label {
+
+          .categoria-card-body {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            min-height: 360px;
+          }
+
+          .categoria-text {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 18px;
+          }
+
+          .categoria-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+          }
+
+          .categoria-sub {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.65);
+            font-weight: 600;
+          }
+
+          /* ===== COME FUNZIONA (stile mock) ===== */
+          .hiw-section {
+            background: radial-gradient(1200px 600px at 50% 0%, rgba(0, 123, 255, 0.12), transparent 60%),
+                        radial-gradient(900px 500px at 80% 20%, rgba(40, 167, 69, 0.10), transparent 55%),
+                        radial-gradient(900px 500px at 20% 30%, rgba(255, 193, 7, 0.08), transparent 55%);
+          }
+
+          .hiw-col {
+            position: relative;
+            padding: 10px 10px;
+          }
+
+          .hiw-col-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0 0 18px 0;
+            letter-spacing: -0.02em;
+          }
+
+          .hiw-col-title-clienti {
+            color: #2f9bff;
+          }
+
+          .hiw-col-title-fornitori {
+            color: #37d67a;
+          }
+
+          .hiw-step {
+            display: flex;
+            gap: 14px;
+            padding: 18px 0;
+          }
+
+          .hiw-step-rail {
+            width: 44px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+          }
+
+          .hiw-step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.92);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+          }
+
+          .hiw-step-number-clienti {
+            box-shadow: 0 10px 24px rgba(0, 123, 255, 0.18);
+          }
+
+          .hiw-step-number-fornitori {
+            box-shadow: 0 10px 24px rgba(40, 167, 69, 0.18);
+          }
+
+          .hiw-step-line {
+            width: 2px;
+            flex: 1;
+            margin-top: 10px;
+            background: rgba(255,255,255,0.10);
+            border-radius: 2px;
+          }
+
+          .hiw-step-line-clienti {
+            background: linear-gradient(180deg, rgba(47, 155, 255, 0.55), rgba(255,255,255,0.06));
+          }
+
+          .hiw-step-line-fornitori {
+            background: linear-gradient(180deg, rgba(55, 214, 122, 0.55), rgba(255,255,255,0.06));
+          }
+
+          .hiw-step-body {
+            padding-right: 10px;
+          }
+
+          .hiw-step-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.95);
+            margin-bottom: 6px;
+          }
+
+          .hiw-step-desc {
+            color: rgba(255,255,255,0.70);
+            font-size: 0.92rem;
+            line-height: 1.55;
+            max-width: 520px;
+            margin-bottom: 12px;
+          }
+
+          .hiw-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-weight: 700;
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.14);
+            color: rgba(255,255,255,0.92);
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
           }
-          
-          /* DECORAZIONI BACKGROUND */
-          .timeline-bg-decoration {
-            position: absolute;
-            opacity: 0.05;
-            pointer-events: none;
+
+          .hiw-pill:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.30);
+            background: rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.95);
           }
-          
-          .timeline-bg-left {
-            top: 20%;
-            left: 5%;
-            animation: float 6s ease-in-out infinite;
+
+          .hiw-pill-clienti {
+            background: rgba(0, 123, 255, 0.18);
+            border-color: rgba(0, 123, 255, 0.35);
           }
-          
-          .timeline-bg-right {
-            bottom: 20%;
-            right: 5%;
-            animation: float 6s ease-in-out infinite reverse;
+
+          .hiw-pill-fornitori {
+            background: rgba(40, 167, 69, 0.18);
+            border-color: rgba(40, 167, 69, 0.35);
           }
-          
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+
+          /* ===== STATS STRIP (stile mock) ===== */
+          .hiw-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            padding: 18px 22px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(30,30,35,0.75), rgba(18,18,22,0.75));
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
           }
-          
-          /* RESPONSIVE DESIGN */
+
+          .categoria-card .card {
+            background: linear-gradient(180deg, rgba(30,30,35,0.86), rgba(18,18,22,0.88));
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            box-shadow: 0 18px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+          }
+
+          .categoria-card .card:hover {
+            border-color: rgba(255,255,255,0.22) !important;
+            box-shadow: 0 24px 70px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07);
+          }
+
+          .categoria-card .card-body {
+            gap: 0;
+          }
+
+          @media (max-width: 576px) {
+            .categoria-img {
+              width: 220px;
+              height: 220px;
+              border-radius: 22px;
+            }
+          }
+          .categoria-card .card .card-body {
+            position: relative;
+          }
+          .card-hover:hover {
+            transform: translateY(-4px);
+            transition: transform 0.2s ease;
+          }
+
+          .hiw-stat {
+            display: grid;
+            grid-template-columns: 44px 1fr;
+            grid-template-rows: auto auto;
+            column-gap: 12px;
+            align-items: center;
+            padding: 10px 6px;
+          }
+
+          .hiw-stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.9);
+            grid-row: 1 / span 2;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+          }
+
+          .hiw-stat-icon-blue { background: rgba(0, 123, 255, 0.16); border-color: rgba(0, 123, 255, 0.28); }
+          .hiw-stat-icon-green { background: rgba(40, 167, 69, 0.16); border-color: rgba(40, 167, 69, 0.28); }
+          .hiw-stat-icon-cyan { background: rgba(54, 185, 204, 0.16); border-color: rgba(54, 185, 204, 0.28); }
+          .hiw-stat-icon-gold { background: rgba(255, 193, 7, 0.16); border-color: rgba(255, 193, 7, 0.28); }
+
+          .hiw-stat-value {
+            font-weight: 900;
+            font-size: 1.6rem;
+            line-height: 1.1;
+            color: rgba(255,255,255,0.95);
+          }
+
+          .hiw-stat-label {
+            color: rgba(255,255,255,0.65);
+            font-size: 0.85rem;
+            font-weight: 600;
+          }
+
           @media (max-width: 992px) {
-            .timeline-path {
-              left: 30px;
-              width: 2px;
-              height: auto;
-              top: 120px;
-              bottom: 60px;
-              transform: none;
-              background: linear-gradient(to bottom, #007bff 50%, #28a745 50%);
-            }
-            
-            .timeline-side {
-              padding: 0 20px 40px 70px;
-            }
-            
-            .timeline-header {
-              margin-bottom: 30px;
-            }
-            
-            .timeline-right {
-              padding-top: 40px;
-            }
-            
-            .timeline-right .timeline-header h3 {
-              color: #28a745 !important;
-            }
-            
-            .hero-nav-arrow {
-              width: 50px;
-              height: 50px;
-              font-size: 18px;
-            }
-            
-            .hero-nav-left {
-              left: 20px;
-            }
-            
-            .hero-nav-right {
-              right: 20px;
-            }
-            
-            .hero-dots {
-              bottom: 20px;
-              padding: 8px 16px;
-              gap: 8px;
-            }
-            
-            .hero-dot {
-              width: 10px;
-              height: 10px;
+            .hiw-stats-strip {
+              grid-template-columns: repeat(2, 1fr);
             }
           }
-          
-          @media (max-width: 768px) {
-            .timeline-side {
-              padding: 0 15px 30px 60px;
-            }
-            
-            .step-card {
-              padding: 20px;
-            }
-            
-            .step-number {
-              width: 40px;
-              height: 40px;
-              font-size: 1rem;
-            }
-            
-            .step-title {
-              font-size: 1rem;
-            }
-            
-            .step-description {
-              font-size: 0.85rem;
-            }
-            
-            .stats-container {
-              padding: 30px 20px;
-            }
-            
-            .stat-number {
-              font-size: 2.5rem;
-            }
-            
-            .stat-icon {
-              font-size: 2.5rem;
+
+          @media (max-width: 576px) {
+            .hiw-stats-strip {
+              grid-template-columns: 1fr;
             }
           }
         `}

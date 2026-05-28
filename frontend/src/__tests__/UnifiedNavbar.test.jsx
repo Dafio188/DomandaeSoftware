@@ -23,10 +23,8 @@ const mockAuthContextAdmin = {
 };
 
 // Wrapper per i test con Router e Context
-const TestWrapper = ({ children, authValue = mockAuthContext, location = '/' }) => {
+const TestWrapper = ({ children, authValue = mockAuthContext }) => {
   // Mock di useLocation
-  const mockLocation = { pathname: location };
-  
   return (
     <BrowserRouter>
       <AuthContext.Provider value={authValue}>
@@ -61,14 +59,14 @@ describe('UnifiedNavbar', () => {
       expect(screen.getByRole('navigation')).toBeInTheDocument();
     });
 
-    test('mostra il logo TechnoBridge', () => {
+    test('mostra il logo SoftMatch', () => {
       render(
         <TestWrapper>
           <UnifiedNavbar />
         </TestWrapper>
       );
 
-      const logo = screen.getByAltText('TechnoBridge');
+      const logo = screen.getByAltText('SoftMatch');
       expect(logo).toBeInTheDocument();
       expect(logo).toHaveAttribute('src', expect.stringContaining('logo'));
     });

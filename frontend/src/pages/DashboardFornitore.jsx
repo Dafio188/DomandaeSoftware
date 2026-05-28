@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { getOfferteFornitore, getProgettiFornitore, getAllRichieste } from '../services/api';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { FaUser, FaEuroSign, FaCalendar, FaCheckCircle, FaTimesCircle, FaClock, FaLightbulb, FaTools, FaChartLine, FaHandshake, FaStar, FaBriefcase, FaPlus, FaEye, FaImage, FaTimes, FaMagic, FaRocket, FaInfoCircle, FaProjectDiagram, FaArrowLeft, FaArchive, FaSearch, FaArrowRight, FaUserTie, FaEdit, FaArrowUp, FaQuestionCircle, FaEnvelope, FaCog } from 'react-icons/fa';
+import { FaUser, FaEuroSign, FaCalendar, FaCheckCircle, FaTimesCircle, FaClock, FaLightbulb, FaTools, FaChartLine, FaHandshake, FaStar, FaBriefcase, FaPlus, FaEye, FaImage, FaTimes, FaMagic, FaRocket, FaInfoCircle, FaProjectDiagram, FaArrowLeft, FaArchive, FaSearch, FaArrowRight, FaUserTie, FaEdit, FaArrowUp, FaQuestionCircle, FaEnvelope, FaCog, FaTicketAlt, FaHistory } from 'react-icons/fa';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from 'recharts';
 import { API_BASE } from '../config/api.js';
 
 function DashboardFornitore() {
@@ -32,7 +33,15 @@ function DashboardFornitore() {
   const [prodottoCategoria, setProdottoCategoria] = useState('');
   const [prodottoImmagine, setProdottoImmagine] = useState(null);
   const [prodottoImmaginePrev, setProdottoImmaginePrev] = useState(null);
-  const [showProdottoPreview, setShowProdottoPreview] = useState(false);
+  const [_showProdottoPreview, _setShowProdottoPreview] = useState(false);
+
+  // Stati per statistiche dashboard — mancanti: causa crash pagina nera
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [dashboardData, setDashboardData] = useState({
+    stats: {},
+    grafico_guadagni: [],
+    recent_movements: [],
+  });
 
   // Categorie prodotti
   const categorieProdotti = [
@@ -45,7 +54,7 @@ function DashboardFornitore() {
   ];
 
   // Opzioni tipo software (per le richieste)
-  const tipiSoftware = [
+  const _tipiSoftware = [
     { value: 'crm', label: 'CRM - Customer Relationship Management', icon: '👥' },
     { value: 'gestionale', label: 'Gestionale/ERP - Enterprise Resource Planning', icon: '📊' },
     { value: 'ecommerce', label: 'E-commerce - Negozio Online', icon: '🛒' },
@@ -80,13 +89,23 @@ function DashboardFornitore() {
       });
       
       getAllRichieste(token).then(setRichieste);
+      
+      // Carica statistiche avanzate
+      setLoadingStats(true);
+      axios.get(`${API_BASE}stats/dashboard/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(res => {
+        setDashboardData(res.data);
+      }).catch(err => {
+        console.error('Errore caricamento statistiche dashboard:', err);
+      }).finally(() => {
+        setLoadingStats(false);
+      });
+
       // Carica i prodotti pronti del fornitore
       axios.get(`${API_BASE}prodotti-pronti/`)
         .then(res => {
-          console.log('Prodotti caricati:', res.data);
-          console.log('User ID:', user.id);
           const prodottiFornitore = res.data.filter(p => p.fornitore === user.id);
-          console.log('Prodotti filtrati per fornitore:', prodottiFornitore);
           setProdotti(prodottiFornitore);
         })
         .catch(err => {
@@ -169,7 +188,7 @@ function DashboardFornitore() {
       setSuccess('🎉 Prodotto pubblicato con successo! È ora visibile nel marketplace e i clienti possono contattarti direttamente per acquistarlo.');
       setProdottoTitolo(''); setProdottoDescrizione(''); setProdottoPrezzo(''); setProdottoCategoria('');
       removeProdottoImage();
-      setShowProdottoPreview(false);
+      _setShowProdottoPreview(false);
       setShowCreaProdotto(false);
       
       // Mostra un toast di successo più evidente
@@ -242,14 +261,8 @@ function DashboardFornitore() {
     setError('');
   };
 
-  // Calcolo statistiche
-  const stats = {
-    offerteInviate: offerte.length,
-    offerteAccettate: offerte.filter(o => o.stato === 'accettata').length,
-    progettiAttivi: progetti.length,
-    prodottiPubblicati: prodotti.length,
-    guadagnoTotale: progetti.filter(p => p.stato === 'completato').reduce((sum, p) => sum + (parseFloat(p.prezzo_finale) || 0), 0)
-  };
+  // Utilizzo statistiche reali dalla dashboardData
+  const realStats = dashboardData.stats;
 
   // Filtra richieste escludendo quelle per cui ho già fatto un'offerta
   const richiesteDisponibili = richieste.filter(richiesta => {
@@ -262,377 +275,270 @@ function DashboardFornitore() {
   });
 
   return (
-    <div className="dashboard-fornitore min-vh-100" style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #e8edf5 100%)' }}>
-      <div className="container-fluid py-4">
-        <div className="row">
-          <div className="col-12">
-            {/* HEADER MODERNO MANTENUTO */}
-            <div className="welcome-header mb-4">
-              <div className="card border-0 shadow-lg rounded-4" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f4f6f9 100%)' }}>
-                <div className="card-body p-4">
-                  <div className="row align-items-center">
-                    <div className="col-lg-8">
-                      <div className="d-flex align-items-center">
-                        <div className="welcome-icon bg-primary bg-opacity-10 rounded-circle p-3 me-4">
-                          <FaUserTie size={40} className="text-primary" />
-                        </div>
-                        <div>
-                          <h2 className="welcome-title mb-2 text-dark">
-                            Ciao, <span className="text-primary fw-bold">{user?.username || 'Fornitore'}</span>! 👋
-                          </h2>
-                          <p className="welcome-subtitle text-muted mb-0 fs-5">
-                            Ecco la tua dashboard personalizzata con le opportunità più interessanti
-                          </p>
-                        </div>
+    <div className="py-4">
+      <div className="row">
+        <div className="col-12">
+            {/* HEADER MODERNO IN STILE APPLE */}
+            <div className="welcome-header mb-5">
+              <div className="mac-glass-card p-4 p-md-5">
+                <div className="row align-items-center">
+                  <div className="col-lg-8">
+                    <div className="d-flex align-items-center">
+                      <div className="welcome-icon bg-primary bg-opacity-10 rounded-circle p-4 me-4 d-none d-md-flex">
+                        <FaUserTie size={48} className="text-primary" />
                       </div>
-                    </div>
-                    <div className="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                      <div className="d-flex justify-content-lg-end gap-2 flex-wrap">
-                        <Link to="/richieste" className="btn btn-primary rounded-pill px-4">
-                          <FaSearch className="me-2" />
-                          Trova Progetti
-                        </Link>
-                        <Link to="/prodotti-pronti" className="btn btn-outline-warning rounded-pill px-4">
-                          <FaStar className="me-2" />
-                          Marketplace
-                        </Link>
-                        <Link to="/le-tue-idee" className="btn btn-outline-info rounded-pill px-4">
-                          <FaLightbulb className="me-2" />
-                          Le Tue Idee
-                        </Link>
+                      <div>
+                        <h1 className="mac-title mb-2">
+                          Ciao, <span className="text-primary">{user?.username || 'Fornitore'}</span>! 👋
+                        </h1>
+                        <p className="mac-subtitle mb-0 fs-5">
+                          Ecco il riepilogo delle tue attività e le nuove opportunità.
+                        </p>
                       </div>
                     </div>
                   </div>
+                  <div className="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                    <div className="d-flex justify-content-lg-end gap-2 flex-wrap">
+                      <div className="mac-glass-card px-4 py-2 d-flex align-items-center border-0 shadow-none bg-white bg-opacity-50">
+                        <FaTicketAlt className="me-2 text-primary" />
+                        <span className="fw-bold text-dark">{user?.crediti ?? 0}</span>
+                        <span className="ms-1 text-muted small">Crediti</span>
+                      </div>
+                      <Link to="/crediti" className="btn btn-primary mac-button px-4 shadow-sm">
+                        Ricarica
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-top d-flex flex-wrap gap-2">
+                  <Link to="/richieste" className="btn btn-light mac-button px-4 border">
+                    <FaSearch className="me-2" /> Trova Progetti
+                  </Link>
+                  <Link to="/prodotti-pronti" className="btn btn-light mac-button px-4 border">
+                    <FaStar className="me-2" /> Marketplace
+                  </Link>
+                  <Link to="/le-tue-idee" className="btn btn-light mac-button px-4 border">
+                    <FaLightbulb className="me-2" /> Le Tue Idee
+                  </Link>
                 </div>
               </div>
             </div>
 
             {/* MESSAGGI DI SUCCESSO/ERRORE */}
             {success && (
-              <div className="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
-                <div className="d-flex align-items-center">
-                  <FaCheckCircle className="me-3 text-success" size={24} />
-                  <div>
-                    <strong>Perfetto!</strong>
-                    <div>{success}</div>
-                  </div>
-                </div>
-                <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
+              <div className="alert alert-success mac-glass-card border-0 shadow-sm mb-4 d-flex align-items-center p-3" role="alert">
+                <FaCheckCircle className="me-3 text-success" size={24} />
+                <div className="text-dark">{success}</div>
+                <button type="button" className="btn-close ms-auto" onClick={() => setSuccess('')}></button>
               </div>
             )}
 
             {error && (
-              <div className="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
-                <div className="d-flex align-items-center">
-                  <FaTimesCircle className="me-3 text-danger" size={24} />
-                  <div>
-                    <strong>Attenzione!</strong>
-                    <div>{error}</div>
-                  </div>
-                </div>
-                <button type="button" className="btn-close" onClick={() => setError('')}></button>
+              <div className="alert alert-danger mac-glass-card border-0 shadow-sm mb-4 d-flex align-items-center p-3" role="alert">
+                <FaTimesCircle className="me-3 text-danger" size={24} />
+                <div className="text-dark">{error}</div>
+                <button type="button" className="btn-close ms-auto" onClick={() => setError('')}></button>
               </div>
             )}
 
-            {/* STATISTICHE DASHBOARD */}
-            <div className="row g-4 mb-5">
-              <div className="col-md-2-4">
-                <div className="card bg-primary bg-gradient text-white h-100 border-0 rounded-4 card-hover">
-                  <div className="card-body text-center">
-                    <FaHandshake size={28} className="mb-2" />
-                    <h4 className="card-title">{stats.offerteInviate}</h4>
-                    <p className="card-text small">Offerte inviate</p>
+            {/* STATISTICHE DASHBOARD - WIDGET STYLE */}
+            <div className="row g-4 mb-4">
+              <div className="col-6 col-md-4 col-lg-2-4">
+                <div className="mac-glass-card p-4 text-center h-100 border-0">
+                  <div className="bg-primary bg-opacity-10 rounded-circle p-3 mx-auto mb-3" style={{width:'fit-content'}}>
+                    <FaHandshake size={24} className="text-primary" />
                   </div>
+                  <h3 className="mac-title mb-1">{realStats.totale_offerte}</h3>
+                  <p className="mac-subtitle small mb-0">Offerte inviate</p>
                 </div>
               </div>
-              <div className="col-md-2-4">
-                <div className="card bg-success bg-gradient text-white h-100 border-0 rounded-4 card-hover">
-                  <div className="card-body text-center">
-                    <FaCheckCircle size={28} className="mb-2" />
-                    <h4 className="card-title">{stats.offerteAccettate}</h4>
-                    <p className="card-text small">Offerte accettate</p>
+              <div className="col-6 col-md-4 col-lg-2-4">
+                <div className="mac-glass-card p-4 text-center h-100 border-0">
+                  <div className="bg-success bg-opacity-10 rounded-circle p-3 mx-auto mb-3" style={{width:'fit-content'}}>
+                    <FaCheckCircle size={24} className="text-success" />
                   </div>
+                  <h3 className="mac-title mb-1">{realStats.offerte_accettate}</h3>
+                  <p className="mac-subtitle small mb-0">Accettate</p>
                 </div>
               </div>
-              <div className="col-md-2-4">
-                <div className="card bg-info bg-gradient text-white h-100 border-0 rounded-4 card-hover">
-                  <div className="card-body text-center">
-                    <FaBriefcase size={28} className="mb-2" />
-                    <h4 className="card-title">{stats.progettiAttivi}</h4>
-                    <p className="card-text small">Progetti attivi</p>
+              <div className="col-6 col-md-4 col-lg-2-4">
+                <div className="mac-glass-card p-4 text-center h-100 border-0">
+                  <div className="bg-info bg-opacity-10 rounded-circle p-3 mx-auto mb-3" style={{width:'fit-content'}}>
+                    <FaBriefcase size={24} className="text-info" />
                   </div>
+                  <h3 className="mac-title mb-1">{progetti.length}</h3>
+                  <p className="mac-subtitle small mb-0">Progetti attivi</p>
                 </div>
               </div>
-              <div className="col-md-2-4">
-                <div className="card bg-warning bg-gradient text-white h-100 border-0 rounded-4 card-hover">
-                  <div className="card-body text-center">
-                    <FaStar size={28} className="mb-2" />
-                    <h4 className="card-title">{stats.prodottiPubblicati}</h4>
-                    <p className="card-text small">Prodotti pubblicati</p>
+              <div className="col-6 col-md-4 col-lg-2-4">
+                <div className="mac-glass-card p-4 text-center h-100 border-0">
+                  <div className="bg-warning bg-opacity-10 rounded-circle p-3 mx-auto mb-3" style={{width:'fit-content'}}>
+                    <FaChartLine size={24} className="text-warning" />
                   </div>
+                  <h3 className="mac-title mb-1">{realStats.success_rate}%</h3>
+                  <p className="mac-subtitle small mb-0">Success Rate</p>
                 </div>
               </div>
-              <div className="col-md-2-4">
-                <div className="card bg-dark bg-gradient text-white h-100 border-0 rounded-4 card-hover">
-                  <div className="card-body text-center">
-                    <FaEuroSign size={28} className="mb-2" />
-                    <h4 className="card-title">{stats.guadagnoTotale.toFixed(0)}€</h4>
-                    <p className="card-text small">Guadagno totale</p>
+              <div className="col-6 col-md-4 col-lg-2-4">
+                <div className="mac-glass-card p-4 text-center h-100 border-0">
+                  <div className="bg-dark bg-opacity-10 rounded-circle p-3 mx-auto mb-3" style={{width:'fit-content'}}>
+                    <FaEuroSign size={24} className="text-dark" />
                   </div>
+                  <h3 className="mac-title mb-1">{(realStats.guadagno_totale ?? 0).toFixed(0)}€</h3>
+                  <p className="mac-subtitle small mb-0">Guadagno tot.</p>
                 </div>
               </div>
             </div>
 
-            {/* 🤝 GESTIONE OFFERTE INVIATE - PRIORITÀ MASSIMA */}
-            <div className="row mt-4">
-              <div className="col-12">
-                <div className="card border-0 shadow-lg rounded-4">
-                  <div className="card-header bg-info bg-gradient text-white border-0 rounded-top-4">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h4 className="mb-1">
-                          <FaHandshake className="me-3" />
-                          🤝 Gestione Offerte Inviate
-                        </h4>
-                        <p className="mb-0 opacity-90">Monitora e gestisci tutte le tue proposte inviate ai clienti</p>
-                      </div>
-                      <div className="d-flex align-items-center gap-3">
-                        <div className="text-center">
-                          <h5 className="mb-0">{offerte.length}</h5>
-                          <small className="opacity-75">totali</small>
-                        </div>
-                        <div className="text-center">
-                          <h5 className="mb-0 text-warning">{offerte.filter(o => o.stato === 'in_attesa').length}</h5>
-                          <small className="opacity-75">in attesa</small>
-                        </div>
-                        <div className="text-center">
-                          <h5 className="mb-0 text-success">{offerte.filter(o => o.stato === 'accettata').length}</h5>
-                          <small className="opacity-75">accettate</small>
-                        </div>
-                      </div>
+            {/* ANALITYCS & MOVIMENTI */}
+            <div className="row g-4 mb-5">
+              <div className="col-xl-8">
+                <div className="mac-glass-card p-4 h-100">
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                      <h5 className="mac-title mb-1">Andamento Guadagni</h5>
+                      <p className="mac-subtitle small mb-0">Prestazioni degli ultimi mesi</p>
+                    </div>
+                    <div className="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">
+                       {realStats.guadagno_totale > 0 ? '+ Pro' : 'In attesa'}
                     </div>
                   </div>
-                  <div className="card-body p-4">
-                    {offerte.length > 0 ? (
-                      <>
-                        {/* Filtri Rapidi */}
-                        <div className="row mb-4">
-                          <div className="col-12">
-                            <div className="card bg-light border-0 rounded-3">
-                              <div className="card-body py-3">
-                                <div className="d-flex justify-content-between align-items-center">
-                                  <h6 className="fw-bold mb-0 text-dark">
-                                    <FaSearch className="me-2 text-primary" />
-                                    Filtri Rapidi
-                                  </h6>
-                                  <div className="btn-group" role="group">
-                                    <button type="button" className="btn btn-outline-primary btn-sm active">
-                                      Tutte ({offerte.length})
-                                    </button>
-                                    <button type="button" className="btn btn-outline-warning btn-sm">
-                                      In Attesa ({offerte.filter(o => o.stato === 'in_attesa').length})
-                                    </button>
-                                    <button type="button" className="btn btn-outline-success btn-sm">
-                                      Accettate ({offerte.filter(o => o.stato === 'accettata').length})
-                                    </button>
-                                    <button type="button" className="btn btn-outline-danger btn-sm">
-                                      Rifiutate ({offerte.filter(o => o.stato === 'rifiutata').length})
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                  <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={dashboardData.grafico_guadagni}>
+                        <defs>
+                          <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#0071e3" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#0071e3" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#86868b'}} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#86868b'}} />
+                        <RechartsTooltip 
+                          contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="earnings" 
+                          stroke="#0071e3" 
+                          strokeWidth={3}
+                          fillOpacity={1} 
+                          fill="url(#colorEarnings)" 
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+              <div className="col-xl-4">
+                <div className="mac-glass-card p-4 h-100">
+                  <div className="d-flex align-items-center mb-4">
+                    <FaHistory className="text-primary me-2" />
+                    <h5 className="mac-title mb-0">Storico Crediti</h5>
+                  </div>
+                  <div className="movements-list overflow-auto" style={{maxHeight:'280px'}}>
+                    {dashboardData.recent_movements.length > 0 ? (
+                      dashboardData.recent_movements.map(mov => (
+                        <div key={mov.id} className="d-flex align-items-center p-3 mb-2 rounded-4 bg-white bg-opacity-40 border border-white">
+                          <div className={`rounded-circle p-2 me-3 ${mov.delta > 0 ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'}`}>
+                            {mov.delta > 0 ? <FaArrowUp size={12} /> : <FaArrowLeft size={12} style={{transform:'rotate(-90deg)'}} />}
+                          </div>
+                          <div className="flex-grow-1">
+                            <h6 className="mac-title small mb-0">{mov.reason || 'Movimento crediti'}</h6>
+                            <small className="mac-subtitle" style={{fontSize:'0.65rem'}}>{new Date(mov.created_at).toLocaleDateString()}</small>
+                          </div>
+                          <div className={`fw-bold ${mov.delta > 0 ? 'text-success' : 'text-danger'}`}>
+                            {mov.delta > 0 ? '+' : ''}{mov.delta}
                           </div>
                         </div>
-
-                        {/* Vista Card delle Offerte */}
-                        <div className="border-top pt-4">
-                          <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h6 className="fw-bold mb-0">
-                              <FaChartLine className="me-2 text-info" />
-                              Le Tue Offerte Recenti
-                            </h6>
-                          </div>
-                          
-                          <div className="row g-3">
-                            {offerte.map(offerta => (
-                              <div key={offerta.id} className="col-lg-6">
-                                <div className="card border-0 shadow-sm rounded-3 h-100 offerta-card-hover">
-                                  <div className="card-body">
-                                    {/* Header con titolo e stato */}
-                                    <div className="d-flex justify-content-between align-items-start mb-3">
-                                      <div className="flex-grow-1">
-                                        <h6 className="card-title fw-bold mb-1 text-primary">
-                                          {offerta.richiesta_titolo || `Richiesta #${offerta.richiesta}`}
-                                        </h6>
-                                        <small className="text-muted">
-                                          <FaUser className="me-1" />
-                                          Cliente: <strong>{offerta.cliente_username}</strong>
-                                        </small>
-                                      </div>
-                                      <span className={`badge rounded-pill px-3 py-2 ${
-                                        offerta.stato === 'accettata' ? 'bg-success' :
-                                        offerta.stato === 'rifiutata' ? 'bg-danger' :
-                                        'bg-warning text-dark'
-                                      }`}>
-                                        {offerta.stato === 'accettata' && '✅ Accettata'}
-                                        {offerta.stato === 'rifiutata' && '❌ Rifiutata'}
-                                        {offerta.stato === 'in_attesa' && '🟡 In Attesa'}
-                                      </span>
-                                    </div>
-                                    
-                                    {/* Descrizione offerta */}
-                                    <div className="mb-3">
-                                      <small className="text-muted fw-bold d-block mb-1">La tua proposta:</small>
-                                      <p className="text-muted mb-0" style={{ 
-                                        fontSize: '0.85rem',
-                                        lineHeight: '1.4',
-                                        height: '40px',
-                                        overflow: 'hidden',
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: 'vertical'
-                                      }}>
-                                        {offerta.descrizione.length > 80 ? 
-                                          offerta.descrizione.substring(0, 80) + '...' : 
-                                          offerta.descrizione
-                                        }
-                                      </p>
-                                    </div>
-                                    
-                                    {/* Info prezzo e data */}
-                                    <div className="row g-2 mb-3">
-                                      <div className="col-6">
-                                        <div className="bg-success bg-opacity-10 rounded-3 p-2 text-center">
-                                          <FaEuroSign className="text-success mb-1" size={16} />
-                                          <div className="fw-bold text-success">{offerta.prezzo}€</div>
-                                          <small className="text-muted">La tua offerta</small>
-                                        </div>
-                                      </div>
-                                      <div className="col-6">
-                                        <div className="bg-info bg-opacity-10 rounded-3 p-2 text-center">
-                                          <FaCalendar className="text-info mb-1" size={16} />
-                                          <div className="fw-bold text-info" style={{ fontSize: '0.8rem' }}>
-                                            {new Date(offerta.data_offerta).toLocaleDateString('it-IT')}
-                                          </div>
-                                          <small className="text-muted">Data invio</small>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    
-                                    {/* Azioni */}
-                                    <div className="border-top pt-3">
-                                      <div className="d-flex gap-2">
-                                        {offerta.stato === 'in_attesa' && (
-                                          <button 
-                                            className="btn btn-outline-warning btn-sm rounded-pill flex-grow-1"
-                                            title="Modifica offerta (se in attesa)"
-                                            disabled
-                                          >
-                                            <FaEdit className="me-1" />
-                                            Modifica
-                                          </button>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
+                      ))
                     ) : (
-                      <div className="text-center py-5">
-                        <div className="bg-info bg-opacity-10 rounded-circle mx-auto mb-4" style={{ width: '120px', height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FaHandshake size={48} className="text-info opacity-50" />
-                        </div>
-                        <h5 className="text-muted mb-3">Nessuna offerta inviata ancora</h5>
-                        <p className="text-muted mb-4">
-                          Inizia a inviare offerte competitive per le richieste dei clienti!<br />
-                          Le tue proposte appariranno qui con tutte le statistiche e la gestione completa.
-                        </p>
-                        <div className="d-flex gap-3 justify-content-center">
-                          <button 
-                            className="btn btn-info rounded-pill px-4"
-                            onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
-                          >
-                            <FaArrowUp className="me-2" />
-                            Vedi Richieste Sopra
-                          </button>
-                          <Link to="/richieste" className="btn btn-outline-info rounded-pill px-4">
-                            <FaSearch className="me-2" />
-                            Esplora Tutte le Richieste
-                          </Link>
-                        </div>
-                      </div>
+                      <p className="text-center text-muted py-5 small">Nessun movimento recente</p>
                     )}
                   </div>
+                  <Link to="/crediti" className="btn btn-link w-100 text-primary text-decoration-none small mt-3 fw-bold">
+                    Gestisci Crediti
+                  </Link>
                 </div>
               </div>
             </div>
 
-            {/* RICHIESTE IN EVIDENZA - VERSIONE COMPATTA */}
+            {/* 🤝 GESTIONE OFFERTE INVIATE */}
             <div className="row mt-4">
               <div className="col-12">
-                <div className="card border-0 shadow-sm rounded-4">
-                  <div className="card-header bg-success bg-gradient text-white border-0 rounded-top-4">
+                <div className="mac-glass-card overflow-hidden">
+                  <div className="p-4 border-bottom bg-white bg-opacity-30">
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
-                        <h5 className="mb-0">
-                          <FaSearch className="me-2" />
-                          🎯 Richieste Aperte ({richiesteDisponibili.length})
-                        </h5>
+                        <h4 className="mac-title mb-1">
+                          <FaHandshake className="me-2 text-primary" />
+                          Gestione Offerte
+                        </h4>
+                        <p className="mac-subtitle mb-0 small">Monitora le tue proposte ai clienti</p>
                       </div>
-                      <Link to="/richieste" className="btn btn-outline-light btn-sm rounded-pill">
-                        <FaArrowRight className="me-1" />
-                        Esplora Tutte
-                      </Link>
+                      <div className="d-none d-md-flex align-items-center gap-4">
+                        <div className="text-center">
+                          <h5 className="mac-title mb-0">{offerte.length}</h5>
+                          <small className="mac-subtitle">totali</small>
+                        </div>
+                        <div className="text-center">
+                          <h5 className="mac-title mb-0 text-warning">{offerte.filter(o => o.stato === 'in_attesa').length}</h5>
+                          <small className="mac-subtitle">attesa</small>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="card-body p-3">
-                    {richiesteDisponibili.length > 0 ? (
-                      <div className="row g-3">
-                        {richiesteDisponibili.slice(0, 3).map(richiesta => (
-                          <div key={richiesta.id} className="col-lg-4">
-                            <div className="card border-0 bg-light rounded-3 h-100">
-                              <div className="card-body p-3">
-                                <h6 className="card-title fw-bold mb-2 text-primary">
-                                  {richiesta.titolo.length > 40 ? richiesta.titolo.substring(0, 40) + '...' : richiesta.titolo}
-                                </h6>
-                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                  <span className="fw-bold text-success">
-                                    <FaEuroSign className="me-1" />
-                                    {richiesta.budget}€
-                                  </span>
-                                  <small className="text-muted">
-                                    <FaUser className="me-1" />
-                                    {richiesta.cliente_username}
+                  <div className="p-4">
+                    {offerte.length > 0 ? (
+                      <div className="row g-4">
+                        {offerte.map(offerta => (
+                          <div key={offerta.id} className="col-lg-6">
+                            <div className="mac-glass-card p-4 border-0 shadow-sm h-100 bg-white bg-opacity-50">
+                              <div className="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                  <h6 className="mac-title mb-1 text-primary">
+                                    {offerta.richiesta_titolo || `Richiesta #${offerta.richiesta}`}
+                                  </h6>
+                                  <small className="mac-subtitle">
+                                    <FaUser className="me-1" /> Cliente: {offerta.cliente_username}
                                   </small>
                                 </div>
-                                <button 
-                                  className="btn btn-primary btn-sm w-100 rounded-pill"
-                                  onClick={() => {
-                                    setRichiestaId(richiesta.id);
-                                    setShowModalOfferta(true);
-                                    setRichiestaSelezionata(richiesta);
-                                  }}
-                                >
-                                  <FaHandshake className="me-1" />
-                                  Fai Offerta
-                                </button>
+                                <span className={`mac-badge ${
+                                  offerta.stato === 'accettata' ? 'bg-success text-white' :
+                                  offerta.stato === 'rifiutata' ? 'bg-danger text-white' :
+                                  'bg-warning text-dark'
+                                }`}>
+                                  {offerta.stato === 'accettata' ? 'Accettata' : 
+                                   offerta.stato === 'rifiutata' ? 'Rifiutata' : 'In attesa'}
+                                </span>
+                              </div>
+                              <p className="text-muted small mb-3" style={{
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                                height: '2.8em'
+                              }}>
+                                {offerta.descrizione}
+                              </p>
+                              <div className="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <div className="h5 mac-title text-success mb-0">{offerta.prezzo}€</div>
+                                <div className="text-muted small">
+                                  <FaCalendar className="me-1" />
+                                  {new Date(offerta.data_offerta).toLocaleDateString()}
+                                </div>
                               </div>
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-3">
-                        <h6 className="text-muted mb-2">Nessuna richiesta disponibile</h6>
-                        <Link to="/richieste" className="btn btn-primary btn-sm rounded-pill">
-                          <FaSearch className="me-1" />
-                          Esplora Richieste
-                        </Link>
+                      <div className="text-center py-5">
+                        <FaHandshake size={48} className="text-muted opacity-20 mb-3" />
+                        <h5 className="mac-subtitle">Nessuna offerta inviata</h5>
+                        <p className="text-muted small">Inizia a proporre le tue soluzioni ai clienti!</p>
                       </div>
                     )}
                   </div>
@@ -640,267 +546,115 @@ function DashboardFornitore() {
               </div>
             </div>
 
-            {/* PROGETTI E PRODOTTI - Sezione secondaria */}
+            {/* RICHIESTE IN EVIDENZA */}
             <div className="row mt-5">
-              {/* Progetti assegnati - Con toggle attivi/archiviati */}
-              <div className="col-lg-6">
-                <div className="card border-0 shadow-lg rounded-4">
-                  <div className="card-header bg-success bg-gradient text-white border-0 rounded-top-4">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <h5 className="mb-0">
-                        <FaBriefcase className="me-2" />
-                        {showArchived ? 'Progetti Archiviati' : 'Progetti Assegnati'}
-                      </h5>
-                      <div className="d-flex align-items-center">
-                        {/* Contatori */}
-                        <div className="me-3">
-                          <span className="badge bg-light text-dark me-1" style={{ fontSize: '0.7rem' }}>
-                            Attivi: {progetti.length}
-                          </span>
-                          <span className="badge bg-light text-dark" style={{ fontSize: '0.7rem' }}>
-                            Archiviati: {progettiArchiviati.length}
-                          </span>
+              <div className="col-12">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <h4 className="mac-title mb-0">🎯 Opportunità per te</h4>
+                  <Link to="/richieste" className="btn btn-link text-primary p-0 text-decoration-none fw-bold">
+                    Vedi tutte <FaArrowRight className="ms-1" size={12} />
+                  </Link>
+                </div>
+                <div className="row g-4">
+                  {richiesteDisponibili.slice(0, 3).map(richiesta => (
+                    <div key={richiesta.id} className="col-lg-4">
+                      <div className="mac-glass-card p-4 h-100 border-0">
+                        <h6 className="mac-title mb-3 text-primary">{richiesta.titolo}</h6>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <div className="h5 mac-title text-success mb-0">{richiesta.budget}€</div>
+                          <small className="mac-subtitle">
+                            <FaUser className="me-1" /> {richiesta.cliente_username}
+                          </small>
                         </div>
-                        
-                        {/* Toggle Switch */}
-                        <div className="form-check form-switch">
-                          <input 
-                            className="form-check-input" 
-                            type="checkbox" 
-                            role="switch" 
-                            id="toggleArchivedFornitore"
-                            checked={showArchived}
-                            onChange={(e) => setShowArchived(e.target.checked)}
-                          />
-                          <label className="form-check-label text-white ms-2" htmlFor="toggleArchivedFornitore" style={{ fontSize: '0.85rem' }}>
-                            {showArchived ? '🗃️' : '⚡'}
-                          </label>
-                        </div>
+                        <button 
+                          className="btn btn-primary mac-button w-100 shadow-sm"
+                          onClick={() => {
+                            setRichiestaId(richiesta.id);
+                            setShowModalOfferta(true);
+                            setRichiestaSelezionata(richiesta);
+                          }}
+                        >
+                          Fai Offerta
+                        </button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* PROGETTI E PRODOTTI */}
+            <div className="row mt-5 g-5">
+              <div className="col-lg-6">
+                <div className="mac-glass-card p-4 h-100">
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h5 className="mac-title mb-0">
+                      <FaBriefcase className="me-2 text-success" />
+                      Progetti {showArchived ? 'Archiviati' : 'Attivi'}
+                    </h5>
+                    <div className="form-check form-switch">
+                      <input className="form-check-input" type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} id="archivedSwitch" />
+                      <label className="form-check-label ms-2 small text-muted" htmlFor="archivedSwitch">Archivio</label>
+                    </div>
                   </div>
-                  <div className="card-body">
-                    {!showArchived ? (
-                      // Progetti Attivi
-                      <div className="row g-3">
-                        {progetti.length > 0 ? progetti.map(p => (
-                          <div key={p.id} className="col-12">
-                            <div className="card border-0 shadow-sm rounded-3 h-100">
-                              <div className="card-body text-center">
-                                <div className="mb-2">
-                                  <span className={`badge rounded-pill px-3 py-2 ${
-                                    p.stato === 'completato' ? 'bg-success' :
-                                    p.stato === 'pagamento' ? 'bg-warning text-dark' :
-                                    p.stato === 'prima_release' ? 'bg-info' :
-                                    'bg-primary'
-                                  }`}>
-                                    {p.stato === 'bozza' && '🎨 Sviluppo'}
-                                    {p.stato === 'prima_release' && '🔍 Revisione'}
-                                    {p.stato === 'pagamento' && '💳 Pagamento'}
-                                    {p.stato === 'completato' && '🏆 Completato'}
-                                  </span>
-                                </div>
-                                <h6 className="card-title text-success fw-bold mb-2">
-                                  {p.richiesta_titolo || `Progetto #${p.richiesta}`}
-                                </h6>
-                                <div className="mb-3">
-                                  <div className="row g-2">
-                                    <div className="col-6">
-                                      <small className="text-muted">
-                                        <FaUser className="me-1 text-info" />
-                                        <strong>Cliente:</strong><br />
-                                        {p.cliente_username}
-                                      </small>
-                                    </div>
-                                    <div className="col-6">
-                                      <small className="text-muted">
-                                        <FaUser className="me-1 text-success" />
-                                        <strong>Fornitore:</strong><br />
-                                        {p.fornitore_username || user?.username}
-                                      </small>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div>
-                                  <a href={`/progetto/${p.id}`} className="btn btn-outline-success rounded-pill">
-                                    <FaTools className="me-2" />Gestisci progetto
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
+                  
+                  <div className="row g-3">
+                    {(showArchived ? progettiArchiviati : progetti).length > 0 ? 
+                      (showArchived ? progettiArchiviati : progetti).map(p => (
+                      <div key={p.id} className="col-12">
+                        <div className="p-3 rounded-4 bg-white bg-opacity-40 border border-white">
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span className="mac-badge bg-primary text-white" style={{fontSize:'0.6rem'}}>
+                              {p.stato}
+                            </span>
+                            <span className="mac-title text-success">{p.prezzo_finale || p.budget}€</span>
                           </div>
-                        )) : (
-                          <div className="col-12 text-center text-muted py-4">
-                            <FaClock size={48} className="mb-3 opacity-50" />
-                            <h6>Nessun progetto attivo</h6>
-                            <p className="mb-0">Quando una tua offerta viene accettata, il progetto apparirà qui!</p>
-                          </div>
-                        )}
+                          <h6 className="mac-title small mb-3">{p.richiesta_titolo}</h6>
+                          <Link to={`/progetto/${p.id}`} className="btn btn-light mac-button btn-sm w-100 border">
+                            Gestisci Progetto
+                          </Link>
+                        </div>
                       </div>
-                    ) : (
-                      // Progetti Archiviati
-                      <div className="row g-3">
-                        {progettiArchiviati.length > 0 ? progettiArchiviati.map(p => (
-                          <div key={p.id} className="col-12">
-                            <div className="card border-0 shadow-sm rounded-3 h-100 bg-light bg-opacity-50">
-                              <div className="card-body text-center">
-                                <div className="mb-2">
-                                  <span className="badge bg-secondary rounded-pill px-3 py-2">
-                                    🗃️ Archiviato
-                                  </span>
-                                </div>
-                                <h6 className="card-title text-secondary fw-bold mb-2">
-                                  {p.richiesta_titolo || `Progetto #${p.richiesta}`}
-                                </h6>
-                                <div className="mb-3">
-                                  <div className="row g-2">
-                                    <div className="col-6">
-                                      <small className="text-muted">
-                                        <FaUser className="me-1 text-info" />
-                                        <strong>Cliente:</strong><br />
-                                        {p.cliente_username}
-                                      </small>
-                                    </div>
-                                    <div className="col-6">
-                                      <small className="text-muted">
-                                        <FaUser className="me-1 text-success" />
-                                        <strong>Fornitore:</strong><br />
-                                        {p.fornitore_username || user?.username}
-                                      </small>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div>
-                                  <a href={`/progetto/${p.id}`} className="btn btn-outline-secondary btn-sm rounded-pill">
-                                    <FaArchive className="me-2" />Vedi Archivio
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )) : (
-                          <div className="col-12 text-center text-muted py-4">
-                            <FaArchive size={48} className="mb-3 opacity-50" />
-                            <h6>Nessun progetto archiviato</h6>
-                            <p className="mb-0">I progetti completati e archiviati appariranno qui</p>
-                          </div>
-                        )}
+                    )) : (
+                      <div className="text-center py-4">
+                        <p className="mac-subtitle small">Nessun progetto da mostrare</p>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* SEZIONE PRODOTTI PRONTI CON PULSANTE CREA */}
               <div className="col-lg-6">
-                <div className="card border-2 border-opacity-10 shadow-lg rounded-4" style={{ background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fc 100%)' }}>
-                  <div className="card-header bg-warning bg-gradient text-white border-0 rounded-top-4">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <h5 className="mb-0"><FaStar className="me-2" />I tuoi prodotti pronti</h5>
-                      <div className="d-flex gap-2">
-                        <Link 
-                          to="/prodotti-pronti" 
-                          className="btn btn-light btn-sm rounded-pill"
-                          title="Vedi tutti i prodotti nel marketplace"
-                        >
-                          <FaEye className="me-1" />
-                          Marketplace
-                        </Link>
-                        <button 
-                          className="btn btn-outline-light btn-sm rounded-pill"
-                          onClick={() => setShowCreaProdotto(true)}
-                          title="Crea nuovo prodotto"
-                        >
-                          <FaPlus className="me-1" />
-                          Nuovo
-                        </button>
-                      </div>
-                    </div>
+                <div className="mac-glass-card p-4 h-100">
+                  <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h5 className="mac-title mb-0">
+                      <FaStar className="me-2 text-warning" />
+                      I tuoi Prodotti
+                    </h5>
+                    <button className="btn btn-primary mac-button btn-sm px-3" onClick={() => setShowCreaProdotto(true)}>
+                      <FaPlus className="me-1" /> Nuovo
+                    </button>
                   </div>
-                  <div className="card-body">
-                    {prodotti.length > 0 ? (
-                      <div className="row g-3">
-                        {prodotti.slice(0, 4).map(prodotto => {
-                          const categoria = categorieProdotti.find(c => c.value === prodotto.categoria);
-                          return (
-                            <div key={prodotto.id} className="col-12">
-                              <div className="card border-0 shadow-sm rounded-3 h-100">
-                                <div className="card-body">
-                                  <div className="d-flex align-items-start">
-                                    {prodotto.immagine && (
-                                      <img 
-                                        src={prodotto.immagine} 
-                                        alt={prodotto.titolo}
-                                        className="rounded-3 me-3"
-                                        style={{ width: '60px', height: '60px', objectFit: 'cover' }}
-                                      />
-                                    )}
-                                    <div className="flex-grow-1">
-                                      <div className="d-flex align-items-center mb-2">
-                                        {categoria && (
-                                          <span className="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 py-1 me-2" style={{ fontSize: '0.7rem' }}>
-                                            {categoria.icon} {categoria.label}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <h6 className="card-title fw-bold mb-2 text-primary" style={{ fontSize: '0.9rem' }}>
-                                        {prodotto.titolo}
-                                      </h6>
-                                      <p className="text-muted mb-2" style={{ 
-                                        fontSize: '0.8rem',
-                                        lineHeight: '1.4',
-                                        height: '32px',
-                                        overflow: 'hidden',
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: 'vertical'
-                                      }}>
-                                        {prodotto.descrizione.length > 80 ? 
-                                          prodotto.descrizione.substring(0, 80) + '...' : 
-                                          prodotto.descrizione
-                                        }
-                                      </p>
-                                      <div className="d-flex justify-content-between align-items-center">
-                                        <span className="text-success fw-bold">
-                                          <FaEuroSign className="me-1" />
-                                          {prodotto.prezzo}€
-                                        </span>
-                                        <small className="text-muted">
-                                          <FaCalendar className="me-1" />
-                                          {new Date(prodotto.data_pubblicazione).toLocaleDateString('it-IT')}
-                                        </small>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <div className="bg-warning bg-opacity-10 rounded-circle mx-auto mb-3" style={{ width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FaStar size={32} className="text-warning opacity-50" />
+
+                  <div className="row g-3">
+                    {prodotti.length > 0 ? prodotti.slice(0, 3).map(prodotto => (
+                      <div key={prodotto.id} className="col-12">
+                        <div className="p-3 rounded-4 bg-white bg-opacity-40 border border-white d-flex align-items-center">
+                          {prodotto.immagine && (
+                            <img src={prodotto.immagine} className="rounded-3 me-3" style={{width:50, height:50, objectFit:'cover'}} alt="" />
+                          )}
+                          <div className="flex-grow-1 overflow-hidden">
+                            <h6 className="mac-title small mb-0 text-truncate">{prodotto.titolo}</h6>
+                            <span className="text-success fw-bold small">{prodotto.prezzo}€</span>
+                          </div>
+                          <Link to="/prodotti-pronti" className="btn btn-light mac-button btn-sm ms-2 border">
+                            <FaEye size={12} />
+                          </Link>
                         </div>
-                        <h6 className="text-muted mb-2">Nessun prodotto pubblicato</h6>
-                        <p className="text-muted mb-3" style={{ fontSize: '0.9rem' }}>Crea il tuo primo prodotto per il marketplace!</p>
-                        <button 
-                          className="btn btn-warning rounded-pill px-4"
-                          onClick={() => setShowCreaProdotto(true)}
-                        >
-                          <FaPlus className="me-2" />
-                          Crea Primo Prodotto
-                        </button>
                       </div>
-                    )}
-                    
-                    {prodotti.length > 4 && (
-                      <div className="text-center mt-3 pt-3 border-top">
-                        <Link to="/prodotti-pronti" className="btn btn-outline-warning btn-sm rounded-pill">
-                          <FaEye className="me-1" />
-                          Vedi tutti i {prodotti.length} prodotti
-                        </Link>
+                    )) : (
+                      <div className="text-center py-4">
+                        <p className="mac-subtitle small">Non hai ancora pubblicato prodotti</p>
                       </div>
                     )}
                   </div>
@@ -909,7 +663,6 @@ function DashboardFornitore() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* MODAL OFFERTA */}
       {showModalOfferta && richiestaSelezionata && (

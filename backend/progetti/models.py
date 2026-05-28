@@ -43,9 +43,16 @@ class Progetto(models.Model):
     bozza_cliente_ok = models.BooleanField(default=False)
     pagamento_cliente_ok = models.BooleanField(default=False)
     pagamento_admin_ok = models.BooleanField(default=False)
+    pagamento_cliente_ricevuta = models.FileField(upload_to='progetti/pagamenti/%Y/%m/', null=True, blank=True)
     consegna_fornitore_ok = models.BooleanField(default=False)
     consegna_cliente_ok = models.BooleanField(default=False)
     bonifico_fornitore_ok = models.BooleanField(default=False, help_text="Conferma ricezione bonifico da parte del fornitore")
+    bonifico_admin_ok = models.BooleanField(default=False, help_text="Bonifico inviato da SoftMatch (admin)")
+    bonifico_fornitore_ricevuta = models.FileField(upload_to='progetti/bonifici/%Y/%m/', null=True, blank=True)
+    contestazione_motivo = models.TextField(blank=True, default='')
+    contestazione_aperta_da = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='contestazioni_aperte', help_text="Utente che ha aperto la contestazione")
+    contestazione_risolta = models.BooleanField(default=False)
+    contestazione_risoluzione_note = models.TextField(blank=True, default='')
 
     # Tipo di progetto per distinguere quelli da prodotti acquistati
     tipo_progetto = models.CharField(

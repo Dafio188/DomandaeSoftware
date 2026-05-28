@@ -169,6 +169,6 @@ class FAQCommentLikeAdmin(admin.ModelAdmin):
     comment_short.short_description = 'Commento'
 
 # Personalizzazione del titolo admin
-admin.site.site_header = 'Domanda & Software - Gestione FAQ'
-admin.site.site_title = 'FAQ Admin'
+admin.site.site_header = 'SoftMatch - Gestione FAQ'
+admin.site.site_title = 'SoftMatch Admin'
 admin.site.index_title = 'Gestione FAQ e Community'

@@ -153,61 +153,68 @@ function Progetti() {
   }
 
   return (
-    <div className="min-vh-100 bg-light py-4">
+    <div className="min-vh-100 bg-light py-4" style={{ background: 'linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%)' }}>
       <div className="container">
         
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
+        {/* Header - Apple Style */}
+        <div className="d-flex justify-content-between align-items-center mb-5" data-aos="fade-down">
           <div>
-            <h1 className="h2 mb-1">
-              <FaProjectDiagram className="me-3 text-primary" />
+            <h1 className="display-5 fw-bold mb-1" style={{ letterSpacing: '-0.02em', color: '#1d1d1f' }}>
               I Miei Progetti
             </h1>
-            <p className="text-muted mb-0">
+            <p className="text-muted fs-5 mb-0">
               {user.is_cliente ? 'Gestisci i tuoi progetti in corso e completati' : 'I progetti che stai sviluppando'}
             </p>
           </div>
-          <Link to="/dashboard" className="btn btn-outline-primary">
+          <Link to="/dashboard" className="btn btn-primary rounded-pill px-4 py-2 shadow-sm" style={{ background: '#0071e3', border: 'none' }}>
             <FaRocket className="me-2" />
-            Torna alla Dashboard
+            Dashboard
           </Link>
         </div>
 
-        {/* Statistiche */}
-        <div className="row g-3 mb-4">
+        {/* Statistiche - Glassmorphism Cards */}
+        <div className="row g-4 mb-5" data-aos="fade-up">
           <div className="col-md-3">
-            <div className="card border-0 shadow-sm text-center">
-              <div className="card-body">
-                <FaProjectDiagram className="text-primary mb-2" size={32} />
-                <h4 className="fw-bold mb-1">{statistiche.totali}</h4>
-                <small className="text-muted">Progetti Totali</small>
+            <div className="card border-0 shadow-sm text-center h-100" style={{ borderRadius: '20px', background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+              <div className="card-body py-4">
+                <div className="mb-3 d-inline-block p-3 rounded-circle bg-primary bg-opacity-10">
+                  <FaProjectDiagram className="text-primary" size={24} />
+                </div>
+                <h3 className="fw-bold mb-1" style={{ color: '#1d1d1f' }}>{statistiche.totali}</h3>
+                <small className="text-muted fw-bold text-uppercase">Totali</small>
               </div>
             </div>
           </div>
           <div className="col-md-3">
-            <div className="card border-0 shadow-sm text-center">
-              <div className="card-body">
-                <FaPlay className="text-warning mb-2" size={32} />
-                <h4 className="fw-bold mb-1">{statistiche.in_corso}</h4>
-                <small className="text-muted">In Corso</small>
+            <div className="card border-0 shadow-sm text-center h-100" style={{ borderRadius: '20px', background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+              <div className="card-body py-4">
+                <div className="mb-3 d-inline-block p-3 rounded-circle bg-warning bg-opacity-10">
+                  <FaPlay className="text-warning" size={24} />
+                </div>
+                <h3 className="fw-bold mb-1" style={{ color: '#1d1d1f' }}>{statistiche.in_corso}</h3>
+                <small className="text-muted fw-bold text-uppercase">In Corso</small>
               </div>
             </div>
           </div>
           <div className="col-md-3">
-            <div className="card border-0 shadow-sm text-center">
-              <div className="card-body">
-                <FaTrophy className="text-success mb-2" size={32} />
-                <h4 className="fw-bold mb-1">{statistiche.completati}</h4>
-                <small className="text-muted">Completati</small>
+            <div className="card border-0 shadow-sm text-center h-100" style={{ borderRadius: '20px', background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+              <div className="card-body py-4">
+                <div className="mb-3 d-inline-block p-3 rounded-circle bg-success bg-opacity-10">
+                  <FaTrophy className="text-success" size={24} />
+                </div>
+                <h3 className="fw-bold mb-1" style={{ color: '#1d1d1f' }}>{statistiche.completati}</h3>
+                <small className="text-muted fw-bold text-uppercase">Vinti</small>
               </div>
             </div>
           </div>
           <div className="col-md-3">
-            <div className="card border-0 shadow-sm text-center">
-              <div className="card-body">
-                <FaEuroSign className="text-info mb-2" size={32} />
-                <h4 className="fw-bold mb-1">€{statistiche.valore_totale.toLocaleString()}</h4>
-                <small className="text-muted">Valore Totale</small>
+            <div className="card border-0 shadow-sm text-center h-100" style={{ borderRadius: '20px', background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+              <div className="card-body py-4">
+                <div className="mb-3 d-inline-block p-3 rounded-circle bg-info bg-opacity-10">
+                  <FaEuroSign className="text-info" size={24} />
+                </div>
+                <h3 className="fw-bold mb-1" style={{ color: '#1d1d1f' }}>{statistiche.valore_totale.toLocaleString()}€</h3>
+                <small className="text-muted fw-bold text-uppercase">Valore</small>
               </div>
             </div>
           </div>

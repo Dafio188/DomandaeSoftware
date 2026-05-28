@@ -1,18 +1,15 @@
 services:
   db:
     image: postgres:15
-    environment:
-      POSTGRES_DB: domanda_software
-      POSTGRES_USER: domanda
-      POSTGRES_PASSWORD: domanda_pw
-      POSTGRES_HOST_AUTH_METHOD: trust
+    env_file:
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database_backups:/backups
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5433:5432"
     restart: always
-    command: postgres -c listen_addresses='*' -c log_statement=all
+    command: postgres -c listen_addresses='*'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U domanda -d domanda_software"]
       interval: 30s
@@ -25,30 +22,27 @@ services:
       sh -c "python manage.py migrate &&
              python init_data.py &&
              python manage.py runserver 0.0.0.0:8000"
-    environment:
-      - DEBUG=1
-      - DJANGO_SECRET_KEY=supersecretkey
-      - DJANGO_ALLOWED_HOSTS=*
-      - DB_NAME=domanda_software
-      - DB_USER=domanda
-      - DB_PASSWORD=domanda_pw
-      - DB_HOST=db
-      - DB_PORT=5432
-      - PRODUCTION=true
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "8001:8000"
+      - "8088:8000"
     volumes:
       - ./backend/media:/app/media
       - ./backend/static:/app/static
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.production
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
     ports:
-      - "3000:80"
+      - "3088:80"
     depends_on:
       - backend
     restart: unless-stopped
@@ -58,11 +52,8 @@ services:
     image: postgres:15
     depends_on:
       - db
-    environment:
-      POSTGRES_DB: domanda_software
-      POSTGRES_USER: domanda
-      POSTGRES_PASSWORD: domanda_pw
-      PGPASSWORD: domanda_pw
+    env_file:
+      - .env
     volumes:
       - ./database_backups:/backups
     command: >
@@ -75,6 +66,16 @@ services:
         find /backups -name '*.sql' -mtime +7 -delete;
       done"
     restart: unless-stopped
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8089:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      - db
 
 volumes:
   postgres_data:

@@ -24,14 +24,8 @@ if domain_name:
 
 # Rimuovi stringhe vuote
 ALLOWED_HOSTS = [host for host in ALLOWED_HOSTS if host]
-
-# FALLBACK: Assicurati che jwgamebibble.it sia sempre incluso
-if 'jwgamebibble.it' not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.extend(['jwgamebibble.it', 'www.jwgamebibble.it'])
-
-# Debug: mostra gli ALLOWED_HOSTS nei log
-print(f"DEBUG: ALLOWED_HOSTS = {ALLOWED_HOSTS}")
-print(f"DEBUG: DOMAIN_NAME = {domain_name}")
+if not ALLOWED_HOSTS:
+    raise ValueError("ALLOWED_HOSTS must be set (e.g. DOMAIN_NAME, www.DOMAIN_NAME)")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     # App custom
     'utenti',
@@ -101,6 +96,18 @@ DATABASES = {
     }
 }
 
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get('JWT_ACCESS_MINUTES', '20'))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get('JWT_REFRESH_DAYS', '7'))),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+}
+
 # Static files configuration
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -142,6 +149,20 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': os.environ.get('DRF_THROTTLE_ANON', '60/hour'),
+        'user': os.environ.get('DRF_THROTTLE_USER', '600/hour'),
+        'auth': os.environ.get('DRF_THROTTLE_AUTH', '10/hour'),
+        'password_reset': os.environ.get('DRF_THROTTLE_PASSWORD_RESET', '5/hour'),
+    },
 }
 
 # CORS Settings per produzione - IMPORTANTE: Specificare domini esatti
@@ -166,6 +187,10 @@ SECURE_HSTS_PRELOAD = True
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
 
 # Altri headers di sicurezza
 X_FRAME_OPTIONS = 'DENY'
@@ -212,3 +237,8 @@ LOGGING = {
         },
     },
 } 
+
+FRONTEND_URL = os.environ.get('FRONTEND_URL', f'https://{domain_name}' if domain_name else '')
+ADMIN_NOTIFICATION_EMAILS = [
+    e.strip() for e in os.environ.get('ADMIN_NOTIFICATION_EMAILS', '').split(',') if e.strip()
+]

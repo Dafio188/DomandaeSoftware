@@ -30,7 +30,7 @@ function PrivacyPolicy() {
               <div className="text-center">
                 <span className="badge bg-warning text-dark px-4 py-2 rounded-pill">
                   <FaCalendarAlt className="me-2" />
-                  Ultimo aggiornamento: Dicembre 2024
+                  Ultimo aggiornamento: Aprile 2026
                 </span>
               </div>
             </div>
@@ -52,7 +52,7 @@ function PrivacyPolicy() {
           <div className="card-body p-5">
             <h5 className="text-primary mb-3">Chi Siamo</h5>
             <p className="mb-4">
-              <strong>Domanda & Software</strong> è una piattaforma marketplace che connette 
+              <strong>SoftMatch</strong> è una piattaforma marketplace che connette 
               clienti con sviluppatori professionali per progetti software su misura.
             </p>
             
@@ -60,9 +60,9 @@ function PrivacyPolicy() {
               <div className="col-md-6">
                 <h6 className="fw-bold text-success">📋 Titolare del Trattamento</h6>
                 <ul className="list-unstyled">
-                  <li><strong>Denominazione:</strong> Domanda & Software S.r.l.</li>
+                  <li><strong>Denominazione:</strong> SoftMatch S.r.l.</li>
                   <li><strong>Sede:</strong> Via Roma 123, 00100 Roma (IT)</li>
-                  <li><strong>Email:</strong> privacy@domandaesoftware.com</li>
+                  <li><strong>Email:</strong> privacy@softmatch.it</li>
                   <li><strong>P.IVA:</strong> IT12345678901</li>
                 </ul>
               </div>
@@ -284,7 +284,7 @@ function PrivacyPolicy() {
                 <FaExclamationTriangle className="me-3 text-warning" />
                 <div>
                   <strong>Come Esercitare i Tuoi Diritti:</strong><br />
-                  Invia una richiesta a <strong>privacy@domandaesoftware.com</strong> o 
+                  Invia una richiesta a <strong>privacy@softmatch.it</strong> o 
                   usa il pulsante "Cancella Account" nel tuo profilo. Risponderemo entro 30 giorni.
                 </div>
               </div>
@@ -358,7 +358,7 @@ function PrivacyPolicy() {
                   <div className="row g-3">
                     <div className="col-md-6">
                       <strong>📧 Email Privacy:</strong><br />
-                      privacy@domandaesoftware.com
+                      privacy@softmatch.it
                     </div>
                     <div className="col-md-6">
                       <strong>⏰ Tempi Risposta:</strong><br />
@@ -383,4 +383,4 @@ function PrivacyPolicy() {
   );
 }
 
-export default PrivacyPolicy; 
+export default PrivacyPolicy;

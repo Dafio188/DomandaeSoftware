@@ -1,12 +1,21 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 import UnifiedNavbar from './components/UnifiedNavbar';
 import AdminNavbar from './components/AdminNavbar';
 import Home from './pages/Home';
-import Login from './pages/Login';
+import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import DashboardCliente from './pages/DashboardCliente';
 import DashboardFornitore from './pages/DashboardFornitore';
 import DashboardAdmin from './pages/DashboardAdmin';
+import AdminUtenti from './pages/AdminUtenti';
+import AdminProgetti from './pages/AdminProgetti';
+import AdminStatistiche from './pages/AdminStatistiche';
+import AdminSicurezza from './pages/AdminSicurezza';
+import AdminImpostazioni from './pages/AdminImpostazioni';
+import AdminContabilita from './pages/AdminContabilita';
+import AdminAudit from './pages/AdminAudit';
+import Crediti from './pages/Crediti';
 import ProtectedRoute from './components/ProtectedRoute';
 import Progetto from './pages/Progetto';
 import Progetti from './pages/Progetti';
@@ -26,20 +35,27 @@ import Contatti from './pages/Contatti';
 import ProfiloImpostazioni from './pages/ProfiloImpostazioni';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
+  const { role } = useAuth();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
-  const isAdminPage = location.pathname.startsWith('/dashboard/admin') || location.pathname.startsWith('/admin');
+  
+  // Mostra la AdminNavbar solo se siamo su una rotta admin E l'utente è effettivamente un amministratore
+  const isAdminPath = location.pathname.startsWith('/dashboard/admin') || location.pathname.startsWith('/admin');
+  const showAdminNavbar = isAdminPath && role === 'amministratore';
 
   return (
     <>
       {/* Navbar condizionale */}
-      {isAdminPage ? <AdminNavbar /> : <UnifiedNavbar />}
+      {showAdminNavbar ? <AdminNavbar /> : <UnifiedNavbar />}
       
-      {/* Container con padding-top per compensare navbar fixed */}
-      <div className={isHomePage ? "" : "container mt-4"} style={{ paddingTop: isHomePage ? '0' : '90px' }}>
-        <Routes>
+      {/* Container con stile Mac globale */}
+      <div className={isHomePage ? "" : "mac-page-wrapper"} style={{ paddingTop: isHomePage ? '0' : '90px' }}>
+        <div className={isHomePage ? "" : "container"}>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/chi-siamo" element={<ChiSiamo />} />
           <Route path="/scopo-del-sito" element={<ScopoDelSito />} />
@@ -48,27 +64,37 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contatti" element={<Contatti />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/register" element={<Auth />} />
+          <Route path="/password-reset" element={<Auth />} />
           <Route path="/richieste" element={<RichiestePage />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/cliente" element={<ProtectedRoute><DashboardCliente /></ProtectedRoute>} />
-          <Route path="/dashboard/fornitore" element={<ProtectedRoute><DashboardFornitore /></ProtectedRoute>} />
-          <Route path="/dashboard/admin" element={<ProtectedRoute><DashboardAdmin /></ProtectedRoute>} />
+          <Route path="/dashboard/cliente" element={<ProtectedRoute allowedRoles={['cliente']}><DashboardCliente /></ProtectedRoute>} />
+          <Route path="/dashboard/fornitore" element={<ProtectedRoute allowedRoles={['fornitore']}><DashboardFornitore /></ProtectedRoute>} />
+          <Route path="/dashboard/admin" element={<ProtectedRoute allowedRoles={['amministratore']}><DashboardAdmin /></ProtectedRoute>} />
+          <Route path="/admin/utenti" element={<ProtectedRoute allowedRoles={['amministratore']}><AdminUtenti /></ProtectedRoute>} />
+          <Route path="/admin/progetti" element={<ProtectedRoute allowedRoles={['amministratore']}><AdminProgetti /></ProtectedRoute>} />
+          <Route path="/admin/statistiche" element={<ProtectedRoute allowedRoles={['amministratore']}><AdminStatistiche /></ProtectedRoute>} />
+          <Route path="/admin/sicurezza" element={<ProtectedRoute allowedRoles={['amministratore']}><AdminSicurezza /></ProtectedRoute>} />
+          <Route path="/admin/impostazioni" element={<ProtectedRoute allowedRoles={['amministratore']}><AdminImpostazioni /></ProtectedRoute>} />
+          <Route path="/admin/contabilita" element={<ProtectedRoute allowedRoles={['amministratore']}><AdminContabilita /></ProtectedRoute>} />
+          <Route path="/admin/audit" element={<ProtectedRoute allowedRoles={['amministratore']}><AdminAudit /></ProtectedRoute>} />
+          <Route path="/crediti" element={<ProtectedRoute allowedRoles={['fornitore', 'cliente']}><Crediti /></ProtectedRoute>} />
           {/* Rotte alternative con trattino per compatibilità */}
-          <Route path="/dashboard-cliente" element={<ProtectedRoute><DashboardCliente /></ProtectedRoute>} />
-          <Route path="/dashboard-fornitore" element={<ProtectedRoute><DashboardFornitore /></ProtectedRoute>} />
+          <Route path="/dashboard-cliente" element={<ProtectedRoute allowedRoles={['cliente']}><DashboardCliente /></ProtectedRoute>} />
+          <Route path="/dashboard-fornitore" element={<ProtectedRoute allowedRoles={['fornitore']}><DashboardFornitore /></ProtectedRoute>} />
           <Route path="/progetto/:id" element={<ProtectedRoute><Progetto /></ProtectedRoute>} />
           <Route path="/progetti" element={<ProtectedRoute><Progetti /></ProtectedRoute>} />
-          <Route path="/register" element={<Register />} />
           <Route path="/prodotti-pronti" element={<ProdottiPronti />} />
           <Route path="/prodotti-pronti/:id" element={<ProdottoDettaglio />} />
-          <Route path="/password-reset" element={<PasswordReset />} />
           <Route path="/reset-password/:uid/:token" element={<ProtectedRoute><PasswordResetConfirm /></ProtectedRoute>} />
           <Route path="/profilo-impostazioni" element={<ProfiloImpostazioni />} />
         </Routes>
       </div>
-    </>
-  );
+      <ToastContainer position="bottom-right" autoClose={3000} theme="light" />
+    </div>
+  </>
+);
 }
 
 export default App;

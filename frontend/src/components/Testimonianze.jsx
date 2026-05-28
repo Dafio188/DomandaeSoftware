@@ -53,7 +53,7 @@ function Testimonianze() {
 
   // Placeholder testimonianze se non ci sono dati
   const placeholderData = [
-    { id: 1, testo: "Grazie a D&S ho trovato il partner perfetto per il mio gestionale!", autore: "Cliente", tipo_autore: "cliente" },
+    { id: 1, testo: "Grazie a SoftMatch ho trovato il partner perfetto per il mio gestionale!", autore: "Cliente", tipo_autore: "cliente" },
     { id: 2, testo: "Ho ricevuto richieste mirate e ho potuto mostrare i miei prodotti a nuovi clienti.", autore: "Fornitore", tipo_autore: "fornitore" },
     { id: 3, testo: "La piattaforma è intuitiva e il supporto è stato rapido e risolutivo.", autore: "Startup", tipo_autore: "startup" }
   ];

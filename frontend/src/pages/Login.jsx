@@ -17,7 +17,7 @@ function Login() {
       const tokens = await login(username, password);
       await loginUser(tokens);
       navigate('/dashboard');
-    } catch (err) {
+    } catch {
       setError('Credenziali non valide');
     }
   };

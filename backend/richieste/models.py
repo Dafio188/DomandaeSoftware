@@ -62,6 +62,22 @@ class Richiesta(models.Model):
         help_text="Indica se questa richiesta è stata creata automaticamente da un acquisto di prodotto"
     )
 
+    skill_tags = models.JSONField(blank=True, default=list)
+    skill_tags_search = models.TextField(blank=True, default='')
+
+    def save(self, *args, **kwargs):
+        tags = []
+        if isinstance(self.skill_tags, list):
+            for t in self.skill_tags:
+                if isinstance(t, str):
+                    v = t.strip().lower()
+                    if v:
+                        tags.append(v)
+        tags = list(dict.fromkeys(tags))[:10]
+        self.skill_tags = tags
+        self.skill_tags_search = ' '.join(tags)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.titolo} ({self.cliente.username})"
 

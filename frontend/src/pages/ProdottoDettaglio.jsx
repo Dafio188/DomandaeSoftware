@@ -105,8 +105,8 @@ function ProdottoDettaglio() {
               &laquo; Torna ai prodotti
             </a>
             
-            <a href={`mailto:${prodotto.fornitore_email || 'info@domandaesoftware.it'}?subject=Informazioni su ${prodotto.titolo}`} className="btn btn-success">
-              Contatta il fornitore
+            <a href={`mailto:info@softmatch.it?subject=SoftMatch%20-%20Informazioni%20su%20${encodeURIComponent(prodotto.titolo)}`} className="btn btn-success">
+              Contatta il supporto
             </a>
           </div>
         </div>

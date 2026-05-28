@@ -1,6 +1,6 @@
-Prompt per l'IA: Generazione del Piano di Sviluppo Dettagliato per il Portale "Domanda & Software" con React e Bootstrap
+Prompt per l'IA: Generazione del Piano di Sviluppo Dettagliato per il Portale "SoftMatch" con React e Bootstrap
 
-Obiettivo Primario: Generare un piano di sviluppo dettagliato e sequenziale per la creazione del portale web "Domanda & Software", focalizzandosi sulle fasi di programmazione, la struttura dei dati, l'architettura del progetto e l'organizzazione dei file necessari, utilizzando React per il frontend e Bootstrap per la grafica.
+Obiettivo Primario: Generare un piano di sviluppo dettagliato e sequenziale per la creazione del portale web "SoftMatch", focalizzandosi sulle fasi di programmazione, la struttura dei dati, l'architettura del progetto e l'organizzazione dei file necessari, utilizzando React per il frontend e Bootstrap per la grafica.
 
 Contesto del Progetto: Creazione di una piattaforma web che connette utenti con necessità di software a fornitori di servizi di sviluppo. Il sito web includerà funzionalità per la pubblicazione di richieste, la gestione di offerte, la comunicazione tra utenti, un sistema di valutazione e recensioni, dashboard utente differenziate (cliente, fornitore, amministratore) e un sistema di garanzia delle transazioni gestito dall'amministratore con un meccanismo di indennizzo.
 

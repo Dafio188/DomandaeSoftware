@@ -79,7 +79,7 @@ Mantenuto React 18.2.0 per massima compatibilità con le dipendenze.
 
 ## 🎉 **STATO FINALE: SISTEMA PRODUZIONE READY!**
 
-**Domanda & Software** è ora completamente funzionante e pronto per l'uso.
+**SoftMatch** è ora completamente funzionante e pronto per l'uso.
 
 **Accesso:** http://localhost:3000
 

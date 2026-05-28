@@ -18,7 +18,7 @@ Tutte le modifiche importanti a questo progetto saranno documentate in questo fi
 - Configurazione build per passare correttamente le variabili d'ambiente
 
 ### 📝 Dettagli Tecnici
-- Frontend ora utilizza `https://jwgamebibble.it` quando `VITE_API_URL` è impostato
+- Frontend ora utilizza `https://softmatch.it` quando `VITE_API_URL` è impostato
 - Fallback automatico a `http://localhost:8001` per sviluppo locale
 - Build di produzione ottimizzata con variabili d'ambiente corrette
 

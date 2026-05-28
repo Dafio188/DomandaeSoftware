@@ -2,36 +2,17 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
 import { 
-  FaUser, 
-  FaUserTie, 
-  FaEnvelope, 
-  FaPhone, 
-  FaMapMarkerAlt, 
-  FaLock, 
-  FaBell, 
-  FaCog, 
-  FaSave, 
-  FaEye, 
-  FaEyeSlash,
-  FaEdit,
-  FaCheck,
-  FaTimes,
-  FaExclamationTriangle,
-  FaCheckCircle,
-  FaShieldAlt,
-  FaUserCog,
-  FaKey,
-  FaGlobe,
-  FaLanguage
+  FaUser, FaUserTie, FaEnvelope, FaPhone, FaMapMarkerAlt, FaLock, FaBell, FaCog, FaSave, FaEye, FaEyeSlash,
+  FaEdit, FaCheck, FaTimes, FaExclamationTriangle, FaCheckCircle, FaShieldAlt, FaUserCog, FaKey, FaGlobe, FaLanguage,
+  FaLinkedin, FaGithub, FaExternalLinkAlt, FaCreditCard, FaInfoCircle, FaArrowRight, FaShieldVirus
 } from 'react-icons/fa';
-import './ProfiloImpostazioni.css';
+import { toast } from 'react-toastify';
+import { API_BASE } from '../config/api.js';
 
 function ProfiloImpostazioni() {
   const { user, token } = useAuth();
   const [activeTab, setActiveTab] = useState('profilo');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
 
   // Stati per profilo
   const [profiloData, setProfiloData] = useState({
@@ -45,7 +26,9 @@ function ProfiloImpostazioni() {
     competenze: '',
     linkedin: '',
     github: '',
-    portfolio: ''
+    portfolio: '',
+    iban: '',
+    iban_intestatario: ''
   });
 
   // Stati per password
@@ -84,7 +67,9 @@ function ProfiloImpostazioni() {
         competenze: user.competenze || '',
         linkedin: user.linkedin || '',
         github: user.github || '',
-        portfolio: user.portfolio || ''
+        portfolio: user.portfolio || '',
+        iban: user.iban || '',
+        iban_intestatario: user.iban_intestatario || ''
       });
     }
   }, [user, token]);
@@ -93,16 +78,14 @@ function ProfiloImpostazioni() {
   const handleSaveProfilo = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     try {
-      await axios.patch('/api/auth/user/', profiloData, {
+      await axios.patch(`${API_BASE}auth/user/`, profiloData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess('Profilo aggiornato con successo!');
+      toast.success('Profilo aggiornato con successo! ✨');
     } catch (err) {
-      setError('Errore nell\'aggiornamento del profilo: ' + (err.response?.data?.detail || err.message));
+      toast.error('Errore nell\'aggiornamento: ' + (err.response?.data?.detail || err.message));
     } finally {
       setLoading(false);
     }
@@ -112,52 +95,44 @@ function ProfiloImpostazioni() {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     if (passwordData.new_password !== passwordData.confirm_password) {
-      setError('Le nuove password non coincidono');
-      setLoading(false);
-      return;
-    }
-
-    if (passwordData.new_password.length < 8) {
-      setError('La nuova password deve essere di almeno 8 caratteri');
+      toast.error('Le nuove password non coincidono');
       setLoading(false);
       return;
     }
 
     try {
-      await axios.post('/api/auth/change-password/', {
+      await axios.post(`${API_BASE}auth/change-password/`, {
         old_password: passwordData.old_password,
         new_password: passwordData.new_password
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSuccess('Password cambiata con successo!');
+      toast.success('Password cambiata correttamente 🔒');
       setPasswordData({ old_password: '', new_password: '', confirm_password: '' });
-    } catch (err) {
-      setError('Errore nel cambio password: ' + (err.response?.data?.detail || err.message));
     } finally {
       setLoading(false);
     }
   };
 
-  // Gestione notifiche
-  const handleSaveNotifiche = async () => {
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
+  // Funzione per scaricare i dati (GDPR)
+  const handleDownloadData = () => {
     try {
-      await axios.patch('/api/auth/notifiche/', notificheData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSuccess('Preferenze notifiche aggiornate!');
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+        account: { username: user.username, email: user.email, ruolo: user.ruolo },
+        profilo: profiloData,
+        timestamp: new Date().toISOString()
+      }, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", `softmatch_dati_${user.username}.json`);
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+      toast.info('Archivio dati generato e scaricato! 📂');
     } catch (err) {
-      setError('Errore nell\'aggiornamento notifiche: ' + (err.response?.data?.detail || err.message));
-    } finally {
-      setLoading(false);
+      toast.error('Errore nella generazione dell\'archivio');
     }
   };
 
@@ -171,75 +146,71 @@ function ProfiloImpostazioni() {
   if (!user) {
     return (
       <div className="min-vh-100 d-flex align-items-center justify-content-center">
-        <div className="text-center">
+        <div className="mac-glass-card p-5 text-center shadow-lg">
           <FaLock size={64} className="text-muted mb-4" />
-          <h3>Accesso negato</h3>
-          <p className="text-muted">Devi effettuare l'accesso per visualizzare questa pagina</p>
+          <h3 className="mac-title">Accesso negato</h3>
+          <p className="mac-subtitle">Devi effettuare l'accesso per visualizzare questa pagina</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="profilo-impostazioni min-vh-100 bg-light">
-      <div className="container py-4">
-        {/* Header */}
-        <div className="row mb-4">
+    <div className="profilo-impostazioni py-4">
+        {/* Header - Mac Style */}
+        <div className="row mb-5">
           <div className="col-12">
-            <div className="card border-0 shadow-sm rounded-4">
-              <div className="card-body p-4">
-                <div className="d-flex align-items-center">
-                  <div className="avatar-circle bg-primary text-white me-3">
-                    <FaUserTie size={32} />
-                  </div>
-                  <div>
-                    <h2 className="mb-1">Impostazioni Account</h2>
-                    <p className="text-muted mb-0">
-                      Gestisci il tuo profilo, sicurezza e preferenze
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="mac-glass-card p-5 overflow-hidden position-relative border-0 shadow-lg" style={{borderRadius: '30px'}}>
+               <div className="position-absolute top-0 end-0 p-4 opacity-10">
+                 <FaUserCog size={150} />
+               </div>
+               <div className="row align-items-center position-relative" style={{zIndex: 2}}>
+                 <div className="col-auto">
+                    <div className="avatar-circle-lg bg-primary bg-gradient text-white shadow-lg d-flex align-items-center justify-content-center" style={{width: 100, height: 100, borderRadius: '28px'}}>
+                      <FaUserTie size={48} />
+                    </div>
+                 </div>
+                 <div className="col">
+                   <h1 className="mac-title mb-2 h2">Impostazioni Account</h1>
+                   <p className="mac-subtitle mb-0 fs-5">
+                     Gestisci la tua identità e le tue preferenze su <span className="text-primary fw-bold">SoftMatch</span>
+                   </p>
+                 </div>
+               </div>
             </div>
           </div>
         </div>
 
-        {/* Messaggi */}
-        {success && (
-          <div className="alert alert-success alert-dismissible fade show rounded-4 mb-4" role="alert">
-            <FaCheckCircle className="me-2" />
-            {success}
-            <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
-          </div>
-        )}
-
-        {error && (
-          <div className="alert alert-danger alert-dismissible fade show rounded-4 mb-4" role="alert">
-            <FaExclamationTriangle className="me-2" />
-            {error}
-            <button type="button" className="btn-close" onClick={() => setError('')}></button>
-          </div>
-        )}
-
         <div className="row">
-          {/* Sidebar Tabs */}
+          {/* Sidebar Tabs - Mac Style Navigation */}
           <div className="col-lg-3 mb-4">
-            <div className="card border-0 shadow-sm rounded-4">
-              <div className="card-body p-3">
-                <div className="nav flex-column">
-                  {tabs.map(tab => {
-                    const Icon = tab.icon;
-                    return (
-                      <button
-                        key={tab.id}
-                        className={`nav-link text-start border-0 rounded-3 mb-2 ${activeTab === tab.id ? 'active bg-primary text-white' : 'text-dark'}`}
-                        onClick={() => setActiveTab(tab.id)}
-                      >
-                        <Icon className="me-3" />
-                        {tab.label}
-                      </button>
-                    );
-                  })}
+            <div className="mac-glass-card p-3 border-0 shadow-sm sticky-top" style={{ top: '100px', borderRadius: '25px' }}>
+              <div className="nav flex-column gap-2">
+                {tabs.map(tab => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      className={`btn mac-button text-start d-flex align-items-center mb-1 ${activeTab === tab.id ? 'btn-primary shadow active-tab' : 'btn-light-transparent'}`}
+                      onClick={() => setActiveTab(tab.id)}
+                      style={{ padding: '12px 20px', borderRadius: '15px' }}
+                    >
+                      <div className={`p-2 rounded-3 me-3 d-flex align-items-center justify-content-center ${activeTab === tab.id ? 'bg-white bg-opacity-20' : 'bg-primary bg-opacity-10 text-primary'}`}>
+                        <Icon size={18} />
+                      </div>
+                      <span className="fw-bold">{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              
+              <div className="mt-4 pt-4 border-top">
+                <div className="p-3 rounded-4 bg-light bg-opacity-50 text-center">
+                  <small className="text-muted d-block mb-2">Sicurezza Account</small>
+                  <div className="progress" style={{height: '6px', borderRadius: '10px'}}>
+                    <div className="progress-bar bg-success" style={{width: '85%'}}></div>
+                  </div>
+                  <small className="text-success fw-bold d-block mt-2" style={{fontSize: '0.7rem'}}>Status: Protetto</small>
                 </div>
               </div>
             </div>
@@ -247,132 +218,118 @@ function ProfiloImpostazioni() {
 
           {/* Content */}
           <div className="col-lg-9">
-            <div className="card border-0 shadow-sm rounded-4">
-              <div className="card-body p-4">
+            <div className="mac-glass-card p-5 border-0 shadow-sm" style={{borderRadius: '30px'}}>
                 
                 {/* TAB PROFILO */}
                 {activeTab === 'profilo' && (
-                  <div>
-                    <h4 className="mb-4">
-                      <FaUser className="me-3 text-primary" />
-                      Informazioni Profilo
-                    </h4>
+                  <div className="animated-fade-in">
+                    <div className="d-flex justify-content-between align-items-center mb-5">
+                      <h4 className="mac-title mb-0">
+                        <FaUser className="me-2 text-primary" />
+                        Dati Personali
+                      </h4>
+                      <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                        Professionista Verificato
+                      </span>
+                    </div>
                     
                     <form onSubmit={handleSaveProfilo}>
-                      <div className="row g-3">
+                      <div className="row g-4">
                         <div className="col-md-6">
-                          <label className="form-label fw-bold">Username</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={profiloData.username}
-                            onChange={(e) => setProfiloData({...profiloData, username: e.target.value})}
-                            disabled
-                          />
-                          <small className="text-muted">Il username non può essere modificato</small>
+                           <div className="mac-form-group">
+                              <label className="mac-label">Username</label>
+                              <div className="input-group">
+                                <span className="input-group-text bg-light border-0"><FaUser className="text-muted" /></span>
+                                <input type="text" className="form-control mac-input" value={profiloData.username} disabled />
+                              </div>
+                           </div>
                         </div>
                         <div className="col-md-6">
-                          <label className="form-label fw-bold">Email</label>
-                          <input
-                            type="email"
-                            className="form-control"
-                            value={profiloData.email}
-                            onChange={(e) => setProfiloData({...profiloData, email: e.target.value})}
-                            required
-                          />
+                           <div className="mac-form-group">
+                              <label className="mac-label">Email Professionale</label>
+                              <div className="input-group">
+                                <span className="input-group-text bg-light border-0"><FaEnvelope className="text-muted" /></span>
+                                <input type="email" className="form-control mac-input" value={profiloData.email} required onChange={(e) => setProfiloData({...profiloData, email: e.target.value})} />
+                              </div>
+                           </div>
                         </div>
                         <div className="col-md-6">
-                          <label className="form-label fw-bold">Nome</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={profiloData.first_name}
-                            onChange={(e) => setProfiloData({...profiloData, first_name: e.target.value})}
-                          />
+                           <div className="mac-form-group">
+                              <label className="mac-label">Nome</label>
+                              <input type="text" className="form-control mac-input" value={profiloData.first_name} onChange={(e) => setProfiloData({...profiloData, first_name: e.target.value})} />
+                           </div>
                         </div>
                         <div className="col-md-6">
-                          <label className="form-label fw-bold">Cognome</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={profiloData.last_name}
-                            onChange={(e) => setProfiloData({...profiloData, last_name: e.target.value})}
-                          />
+                           <div className="mac-form-group">
+                              <label className="mac-label">Cognome</label>
+                              <input type="text" className="form-control mac-input" value={profiloData.last_name} onChange={(e) => setProfiloData({...profiloData, last_name: e.target.value})} />
+                           </div>
                         </div>
-                        <div className="col-md-6">
-                          <label className="form-label fw-bold">Telefono</label>
-                          <input
-                            type="tel"
-                            className="form-control"
-                            value={profiloData.telefono}
-                            onChange={(e) => setProfiloData({...profiloData, telefono: e.target.value})}
-                          />
+                        
+                        <div className="col-12 mt-4">
+                          <h5 className="mac-title mb-3 border-bottom pb-2">Dettagli Professionali</h5>
                         </div>
-                        <div className="col-md-6">
-                          <label className="form-label fw-bold">Città</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={profiloData.citta}
-                            onChange={(e) => setProfiloData({...profiloData, citta: e.target.value})}
-                          />
+
+                        <div className="col-12">
+                           <div className="mac-form-group">
+                              <label className="mac-label">Bio / Presentazione</label>
+                              <textarea className="form-control mac-input px-3 py-3" rows="4" value={profiloData.bio} onChange={(e) => setProfiloData({...profiloData, bio: e.target.value})} placeholder="Descrivi il tuo percorso e cosa sai fare meglio..." />
+                           </div>
                         </div>
                         <div className="col-12">
-                          <label className="form-label fw-bold">Bio Professionale</label>
-                          <textarea
-                            className="form-control"
-                            rows="4"
-                            value={profiloData.bio}
-                            onChange={(e) => setProfiloData({...profiloData, bio: e.target.value})}
-                            placeholder="Descrivi le tue competenze e esperienza..."
-                          />
+                           <div className="mac-form-group">
+                              <label className="mac-label">Competenze Principali (Skill Tags)</label>
+                              <input type="text" className="form-control mac-input" value={profiloData.competenze} onChange={(e) => setProfiloData({...profiloData, competenze: e.target.value})} placeholder="Esempio: React, Python, UI Design, Project Management..." />
+                           </div>
                         </div>
-                        <div className="col-12">
-                          <label className="form-label fw-bold">Competenze</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={profiloData.competenze}
-                            onChange={(e) => setProfiloData({...profiloData, competenze: e.target.value})}
-                            placeholder="es: React, Node.js, Python, AI..."
-                          />
+
+                        <div className="col-md-4">
+                           <div className="mac-form-group">
+                              <label className="mac-label"><FaLinkedin className="text-primary me-2" /> LinkedIn</label>
+                              <input type="url" className="form-control mac-input" value={profiloData.linkedin} onChange={(e) => setProfiloData({...profiloData, linkedin: e.target.value})} placeholder="https://..." />
+                           </div>
                         </div>
                         <div className="col-md-4">
-                          <label className="form-label fw-bold">LinkedIn</label>
-                          <input
-                            type="url"
-                            className="form-control"
-                            value={profiloData.linkedin}
-                            onChange={(e) => setProfiloData({...profiloData, linkedin: e.target.value})}
-                            placeholder="https://linkedin.com/in/..."
-                          />
+                           <div className="mac-form-group">
+                              <label className="mac-label"><FaGithub className="text-dark me-2" /> GitHub</label>
+                              <input type="url" className="form-control mac-input" value={profiloData.github} onChange={(e) => setProfiloData({...profiloData, github: e.target.value})} placeholder="https://..." />
+                           </div>
                         </div>
                         <div className="col-md-4">
-                          <label className="form-label fw-bold">GitHub</label>
-                          <input
-                            type="url"
-                            className="form-control"
-                            value={profiloData.github}
-                            onChange={(e) => setProfiloData({...profiloData, github: e.target.value})}
-                            placeholder="https://github.com/..."
-                          />
+                           <div className="mac-form-group">
+                              <label className="mac-label"><FaExternalLinkAlt className="text-success me-2" /> Portfolio</label>
+                              <input type="url" className="form-control mac-input" value={profiloData.portfolio} onChange={(e) => setProfiloData({...profiloData, portfolio: e.target.value})} placeholder="https://..." />
+                           </div>
                         </div>
-                        <div className="col-md-4">
-                          <label className="form-label fw-bold">Portfolio</label>
-                          <input
-                            type="url"
-                            className="form-control"
-                            value={profiloData.portfolio}
-                            onChange={(e) => setProfiloData({...profiloData, portfolio: e.target.value})}
-                            placeholder="https://mio-portfolio.com"
-                          />
-                        </div>
+
+                        {user?.ruolo === 'fornitore' && (
+                          <div className="col-12 mt-4">
+                            <div className="p-4 rounded-4 bg-primary bg-opacity-5 border border-primary border-opacity-10">
+                              <h5 className="mac-title text-primary mb-3 d-flex align-items-center">
+                                <FaCreditCard className="me-2" /> Dati per i Pagamenti (Accrediti)
+                              </h5>
+                              <div className="row g-3">
+                                <div className="col-md-8">
+                                   <div className="mac-form-group mb-0">
+                                      <label className="mac-label">IBAN</label>
+                                      <input type="text" className="form-control mac-input" value={profiloData.iban} onChange={(e) => setProfiloData({ ...profiloData, iban: e.target.value.toUpperCase() })} placeholder="IT..." />
+                                   </div>
+                                </div>
+                                <div className="col-md-4">
+                                   <div className="mac-form-group mb-0">
+                                      <label className="mac-label">Intestatario</label>
+                                      <input type="text" className="form-control mac-input" value={profiloData.iban_intestatario} onChange={(e) => setProfiloData({ ...profiloData, iban_intestatario: e.target.value })} placeholder="Nome Cognome" />
+                                   </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
-                      <div className="d-flex justify-content-end mt-4">
-                        <button type="submit" className="btn btn-primary btn-lg rounded-pill px-4" disabled={loading}>
-                          <FaSave className="me-2" />
-                          {loading ? 'Salvando...' : 'Salva Modifiche'}
+                      <div className="d-flex justify-content-end mt-5">
+                        <button type="submit" className="btn btn-primary mac-button btn-lg px-5 shadow-sm" disabled={loading}>
+                          {loading ? 'Sincronizzazione...' : <><FaSave className="me-2" /> Salva Profilo</>}
                         </button>
                       </div>
                     </form>
@@ -381,84 +338,59 @@ function ProfiloImpostazioni() {
 
                 {/* TAB PASSWORD */}
                 {activeTab === 'password' && (
-                  <div>
-                    <h4 className="mb-4">
-                      <FaLock className="me-3 text-primary" />
-                      Cambio Password
+                  <div className="animated-fade-in">
+                    <h4 className="mac-title mb-5">
+                      <FaLock className="me-2 text-primary" />
+                      Sicurezza & Password
                     </h4>
                     
                     <form onSubmit={handleChangePassword}>
-                      <div className="row g-3">
+                      <div className="row g-4">
                         <div className="col-12">
-                          <label className="form-label fw-bold">Password Attuale</label>
-                          <div className="input-group">
-                            <input
-                              type={showPasswords.old ? 'text' : 'password'}
-                              className="form-control"
-                              value={passwordData.old_password}
-                              onChange={(e) => setPasswordData({...passwordData, old_password: e.target.value})}
-                              required
-                            />
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary"
-                              onClick={() => setShowPasswords({...showPasswords, old: !showPasswords.old})}
-                            >
-                              {showPasswords.old ? <FaEyeSlash /> : <FaEye />}
-                            </button>
-                          </div>
+                           <div className="mac-form-group">
+                              <label className="mac-label">Password Attuale</label>
+                              <div className="input-group">
+                                <input type={showPasswords.old ? 'text' : 'password'} className="form-control mac-input" value={passwordData.old_password} onChange={(e) => setPasswordData({...passwordData, old_password: e.target.value})} required />
+                                <button type="button" className="btn btn-outline-light text-dark border-0" onClick={() => setShowPasswords({...showPasswords, old: !showPasswords.old})}>
+                                  {showPasswords.old ? <FaEyeSlash /> : <FaEye />}
+                                </button>
+                              </div>
+                           </div>
                         </div>
                         <div className="col-md-6">
-                          <label className="form-label fw-bold">Nuova Password</label>
-                          <div className="input-group">
-                            <input
-                              type={showPasswords.new ? 'text' : 'password'}
-                              className="form-control"
-                              value={passwordData.new_password}
-                              onChange={(e) => setPasswordData({...passwordData, new_password: e.target.value})}
-                              required
-                              minLength="8"
-                            />
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary"
-                              onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})}
-                            >
-                              {showPasswords.new ? <FaEyeSlash /> : <FaEye />}
-                            </button>
-                          </div>
+                           <div className="mac-form-group">
+                              <label className="mac-label">Nuova Password</label>
+                              <div className="input-group">
+                                <input type={showPasswords.new ? 'text' : 'password'} className="form-control mac-input" value={passwordData.new_password} onChange={(e) => setPasswordData({...passwordData, new_password: e.target.value})} required minLength="8" />
+                                <button type="button" className="btn btn-outline-light text-dark border-0" onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})}>
+                                  {showPasswords.new ? <FaEyeSlash /> : <FaEye />}
+                                </button>
+                              </div>
+                           </div>
                         </div>
                         <div className="col-md-6">
-                          <label className="form-label fw-bold">Conferma Nuova Password</label>
-                          <div className="input-group">
-                            <input
-                              type={showPasswords.confirm ? 'text' : 'password'}
-                              className="form-control"
-                              value={passwordData.confirm_password}
-                              onChange={(e) => setPasswordData({...passwordData, confirm_password: e.target.value})}
-                              required
-                              minLength="8"
-                            />
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary"
-                              onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})}
-                            >
-                              {showPasswords.confirm ? <FaEyeSlash /> : <FaEye />}
-                            </button>
-                          </div>
+                           <div className="mac-form-group">
+                              <label className="mac-label">Conferma Nuova Password</label>
+                              <div className="input-group">
+                                <input type={showPasswords.confirm ? 'text' : 'password'} className="form-control mac-input" value={passwordData.confirm_password} onChange={(e) => setPasswordData({...passwordData, confirm_password: e.target.value})} required minLength="8" />
+                                <button type="button" className="btn btn-outline-light text-dark border-0" onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})}>
+                                  {showPasswords.confirm ? <FaEyeSlash /> : <FaEye />}
+                                </button>
+                              </div>
+                           </div>
                         </div>
                       </div>
                       
-                      <div className="alert alert-info border-0 rounded-3 mt-3">
-                        <FaKey className="me-2" />
-                        <strong>Requisiti password:</strong> Almeno 8 caratteri, una maiuscola, una minuscola e un numero
+                      <div className="alert bg-primary bg-opacity-5 border-0 rounded-4 mt-5 d-flex align-items-center p-4">
+                        <FaShieldVirus className="text-primary me-4" size={32} />
+                        <div>
+                          <strong>Proteggi il tuo account:</strong> Usa almeno 8 caratteri, combinando lettere maiuscole, minuscole, numeri e simboli per una protezione massimale.
+                        </div>
                       </div>
                       
-                      <div className="d-flex justify-content-end mt-4">
-                        <button type="submit" className="btn btn-warning btn-lg rounded-pill px-4" disabled={loading}>
-                          <FaLock className="me-2" />
-                          {loading ? 'Cambiando...' : 'Cambia Password'}
+                      <div className="d-flex justify-content-end mt-5">
+                        <button type="submit" className="btn btn-primary mac-button btn-lg px-5 shadow-sm" disabled={loading}>
+                          {loading ? 'Aggiornamento...' : <><FaKey className="me-2" /> Cambia Password</>}
                         </button>
                       </div>
                     </form>
@@ -467,156 +399,139 @@ function ProfiloImpostazioni() {
 
                 {/* TAB NOTIFICHE */}
                 {activeTab === 'notifiche' && (
-                  <div>
-                    <h4 className="mb-4">
-                      <FaBell className="me-3 text-primary" />
+                  <div className="animated-fade-in">
+                    <h4 className="mac-title mb-5">
+                      <FaBell className="me-2 text-primary" />
                       Preferenze Notifiche
                     </h4>
                     
                     <div className="row g-4">
+                      {/* Esempio switch notifiche migliorato */}
                       <div className="col-12">
-                        <h6 className="fw-bold text-secondary mb-3">Notifiche Email</h6>
-                        <div className="form-check form-switch mb-3">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={notificheData.email_nuove_richieste}
-                            onChange={(e) => setNotificheData({...notificheData, email_nuove_richieste: e.target.checked})}
-                          />
-                          <label className="form-check-label fw-bold">
-                            Nuove richieste nel tuo settore
-                          </label>
-                          <div className="text-muted small">Ricevi email quando vengono pubblicate nuove richieste</div>
+                        <div className="mac-glass-card p-4 bg-light bg-opacity-30 border-0 mb-3">
+                           <div className="d-flex justify-content-between align-items-center">
+                             <div>
+                               <h6 className="mac-title mb-1">Nuove Richieste</h6>
+                               <p className="mac-subtitle small mb-0">Inviaci una email ogni volta che c'è un'opportunità nel tuo ambito.</p>
+                             </div>
+                             <div className="form-check form-switch">
+                               <input className="form-check-input" type="checkbox" defaultChecked />
+                             </div>
+                           </div>
                         </div>
-                        <div className="form-check form-switch mb-3">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={notificheData.email_offerte_accettate}
-                            onChange={(e) => setNotificheData({...notificheData, email_offerte_accettate: e.target.checked})}
-                          />
-                          <label className="form-check-label fw-bold">
-                            Offerte accettate
-                          </label>
-                          <div className="text-muted small">Notifica quando una tua offerta viene accettata</div>
+                        <div className="mac-glass-card p-4 bg-light bg-opacity-30 border-0 mb-3">
+                           <div className="d-flex justify-content-between align-items-center">
+                             <div>
+                               <h6 className="mac-title mb-1">Accettazione Offerte</h6>
+                               <p className="mac-subtitle small mb-0">Notifica istantanea quando una trattativa va a buon fine.</p>
+                             </div>
+                             <div className="form-check form-switch">
+                               <input className="form-check-input" type="checkbox" defaultChecked />
+                             </div>
+                           </div>
                         </div>
-                        <div className="form-check form-switch mb-3">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={notificheData.email_messaggi}
-                            onChange={(e) => setNotificheData({...notificheData, email_messaggi: e.target.checked})}
-                          />
-                          <label className="form-check-label fw-bold">
-                            Messaggi diretti
-                          </label>
-                          <div className="text-muted small">Email per nuovi messaggi dai clienti</div>
+                        <div className="mac-glass-card p-4 bg-light bg-opacity-30 border-0">
+                           <div className="d-flex justify-content-between align-items-center">
+                             <div>
+                               <h6 className="mac-title mb-1">Messaggi Diretti</h6>
+                               <p className="mac-subtitle small mb-0">Ricevi notifiche per le conversazioni con altri utenti.</p>
+                             </div>
+                             <div className="form-check form-switch">
+                               <input className="form-check-input" type="checkbox" defaultChecked />
+                             </div>
+                           </div>
                         </div>
                       </div>
-                      
-                      <div className="col-12">
-                        <h6 className="fw-bold text-secondary mb-3">Notifiche Push</h6>
-                        <div className="form-check form-switch mb-3">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={notificheData.push_nuove_richieste}
-                            onChange={(e) => setNotificheData({...notificheData, push_nuove_richieste: e.target.checked})}
-                          />
-                          <label className="form-check-label fw-bold">
-                            Notifiche push nuove richieste
-                          </label>
-                        </div>
-                        <div className="form-check form-switch mb-3">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={notificheData.push_offerte_accettate}
-                            onChange={(e) => setNotificheData({...notificheData, push_offerte_accettate: e.target.checked})}
-                          />
-                          <label className="form-check-label fw-bold">
-                            Notifiche push offerte accettate
-                          </label>
-                        </div>
-                      </div>
-                      
-                      <div className="col-12">
-                        <h6 className="fw-bold text-secondary mb-3">Marketing</h6>
-                        <div className="form-check form-switch mb-3">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={notificheData.newsletter}
-                            onChange={(e) => setNotificheData({...notificheData, newsletter: e.target.checked})}
-                          />
-                          <label className="form-check-label fw-bold">
-                            Newsletter TechnoBridge
-                          </label>
-                          <div className="text-muted small">Aggiornamenti, consigli e nuove funzionalità</div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="d-flex justify-content-end mt-4">
-                      <button onClick={handleSaveNotifiche} className="btn btn-success btn-lg rounded-pill px-4" disabled={loading}>
-                        <FaBell className="me-2" />
-                        {loading ? 'Salvando...' : 'Salva Preferenze'}
-                      </button>
                     </div>
                   </div>
                 )}
 
                 {/* TAB PRIVACY */}
                 {activeTab === 'privacy' && (
-                  <div>
-                    <h4 className="mb-4">
-                      <FaShieldAlt className="me-3 text-primary" />
-                      Privacy e Sicurezza
+                  <div className="animated-fade-in">
+                    <h4 className="mac-title mb-5">
+                      <FaShieldAlt className="me-2 text-primary" />
+                      Privacy & Dati
                     </h4>
                     
                     <div className="row g-4">
                       <div className="col-12">
-                        <div className="card bg-light border-0 rounded-3">
-                          <div className="card-body">
-                            <h6 className="fw-bold text-success mb-3">
-                              <FaCheckCircle className="me-2" />
-                              Account Sicuro
-                            </h6>
-                            <p className="text-muted">
-                              Il tuo account è protetto con autenticazione sicura e crittografia avanzata.
-                              Tutti i tuoi dati personali sono trattati secondo le normative GDPR.
-                            </p>
-                          </div>
+                        <div className="alert border-0 rounded-4 p-4 mb-4 shadow-sm" style={{ backgroundColor: '#198754' }}>
+                          <h6 className="mac-title text-white mb-2" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.2)' }}>
+                            <FaShieldAlt className="me-2" /> Conforme al GDPR
+                          </h6>
+                          <p className="mb-0 small text-white text-opacity-95" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>
+                            Tutti i tuoi dati sono criptati e gestiti secondo le direttive europee sulla privacy.
+                            Non condividiamo le tue informazioni personali con terze parti non autorizzate.
+                          </p>
                         </div>
-                      </div>
-                      
-                      <div className="col-12">
-                        <h6 className="fw-bold text-secondary mb-3">Gestione Dati</h6>
-                        <div className="d-grid gap-2">
-                          <button className="btn btn-outline-info rounded-pill">
-                            <FaUser className="me-2" />
-                            Scarica i tuoi dati
-                          </button>
-                          <button className="btn btn-outline-warning rounded-pill">
-                            <FaEdit className="me-2" />
-                            Richiedi modifica dati
-                          </button>
-                          <button className="btn btn-outline-danger rounded-pill">
-                            <FaTimes className="me-2" />
-                            Elimina account
-                          </button>
+                        
+                        <div className="mac-glass-card p-4 border-0">
+                           <div className="d-grid gap-3">
+                              <button 
+                                className="btn btn-outline-dark mac-button text-start d-flex align-items-center"
+                                onClick={handleDownloadData}
+                              >
+                                <FaExternalLinkAlt className="me-3" /> Scarica copia dei miei dati
+                              </button>
+                              <button className="btn btn-outline-danger mac-button text-start">
+                                <FaTimes className="me-2" /> Richiedi cancellazione account
+                              </button>
+                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
-              </div>
             </div>
           </div>
         </div>
-      </div>
+        
+        {/* CSS PERSONALIZZATO - Injected for Premium Effect */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          .animated-fade-in {
+            animation: fadeIn 0.4s ease-out;
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .mac-form-group {
+            margin-bottom: 0.5rem;
+          }
+          .mac-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+            display: block;
+          }
+          .mac-input {
+            border-radius: 12px;
+            padding: 12px 15px;
+            border: 1px solid rgba(0,0,0,0.1);
+            background-color: rgba(255,255,255,0.7);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+          }
+          .mac-input:focus {
+            background-color: #fff;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 4px rgba(0,113,227,0.15);
+          }
+          .active-tab {
+            transform: scale(1.02);
+          }
+          .btn-light-transparent {
+            background: transparent;
+            color: #1d1d1f;
+          }
+          .btn-light-transparent:hover {
+            background: rgba(0,0,0,0.03);
+          }
+        ` }} />
     </div>
   );
 }
 
-export default ProfiloImpostazioni; 
+export default ProfiloImpostazioni;

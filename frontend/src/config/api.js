@@ -1,8 +1,5 @@
-// Configurazione API dinamica basata sull'ambiente
-const isDevelopment = import.meta.env.MODE === 'development';
+export const API_BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:8088');
 
-// Usa variabile d'ambiente per produzione, localhost per sviluppo
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
 
 // Base path per le API
 export const API_BASE = `${API_BASE_URL}/api/`;
@@ -20,4 +17,4 @@ export const apiConfig = {
   headers: {
     'Content-Type': 'application/json',
   },
-}; 
+};

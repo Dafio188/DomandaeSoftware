@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /profilo/
+Disallow: /impostazioni/
+Disallow: /admin/
+Disallow: /login/
+Disallow: /registrazione/
+
+# Sitemaps
+Sitemap: https://softmatch.it/sitemap.xml

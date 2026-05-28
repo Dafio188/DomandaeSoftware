@@ -53,6 +53,7 @@ function Progetto() {
   const [voto, setVoto] = useState(5);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [pagamentiConfig, setPagamentiConfig] = useState(null);
   const [newStep, setNewStep] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -60,6 +61,13 @@ function Progetto() {
   const [activeTab, setActiveTab] = useState('deliverables');
   const messagesEndRef = useRef(null);
   const chatInputRef = useRef(null);
+  const [contestazioneMotivo, setContestazioneMotivo] = useState('');
+  const [contestazioneNote, setContestazioneNote] = useState('');
+  const [pagamentoRicevutaFile, setPagamentoRicevutaFile] = useState(null);
+
+  useEffect(() => {
+    axios.get('/api/pagamenti/config/').then((res) => setPagamentiConfig(res.data)).catch(() => setPagamentiConfig(null));
+  }, []);
 
   useEffect(() => {
     console.log('🔍 INIZIANDO CARICAMENTO PROGETTO');
@@ -271,10 +279,66 @@ function Progetto() {
   const partnerName = isCliente ? progetto.fornitore_username : progetto.cliente_username;
   const partnerRole = isCliente ? 'Fornitore' : 'Cliente';
 
+  const openContestazione = async () => {
+    setError('');
+    setSuccess('');
+    try {
+      const motivo = contestazioneMotivo.trim();
+      const res = await axios.post(`/api/progetti/${id}/apri-contestazione/`, { motivo }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProgetto(res.data);
+      setContestazioneMotivo('');
+      setSuccess('Contestazione aperta. Un admin verrà coinvolto per la risoluzione.');
+    } catch (e) {
+      setError(e?.response?.data?.detail || e.message);
+    }
+  };
+
+  const resolveContestazione = async () => {
+    setError('');
+    setSuccess('');
+    try {
+      const note = contestazioneNote.trim();
+      const res = await axios.post(`/api/progetti/${id}/risolvi-contestazione/`, { note }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProgetto(res.data);
+      setContestazioneNote('');
+      setSuccess('Contestazione risolta.');
+    } catch (e) {
+      setError(e?.response?.data?.detail || e.message);
+    }
+  };
+
+  const uploadPagamentoRicevuta = async () => {
+    setError('');
+    setSuccess('');
+    if (!pagamentoRicevutaFile) {
+      setError('Seleziona un file prima di caricare la ricevuta.');
+      return;
+    }
+    try {
+      const form = new FormData();
+      form.append('file', pagamentoRicevutaFile);
+      const res = await axios.post(`/api/progetti/${id}/pagamento-ricevuta/`, form, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProgetto(res.data);
+      setPagamentoRicevutaFile(null);
+      setSuccess('Ricevuta caricata. Ora puoi spuntare la conferma pagamento.');
+    } catch (e) {
+      setError(e?.response?.data?.detail || e.message);
+    }
+  };
+
   // CALCOLI IMPORTI - VISIBILI SOLO PER IL PROPRIO RUOLO E MOMENTO GIUSTO
   const prezzo = progetto?.offerta_prezzo || 0;
-  const importoCliente = (prezzo * 1.05).toFixed(2);
-  const importoFornitore = (prezzo * 0.95).toFixed(2);
+  const feeRate = 0.05;
+  const feeMode = 'cliente';
+  const fee = prezzo * feeRate;
+  const importoCliente = (feeMode === 'split' ? prezzo + fee / 2 : feeMode === 'cliente' ? prezzo + fee : prezzo).toFixed(2);
+  const importoFornitore = (feeMode === 'split' ? prezzo - fee / 2 : feeMode === 'fornitore' ? prezzo - fee : prezzo).toFixed(2);
   
   // Il fornitore vede il suo importo SOLO dopo l'approvazione finale del cliente
   const fornitoreVedeImporto = progetto.consegna_cliente_ok;
@@ -287,12 +351,13 @@ function Progetto() {
     }
     
     const prezzoBase = Number(progetto.offerta_prezzo);
-    const totale = (prezzoBase * 1.05).toFixed(2);
-    const commissione = (prezzoBase * 0.05).toFixed(2);
+    const feeLocal = prezzoBase * feeRate;
+    const totale = (feeMode === 'split' ? prezzoBase + feeLocal / 2 : feeMode === 'cliente' ? prezzoBase + feeLocal : prezzoBase).toFixed(2);
+    const commissione = (feeMode === 'split' ? feeLocal / 2 : feeMode === 'cliente' ? feeLocal : 0).toFixed(2);
     
     alert('💰 CALCOLO IMPORTO CLIENTE\n\n' +
           '💵 Prezzo base offerta: ' + prezzoBase + '€\n' +
-          '📊 Commissione (5%): ' + commissione + '€\n' +
+          '📊 Commissione piattaforma: ' + commissione + '€\n' +
           '💳 TOTALE DA PAGARE: ' + totale + '€\n\n' +
           '💡 Il pagamento scatta automaticamente quando approvi la bozza iniziale');
   };
@@ -311,12 +376,13 @@ function Progetto() {
     }
     
     const prezzoBase = Number(progetto.offerta_prezzo);
-    const netto = (prezzoBase * 0.95).toFixed(2);
-    const commissione = (prezzoBase * 0.05).toFixed(2);
+    const feeLocal = prezzoBase * feeRate;
+    const netto = (feeMode === 'split' ? prezzoBase - feeLocal / 2 : feeMode === 'fornitore' ? prezzoBase - feeLocal : prezzoBase).toFixed(2);
+    const commissione = (feeMode === 'split' ? feeLocal / 2 : feeMode === 'fornitore' ? feeLocal : 0).toFixed(2);
     
     alert('💰 CALCOLO IMPORTO FORNITORE\n\n' +
           '💵 Prezzo base offerta: ' + prezzoBase + '€\n' +
-          '📊 Commissione trattenuta (5%): ' + commissione + '€\n' +
+          '📊 Commissione piattaforma: ' + commissione + '€\n' +
           '💳 TOTALE CHE RICEVERAI: ' + netto + '€\n\n' +
           '🎉 Complimenti! Il cliente ha approvato la consegna finale.');
   };
@@ -609,6 +675,15 @@ function Progetto() {
           <div className="alert alert-danger alert-dismissible fade show" role="alert">
             <FaExclamationTriangle className="me-2" />
             {error}
+          </div>
+        )}
+
+        {progetto.stato === 'in_contestazione' && (
+          <div className="alert alert-warning border-0 rounded-4 shadow-sm">
+            <div className="fw-bold mb-1">Progetto in contestazione</div>
+            <div className="text-muted small">
+              Motivo: {progetto.contestazione_motivo || '—'}
+            </div>
           </div>
         )}
 
@@ -964,12 +1039,36 @@ function Progetto() {
                                 Effettua il pagamento di garanzia:
                               </h6>
                               <p className="small mb-3">
-                                <strong>Importo da versare: {importoCliente}€</strong> (include 5% commissione Domanda&Software)<br/>
-                                📧 <strong>Riceverai via email le coordinate per il bonifico</strong><br/>
+                                <strong>Importo da versare: {importoCliente}€</strong> (include 5% commissione SoftMatch)<br/>
+                                <strong>Coordinate bonifico (SoftMatch)</strong><br/>
+                                IBAN: <strong>{pagamentiConfig?.iban || 'IBAN non configurato'}</strong><br/>
+                                Intestatario: <strong>{pagamentiConfig?.intestatario || 'SoftMatch'}</strong>{pagamentiConfig?.banca ? ` (${pagamentiConfig.banca})` : ''}<br/>
+                                Causale: <strong>SoftMatch Progetto #{progetto.id} - {user?.username}</strong><br/>
                                 🔒 I fondi saranno trattenuti come garanzia<br/>
                                 💳 Rilasciati al fornitore solo a progetto completato<br/>
                                 ⚡ Una volta effettuato, spunta qui sotto per informare l'admin
                               </p>
+                              <div className="mb-3">
+                                <div className="fw-bold mb-2">Ricevuta bonifico</div>
+                                {progetto.pagamento_cliente_ricevuta ? (
+                                  <a href={progetto.pagamento_cliente_ricevuta} target="_blank" rel="noreferrer">Apri ricevuta</a>
+                                ) : (
+                                  <div className="d-flex gap-2 flex-wrap">
+                                    <input
+                                      type="file"
+                                      className="form-control form-control-sm"
+                                      accept=".pdf,image/*"
+                                      onChange={(e) => setPagamentoRicevutaFile(e.target.files?.[0] || null)}
+                                    />
+                                    <button className="btn btn-sm btn-outline-primary" type="button" onClick={uploadPagamentoRicevuta}>
+                                      Carica
+                                    </button>
+                                  </div>
+                                )}
+                                <div className="text-muted small mt-2">
+                                  Carica la ricevuta per velocizzare la verifica admin.
+                                </div>
+                              </div>
                               <div className="form-check">
                                 <input 
                                   className="form-check-input" 
@@ -999,6 +1098,12 @@ function Progetto() {
                               <h6 className="fw-bold text-info mb-1">Pagamento in verifica</h6>
                               <small className="text-muted">
                                 Il cliente ha confermato il pagamento. Un admin sta verificando la ricezione dei fondi.
+                                {isAdmin && progetto.pagamento_cliente_ricevuta && (
+                                  <>
+                                    <br />
+                                    <a href={progetto.pagamento_cliente_ricevuta} target="_blank" rel="noreferrer">Apri ricevuta bonifico</a>
+                                  </>
+                                )}
                               </small>
                             </div>
                           </div>
@@ -1359,6 +1464,11 @@ function Progetto() {
                                 📧 Riceverai il bonifico entro 24-48 ore<br/>
                                 💰 Importo: {importoFornitore}€ (netto commissioni)<br/>
                                 🏦 Sul conto corrente da te fornito<br/>
+                                {progetto.bonifico_admin_ok && progetto.bonifico_fornitore_ricevuta && (
+                                  <>
+                                    📄 <a href={progetto.bonifico_fornitore_ricevuta} target="_blank" rel="noreferrer">Apri ricevuta bonifico</a><br/>
+                                  </>
+                                )}
                                 ⚡ Una volta ricevuto, conferma qui sotto
                               </p>
                             </div>
@@ -1389,8 +1499,23 @@ function Progetto() {
                           <FaSpinner className="text-info mb-2" size={20} />
                           <h6 className="fw-bold text-info mb-1">Bonifico in corso</h6>
                           <small className="text-muted">
-                            Il bonifico di {importoFornitore}€ è stato inviato al fornitore. 
-                            In attesa di conferma ricezione per l'archiviazione finale.
+                            {progetto.bonifico_admin_ok ? (
+                              <>
+                                Il bonifico di {importoFornitore}€ è stato inviato al fornitore.
+                                {progetto.bonifico_fornitore_ricevuta && (
+                                  <>
+                                    <br />
+                                    <a href={progetto.bonifico_fornitore_ricevuta} target="_blank" rel="noreferrer">Apri ricevuta bonifico</a>
+                                  </>
+                                )} 
+                                <br />
+                                In attesa di conferma ricezione per l'archiviazione finale.
+                              </>
+                            ) : (
+                              <>
+                                Il bonifico al fornitore è in preparazione da parte dell’amministrazione.
+                              </>
+                            )}
                           </small>
                         </div>
                       )}
@@ -1428,6 +1553,72 @@ function Progetto() {
         </div>
 
         {/* Step Personalizzati */}
+        {(isCliente || isFornitore || isAdmin) && !progetto.archiviato && (
+          <div className="card border-0 shadow-lg rounded-4 mb-5">
+            <div className="card-header bg-gradient-warning text-dark border-0 rounded-top-4 p-4">
+              <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div className="d-flex align-items-center">
+                  <FaExclamationTriangle className="me-3" size={20} />
+                  <div>
+                    <h5 className="mb-1">Contestazione</h5>
+                    <small className="opacity-75">Apri una contestazione se serve l’intervento dell’amministrazione</small>
+                  </div>
+                </div>
+                <span className={`badge rounded-pill px-3 py-2 ${progetto.stato === 'in_contestazione' ? 'bg-danger' : 'bg-light text-dark'}`}>
+                  {progetto.stato === 'in_contestazione' ? 'In contestazione' : 'Non attiva'}
+                </span>
+              </div>
+            </div>
+            <div className="card-body p-4">
+              {progetto.stato !== 'in_contestazione' && (isCliente || isFornitore) && (
+                <div>
+                  <div className="mb-3">
+                    <label className="form-label fw-bold">Motivo</label>
+                    <textarea className="form-control" rows="3" value={contestazioneMotivo} onChange={(e) => setContestazioneMotivo(e.target.value)} />
+                  </div>
+                  <button className="btn btn-danger rounded-pill" disabled={!contestazioneMotivo.trim()} onClick={openContestazione}>
+                    Apri contestazione
+                  </button>
+                </div>
+              )}
+
+              {progetto.stato === 'in_contestazione' && (
+                <div className="row g-4">
+                  <div className="col-lg-7">
+                    <div className="fw-bold mb-2">Motivo</div>
+                    <div className="text-muted" style={{ whiteSpace: 'pre-wrap' }}>
+                      {progetto.contestazione_motivo || '—'}
+                    </div>
+                    {!!progetto.contestazione_risoluzione_note && (
+                      <>
+                        <div className="fw-bold mt-4 mb-2">Risoluzione</div>
+                        <div className="text-muted" style={{ whiteSpace: 'pre-wrap' }}>
+                          {progetto.contestazione_risoluzione_note}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <div className="col-lg-5">
+                    {isAdmin ? (
+                      <div className="border rounded-4 p-3">
+                        <div className="fw-bold mb-2">Risolvi (Admin)</div>
+                        <textarea className="form-control mb-3" rows="3" value={contestazioneNote} onChange={(e) => setContestazioneNote(e.target.value)} placeholder="Note risoluzione (opzionale)" />
+                        <button className="btn btn-success rounded-pill" onClick={resolveContestazione}>
+                          Risolvi contestazione
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="alert alert-info border-0 rounded-4 mb-0">
+                        Un amministratore sta gestendo la contestazione.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {progetto.step_personalizzati && progetto.step_personalizzati.length > 0 && (
           <div className="card border-0 shadow-lg rounded-4 mb-5">
             <div className="card-header bg-gradient-info text-white border-0 rounded-top-4 p-4">
@@ -1847,7 +2038,7 @@ function Progetto() {
                         <div className="amount-display mb-4">
                           <h3 className="fw-bold mb-2 text-success">{importoFornitore}€</h3>
                           <p className="small text-muted mb-0">
-                            Importo netto che riceverai (5% commissione trattenuta)
+                            Importo che riceverai
                           </p>
                         </div>
                         <div className="d-grid">

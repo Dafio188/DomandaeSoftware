@@ -24,8 +24,10 @@ import {
   FaBolt,
   FaAward,
   FaHeart,
-  FaStar
+  FaStar,
+  FaTicketAlt
 } from 'react-icons/fa';
+import PageHeader from '../components/PageHeader';
 import './ScopoDelSito.css';
 
 function ScopoDelSito() {
@@ -126,40 +128,36 @@ function ScopoDelSito() {
       step: 4,
       titolo: 'Ricevi Pagamenti Sicuri',
       descrizione: 'I pagamenti sono garantiti e protetti dalla piattaforma',
-      azioni: ['Completa milestone', 'Ricevi approvazioni', 'Consegna finale', 'Incassa il 95%'],
+      azioni: ['Completa milestone', 'Ricevi approvazioni', 'Consegna finale', 'Incassa il 100%'],
       icon: <FaEuroSign />
     }
   ];
 
   return (
     <div className="min-vh-100 bg-gradient scopo-page">
-      {/* Hero Section */}
-      <div className="hero-section bg-primary text-white position-relative overflow-hidden">
-        <div className="container py-5 position-relative z-2">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center">
-              <h1 className="display-3 fw-bold mb-4">
-                <FaRocket className="me-3 text-warning" />
-                Scopo del Sito
-              </h1>
-              <p className="lead mb-5 opacity-90">
-                Comprendiamo esattamente <strong>come funziona la nostra piattaforma</strong>, 
-                cosa offriamo a <strong>clienti</strong> e <strong>sviluppatori</strong>, 
-                e come garantiamo <strong>sicurezza</strong> e <strong>qualità</strong> in ogni progetto.
-              </p>
-              
+      <PageHeader 
+        title="Scopo del Sito"
+        subtitle="Comprendiamo esattamente come funziona la nostra piattaforma, cosa offriamo a clienti e sviluppatori, e come garantiamo sicurezza e qualità in ogni progetto."
+        badge="IL NOSTRO SCOPO"
+        icon={FaRocket}
+        theme="primary"
+      />
+
+      <div className="container mb-5">
+        <div className="row justify-content-center text-center">
+            <div className="col-lg-8">
               {/* Toggle User Type */}
-              <div className="user-type-toggle mb-4">
+              <div className="mac-glass-card p-3 d-inline-flex mb-4">
                 <div className="btn-group" role="group">
                   <button 
-                    className={`btn btn-lg ${activeUserType === 'cliente' ? 'btn-warning' : 'btn-outline-light'}`}
+                    className={`btn rounded-pill px-4 ${activeUserType === 'cliente' ? 'btn-primary shadow-sm' : 'btn-link text-decoration-none text-muted'}`}
                     onClick={() => setActiveUserType('cliente')}
                   >
                     <FaUser className="me-2" />
                     Sono un Cliente
                   </button>
                   <button 
-                    className={`btn btn-lg ${activeUserType === 'fornitore' ? 'btn-warning' : 'btn-outline-light'}`}
+                    className={`btn rounded-pill px-4 ${activeUserType === 'fornitore' ? 'btn-primary shadow-sm' : 'btn-link text-decoration-none text-muted'}`}
                     onClick={() => setActiveUserType('fornitore')}
                   >
                     <FaUserTie className="me-2" />
@@ -168,9 +166,7 @@ function ScopoDelSito() {
                 </div>
               </div>
             </div>
-          </div>
         </div>
-        <div className="hero-decoration"></div>
       </div>
 
       <div className="container py-5">
@@ -329,7 +325,7 @@ function ScopoDelSito() {
                     <FaEuroSign className="text-success me-3" />
                     <div>
                       <h6 className="fw-bold mb-1">Pagamento Garantito</h6>
-                      <small className="text-muted">Una volta completato il lavoro, il pagamento è assicurato (95% del totale)</small>
+                      <small className="text-muted">Una volta completato il lavoro, il pagamento è assicurato (100% del totale)</small>
                     </div>
                   </div>
                   <div className="garanzia-item">
@@ -414,11 +410,11 @@ function ScopoDelSito() {
                       <div className="pricing-details">
                         <div className="pricing-item">
                           <span className="label">Ricevi:</span>
-                          <span className="value text-success fw-bold">95%</span>
+                          <span className="value text-success fw-bold">100%</span>
                         </div>
                         <div className="pricing-item">
                           <span className="label">Esempio:</span>
-                          <span className="value">Progetto 1000€ = Ricevi 950€</span>
+                          <span className="value">Progetto 1000€ = Ricevi 1000€</span>
                         </div>
                         <div className="pricing-note">
                           <small className="text-muted">
@@ -438,6 +434,84 @@ function ScopoDelSito() {
                       <strong>Perché il 5%?</strong> La nostra commissione copre: infrastruttura sicura, 
                       supervisione professionale, supporto 24/7, garanzie sui pagamenti, 
                       sistema di reputazione e tutti i servizi che rendono possibile una collaborazione sicura.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="row g-4 justify-content-center mt-4">
+            <div className="col-lg-8">
+              <div className="pricing-card">
+                <div className="pricing-header">
+                  <h4 className="fw-bold text-center mb-4">
+                    <FaTicketAlt className="text-warning me-2" />
+                    Ticket & Crediti (anti-spam)
+                  </h4>
+                </div>
+
+                <div className="alert alert-dark border-0 rounded-3 mb-4" style={{ background: 'rgba(0,0,0,0.25)', color: 'white' }}>
+                  <strong>I crediti non sostituiscono il pagamento del progetto.</strong> Servono solo a regolamentare l’invio delle offerte e ridurre lo spam.
+                </div>
+
+                <div className="row g-4">
+                  <div className="col-md-6">
+                    <div className="pricing-section cliente-pricing">
+                      <h6 className="fw-bold text-success mb-3">
+                        <FaUser className="me-2" />
+                        Cliente
+                      </h6>
+                      <div className="pricing-details">
+                        <div className="pricing-item">
+                          <span className="label">Crediti richiesti:</span>
+                          <span className="value text-success fw-bold">No</span>
+                        </div>
+                        <div className="pricing-item">
+                          <span className="label">Pubblicare richiesta:</span>
+                          <span className="value">Gratis</span>
+                        </div>
+                        <div className="pricing-note">
+                          <small className="text-muted">
+                            <FaCheckCircle className="text-success me-1" />
+                            Paghi solo quando confermi il deposito/garanzia per avviare il progetto
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="pricing-section fornitore-pricing">
+                      <h6 className="fw-bold text-primary mb-3">
+                        <FaUserTie className="me-2" />
+                        Fornitore
+                      </h6>
+                      <div className="pricing-details">
+                        <div className="pricing-item">
+                          <span className="label">Inviare offerta:</span>
+                          <span className="value text-warning fw-bold">1 credito</span>
+                        </div>
+                        <div className="pricing-item">
+                          <span className="label">Come ricarichi:</span>
+                          <span className="value">Scegli un pacchetto e ricevi la causale bonifico</span>
+                        </div>
+                        <div className="pricing-note">
+                          <small className="text-muted">
+                            <FaCheckCircle className="text-success me-1" />
+                            Dopo il bonifico, un admin conferma e i crediti vengono accreditati
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="alert alert-info border-0 rounded-3 mt-4 mb-0">
+                  <div className="d-flex align-items-center">
+                    <FaLightbulb className="text-info me-3" size={24} />
+                    <div>
+                      <strong>Perché i ticket?</strong> Per aumentare la qualità delle offerte, ridurre spam e garantire che i fornitori investano su progetti realmente in target.
                     </div>
                   </div>
                 </div>

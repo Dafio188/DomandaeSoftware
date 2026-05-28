@@ -7,11 +7,13 @@ import {
   FaSearch, FaFilter, FaSort, FaEye, FaEuroSign, FaCalendar, 
   FaUser, FaLayerGroup, FaChevronLeft, FaChevronRight,
   FaImage, FaExclamationTriangle, FaSpinner, FaArrowLeft,
-  FaHandshake, FaTimes
+  FaHandshake, FaTimes, FaSearch as FaRichiesteIcon
 } from 'react-icons/fa';
+import PageHeader from '../components/PageHeader';
+import '../styles/MacStyle.css';
 
 function RichiestePage() {
-  const { user, token } = useAuth();
+  const { user, token, refreshProfile } = useAuth();
   const [richieste, setRichieste] = useState([]);
   const [richiesteFiltered, setRichiesteFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +21,7 @@ function RichiestePage() {
 
   // Stati per filtri
   const [searchTerm, setSearchTerm] = useState('');
+  const [tagFilter, setTagFilter] = useState('');
   const [categoriaFilter, setCategoriaFilter] = useState('');
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
@@ -89,7 +92,6 @@ function RichiestePage() {
     try {
       await axios.post('/api/offerte/', {
         richiesta: richiestaSelezionata.id,
-        fornitore: user.id,
         descrizione,
         prezzo
       }, {
@@ -106,11 +108,19 @@ function RichiestePage() {
       setTimeout(() => {
         alert('✅ OFFERTA INVIATA!\n\nLa tua offerta è stata inviata con successo al cliente.\n\nRiceverai una notifica quando il cliente prenderà una decisione.');
       }, 500);
+
+      if (refreshProfile) {
+        refreshProfile().catch(() => {});
+      }
       
     } catch (err) {
       setError("Errore nell'invio dell'offerta: " + (err.response?.data?.detail || err.message));
     }
   };
+
+  const offertaCreditCost = 1;
+  const userCrediti = Number(user?.crediti ?? 0);
+  const creditiOk = user?.ruolo !== 'fornitore' ? true : userCrediti >= offertaCreditCost;
 
   // Gestione apertura modal offerta
   const handleFaiOfferta = (richiesta) => {
@@ -138,10 +148,21 @@ function RichiestePage() {
 
     // Filtro per testo
     if (searchTerm) {
-      filtered = filtered.filter(r => 
-        r.titolo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.descrizione.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter(r => {
+        const titolo = r.titolo || '';
+        const descrizione = r.descrizione || '';
+        return titolo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+               descrizione.toLowerCase().includes(searchTerm.toLowerCase());
+      });
+    }
+
+    // Filtro per tag/skill
+    if (tagFilter) {
+      const q = tagFilter.trim().toLowerCase();
+      filtered = filtered.filter((r) => {
+        const tags = Array.isArray(r.skill_tags) ? r.skill_tags : [];
+        return tags.some((t) => String(t).toLowerCase().includes(q));
+      });
     }
 
     // Filtro per categoria
@@ -182,7 +203,7 @@ function RichiestePage() {
 
     setRichiesteFiltered(filtered);
     setCurrentPage(1); // Reset pagina quando cambiano i filtri
-  }, [richieste, searchTerm, categoriaFilter, budgetMin, budgetMax, statoFilter, ordinamento]);
+  }, [richieste, searchTerm, tagFilter, categoriaFilter, budgetMin, budgetMax, statoFilter, ordinamento]);
 
   // Calcolo paginazione
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -193,6 +214,7 @@ function RichiestePage() {
   // Reset filtri
   const resetFiltri = () => {
     setSearchTerm('');
+    setTagFilter('');
     setCategoriaFilter('');
     setBudgetMin('');
     setBudgetMax('');
@@ -226,158 +248,168 @@ function RichiestePage() {
   }
 
   return (
-    <div className="min-vh-100 bg-gradient-light">
-      {/* Header */}
-      <div className="bg-primary text-white position-relative overflow-hidden">
-        <div className="container py-5 position-relative z-2">
-          <div className="row align-items-center">
-            <div className="col-lg-8">
-              <div className="d-flex align-items-center mb-3">
-                <Link to="/" className="btn btn-light btn-sm rounded-pill me-3">
-                  <FaArrowLeft className="me-2" />
-                  Homepage
-                </Link>
-                <span className="badge bg-light text-primary px-3 py-2 rounded-pill">RICHIESTE</span>
-              </div>
-              <h1 className="display-4 fw-bold mb-3">Tutte le Richieste</h1>
-              <p className="lead opacity-90">
-                Esplora tutte le richieste software pubblicate dai clienti. 
-                Usa i filtri per trovare il progetto perfetto per te!
-              </p>
+    <div className="py-4">
+      {/* Header Section */}
+      <PageHeader 
+        title="Esplora le Richieste"
+        subtitle="Trova il progetto perfetto per te tra le centinaia di richieste pubblicate. Filtra per categoria, budget e competenze richieste."
+        badge="RICHIESTE"
+        icon={FaSearch}
+        theme="primary"
+      />
+
+      <div className="row justify-content-center mb-5">
+        <div className="col-lg-10">
+          <div className="row g-3">
+            <div className="col-md-4">
+              <Link to="/" className="btn btn-light btn-sm rounded-pill shadow-sm w-100 py-3">
+                <FaArrowLeft className="me-2" />
+                Torna alla Homepage
+              </Link>
             </div>
-            <div className="col-lg-4 text-center">
-              <div className="bg-white bg-opacity-10 rounded-4 p-4">
-                <h3 className="mb-2">{richiesteFiltered.length}</h3>
-                <p className="mb-0 opacity-75">Richieste trovate</p>
+            <div className="col-md-8">
+              <div className="mac-glass-card p-2 d-flex align-items-center justify-content-center">
+                <span className="h4 mb-0 mac-title me-3">{richiesteFiltered.length}</span>
+                <span className="mac-subtitle small">Richieste attive trovate</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container py-5">
-        {/* Filtri */}
-        <div className="card border-0 shadow-lg rounded-4 mb-5">
-          <div className="card-header bg-white border-0 rounded-top-4 p-4">
-            <div className="d-flex align-items-center justify-content-between">
-              <div className="d-flex align-items-center">
-                <FaFilter className="text-primary me-3" size={20} />
-                <h5 className="mb-0">Filtri di Ricerca</h5>
+      {/* Filtri Section - Mac Style */}
+        <div className="mac-glass-card mb-5 p-4">
+          <div className="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+            <div className="d-flex align-items-center">
+              <div className="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                <FaFilter className="text-primary" size={20} />
               </div>
-              <button 
-                className="btn btn-outline-secondary btn-sm rounded-pill"
-                onClick={resetFiltri}
-              >
-                Reset Filtri
-              </button>
+              <h5 className="mb-0 mac-title">Filtri di Ricerca</h5>
             </div>
+            <button 
+              className="btn btn-link text-muted text-decoration-none btn-sm fw-bold"
+              onClick={resetFiltri}
+            >
+              Reset Filtri
+            </button>
           </div>
-          <div className="card-body p-4">
-            <div className="row g-3">
-              {/* Search Bar */}
-              <div className="col-md-6">
-                <label className="form-label fw-bold">🔍 Cerca per titolo o descrizione</label>
-                <div className="input-group">
-                  <span className="input-group-text bg-light border-end-0">
-                    <FaSearch className="text-muted" />
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control border-start-0"
-                    placeholder="es. App mobile, e-commerce..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Categoria */}
-              <div className="col-md-3">
-                <label className="form-label fw-bold">📂 Categoria</label>
-                <select 
-                  className="form-select"
-                  value={categoriaFilter}
-                  onChange={(e) => setCategoriaFilter(e.target.value)}
-                >
-                  <option value="">Tutte le categorie</option>
-                  {categorieSoftware.map(cat => (
-                    <option key={cat.value} value={cat.value}>
-                      {cat.icon} {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Stato */}
-              <div className="col-md-3">
-                <label className="form-label fw-bold">📊 Stato</label>
-                <select 
-                  className="form-select"
-                  value={statoFilter}
-                  onChange={(e) => setStatoFilter(e.target.value)}
-                >
-                  <option value="">Tutti gli stati</option>
-                  <option value="aperta">🟢 Aperta</option>
-                  <option value="assegnata">🟡 Assegnata</option>
-                  <option value="completata">✅ Completata</option>
-                </select>
-              </div>
-
-              {/* Budget Min */}
-              <div className="col-md-3">
-                <label className="form-label fw-bold">💰 Budget Min (€)</label>
+          
+          <div className="row g-3">
+            {/* Search Bar */}
+            <div className="col-md-4">
+              <label className="form-label mac-subtitle small text-uppercase fw-bold">🔍 Cerca per titolo o descrizione</label>
+              <div className="input-group">
+                <span className="input-group-text bg-white border-end-0 rounded-start-3">
+                  <FaSearch className="text-muted" />
+                </span>
                 <input
-                  type="number"
-                  className="form-control"
-                  placeholder="0"
-                  min="0"
-                  value={budgetMin}
-                  onChange={(e) => setBudgetMin(e.target.value)}
+                  type="text"
+                  className="form-control border-start-0 rounded-end-3 mac-input-field"
+                  placeholder="es. App mobile, e-commerce..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+            </div>
 
-              {/* Budget Max */}
-              <div className="col-md-3">
-                <label className="form-label fw-bold">💰 Budget Max (€)</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  placeholder="10000"
-                  min="0"
-                  value={budgetMax}
-                  onChange={(e) => setBudgetMax(e.target.value)}
-                />
-              </div>
+            {/* Skill tag */}
+            <div className="col-md-2">
+              <label className="form-label mac-subtitle small text-uppercase fw-bold">🏷️ Skill</label>
+              <input
+                type="text"
+                className="form-control rounded-3 mac-input-field"
+                placeholder="es. react"
+                value={tagFilter}
+                onChange={(e) => setTagFilter(e.target.value)}
+              />
+            </div>
 
-              {/* Ordinamento */}
-              <div className="col-md-3">
-                <label className="form-label fw-bold">📈 Ordina per</label>
-                <select 
-                  className="form-select"
-                  value={ordinamento}
-                  onChange={(e) => setOrdinamento(e.target.value)}
-                >
-                  <option value="recenti">🕒 Più recenti</option>
-                  <option value="budget_desc">💎 Budget: decrescente</option>
-                  <option value="budget_asc">💰 Budget: crescente</option>
-                  <option value="alfabetico">🔤 Alfabetico</option>
-                </select>
-              </div>
+            {/* Categoria */}
+            <div className="col-md-3">
+              <label className="form-label mac-subtitle small text-uppercase fw-bold">📂 Categoria</label>
+              <select 
+                className="form-select rounded-3 mac-input-field"
+                value={categoriaFilter}
+                onChange={(e) => setCategoriaFilter(e.target.value)}
+              >
+                <option value="">Tutte le categorie</option>
+                {categorieSoftware.map(cat => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.icon} {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Statistiche Filtri */}
-              <div className="col-md-3 d-flex align-items-end">
-                <div className="w-100">
-                  <div className="bg-light rounded-3 p-3 text-center">
-                    <small className="text-muted d-block">Risultati</small>
-                    <strong className="text-primary fs-5">{richiesteFiltered.length}</strong>
-                  </div>
+            {/* Stato */}
+            <div className="col-md-3">
+              <label className="form-label mac-subtitle small text-uppercase fw-bold">📊 Stato</label>
+              <select 
+                className="form-select rounded-3 mac-input-field"
+                value={statoFilter}
+                onChange={(e) => setStatoFilter(e.target.value)}
+              >
+                <option value="">Tutti gli stati</option>
+                <option value="aperta">🟢 Aperta</option>
+                <option value="assegnata">🟡 Assegnata</option>
+                <option value="completata">✅ Completata</option>
+              </select>
+            </div>
+
+            {/* Budget Min */}
+            <div className="col-md-3">
+              <label className="form-label mac-subtitle small text-uppercase fw-bold">💰 Budget Min (€)</label>
+              <input
+                type="number"
+                className="form-control rounded-3 mac-input-field"
+                placeholder="0"
+                min="0"
+                value={budgetMin}
+                onChange={(e) => setBudgetMin(e.target.value)}
+              />
+            </div>
+
+            {/* Budget Max */}
+            <div className="col-md-3">
+              <label className="form-label mac-subtitle small text-uppercase fw-bold">💰 Budget Max (€)</label>
+              <input
+                type="number"
+                className="form-control rounded-3 mac-input-field"
+                placeholder="10000"
+                min="0"
+                value={budgetMax}
+                onChange={(e) => setBudgetMax(e.target.value)}
+              />
+            </div>
+
+            {/* Ordinamento */}
+            <div className="col-md-3">
+              <label className="form-label mac-subtitle small text-uppercase fw-bold">📈 Ordina per</label>
+              <select 
+                className="form-select rounded-3 mac-input-field"
+                value={ordinamento}
+                onChange={(e) => setOrdinamento(e.target.value)}
+              >
+                <option value="recenti">🕒 Più recenti</option>
+                <option value="budget_desc">💎 Budget: decrescente</option>
+                <option value="budget_asc">💰 Budget: crescente</option>
+                <option value="alfabetico">🔤 Alfabetico</option>
+              </select>
+            </div>
+
+            {/* Statistiche Filtri */}
+            <div className="col-md-3 d-flex align-items-end">
+              <div className="w-100">
+                <div className="bg-primary bg-opacity-10 rounded-3 p-2 text-center">
+                  <small className="text-primary d-block fw-bold small">RISULTATI</small>
+                  <strong className="text-primary fs-5">{richiesteFiltered.length}</strong>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Griglia Richieste */}
+        {/* Griglia Richieste - Mac Cards */}
         {currentItems.length > 0 ? (
           <>
             <div className="row g-4 mb-5">
@@ -386,108 +418,108 @@ function RichiestePage() {
                 
                 return (
                   <div key={richiesta.id} className="col-lg-4 col-md-6">
-                    <div className="card border-0 shadow-lg rounded-4 h-100 richiesta-card">
-                      <div className="card-body p-4">
-                        {/* Header con categoria e stato */}
-                        <div className="d-flex align-items-center justify-content-between mb-3">
-                          <div className="badge rounded-pill px-3 py-2" 
-                               style={{ backgroundColor: categoriaInfo?.value ? '#007bff' : '#6c757d', color: 'white' }}>
-                            <span className="me-1">{categoriaInfo?.icon || '⚡'}</span>
-                            {categoriaInfo?.label || 'Altro'}
-                          </div>
-                          <div className={`badge rounded-pill px-3 py-2 ${
-                            richiesta.stato === 'aperta' ? 'bg-success' :
-                            richiesta.stato === 'assegnata' ? 'bg-warning' : 'bg-secondary'
-                          }`}>
-                            {richiesta.stato === 'aperta' ? '🟢 Aperta' :
-                             richiesta.stato === 'assegnata' ? '🟡 Assegnata' : '✅ Completata'}
-                          </div>
+                    <div className="mac-glass-card h-100 p-4 d-flex flex-column">
+                      {/* Header con categoria e stato */}
+                      <div className="d-flex align-items-center justify-content-between mb-3">
+                        <div className="mac-badge" 
+                             style={{ backgroundColor: 'rgba(0, 113, 227, 0.1)', color: '#0071e3' }}>
+                          <span className="me-1">{categoriaInfo?.icon || '⚡'}</span>
+                          {categoriaInfo?.label || 'Altro'}
                         </div>
-
-                        {/* Immagine se presente */}
-                        {richiesta.immagine && (
-                          <div className="mb-3">
-                            <img 
-                              src={richiesta.immagine} 
-                              alt={richiesta.titolo}
-                              className="img-fluid rounded-3"
-                              style={{ height: '150px', width: '100%', objectFit: 'cover' }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Titolo */}
-                        <h5 className="card-title fw-bold text-primary mb-2">
-                          {richiesta.titolo}
-                        </h5>
-
-                        {/* Descrizione */}
-                        <p className="card-text text-muted mb-3" style={{ lineHeight: '1.6' }}>
-                          {richiesta.descrizione.length > 120 
-                            ? richiesta.descrizione.substring(0, 120) + '...'
-                            : richiesta.descrizione
-                          }
-                        </p>
-
-                        {/* Info richiesta */}
-                        <div className="row g-2 mb-3">
-                          <div className="col-6">
-                            <div className="d-flex align-items-center">
-                              <FaEuroSign className="text-success me-2" />
-                              <div>
-                                <small className="text-muted d-block">Budget</small>
-                                <strong className="text-success">{richiesta.budget}€</strong>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-6">
-                            <div className="d-flex align-items-center">
-                              <FaUser className="text-info me-2" />
-                              <div>
-                                <small className="text-muted d-block">Cliente</small>
-                                <strong>{richiesta.cliente_username || 'Cliente'}</strong>
-                              </div>
-                            </div>
-                          </div>
+                        <div className={`mac-badge ${
+                          richiesta.stato === 'aperta' ? 'bg-success bg-opacity-10 text-success' :
+                          richiesta.stato === 'assegnata' ? 'bg-warning bg-opacity-10 text-warning' : 'bg-secondary bg-opacity-10 text-secondary'
+                        }`}>
+                          {richiesta.stato === 'aperta' ? '🟢 Aperta' :
+                           richiesta.stato === 'assegnata' ? '🟡 Assegnata' : '✅ Completata'}
                         </div>
+                      </div>
 
-                        {/* Footer con data e azione */}
-                        <div className="border-top pt-3 d-flex justify-content-between align-items-center">
-                          <small className="text-muted">
-                            <FaCalendar className="me-1" />
-                            {new Date(richiesta.data_creazione).toLocaleDateString('it-IT')}
-                          </small>
-                          
-                          {/* Debug info - rimuovere dopo test */}
-                          {console.log('Debug Richiesta:', {
-                            id: richiesta.id,
-                            stato: richiesta.stato,
-                            userRuolo: user?.ruolo,
-                            showButton: user?.ruolo === 'fornitore' && richiesta.stato === 'aperta'
-                          })}
-                          
-                          {user?.ruolo === 'fornitore' ? (
-                            richiesta.stato === 'aperta' ? (
-                              <button 
-                                className="btn btn-primary btn-sm rounded-pill"
-                                onClick={() => handleFaiOfferta(richiesta)}
-                              >
-                                <FaHandshake className="me-1" />
-                                Fai Offerta
-                              </button>
-                            ) : (
-                              <span className="btn btn-outline-warning btn-sm rounded-pill disabled">
-                                <FaHandshake className="me-1" />
-                                {richiesta.stato === 'assegnata' ? 'Assegnata' : 'Completata'}
-                              </span>
-                            )
-                          ) : (
-                            <span className="btn btn-outline-secondary btn-sm rounded-pill disabled">
-                              <FaEye className="me-1" />
-                              {user ? 'Solo Fornitori' : 'Login Richiesto'}
+                      {/* Immagine se presente */}
+                      {richiesta.immagine && (
+                        <div className="mb-3 position-relative overflow-hidden rounded-4" style={{ height: '160px' }}>
+                          <img 
+                            src={richiesta.immagine} 
+                            alt={richiesta.titolo}
+                            className="w-100 h-100 object-fit-cover"
+                          />
+                        </div>
+                      )}
+
+                      {/* Titolo */}
+                      <h5 className="mac-title mb-2 fs-5">
+                        {richiesta.titolo}
+                      </h5>
+
+                      {Array.isArray(richiesta.skill_tags) && richiesta.skill_tags.length > 0 && (
+                        <div className="d-flex flex-wrap gap-2 mb-3">
+                          {richiesta.skill_tags.slice(0, 5).map((tag) => (
+                            <span key={tag} className="badge bg-light text-dark fw-medium border-0 rounded-pill px-2 py-1 small">
+                              #{tag}
                             </span>
-                          )}
+                          ))}
                         </div>
+                      )}
+
+                      {/* Descrizione */}
+                      <p className="mac-subtitle mb-4 flex-grow-1 small" style={{ lineHeight: '1.5' }}>
+                        {richiesta.descrizione.length > 120 
+                          ? richiesta.descrizione.substring(0, 120) + '...'
+                          : richiesta.descrizione
+                        }
+                      </p>
+
+                      {/* Info richiesta */}
+                      <div className="row g-2 mb-4 p-3 rounded-4 bg-white bg-opacity-50">
+                        <div className="col-6">
+                          <div className="d-flex align-items-center">
+                            <div className="bg-success bg-opacity-10 p-2 rounded-3 me-2">
+                              <FaEuroSign className="text-success" size={12} />
+                            </div>
+                            <div>
+                              <small className="mac-subtitle d-block x-small">BUDGET</small>
+                              <strong className="text-success small">{richiesta.budget}€</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-6 border-start ps-3">
+                          <div className="d-flex align-items-center">
+                            <div className="bg-info bg-opacity-10 p-2 rounded-3 me-2">
+                              <FaUser className="text-info" size={12} />
+                            </div>
+                            <div>
+                              <small className="mac-subtitle d-block x-small">CLIENTE</small>
+                              <strong className="text-dark small">{richiesta.cliente_username || 'Utente'}</strong>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer con data e azione */}
+                      <div className="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                        <small className="mac-subtitle x-small">
+                          <FaCalendar className="me-1" />
+                          {new Date(richiesta.data_creazione).toLocaleDateString('it-IT')}
+                        </small>
+                        
+                        {user?.ruolo === 'fornitore' ? (
+                          richiesta.stato === 'aperta' ? (
+                            <button 
+                              className="btn btn-primary btn-sm rounded-pill px-3 fw-bold"
+                              onClick={() => handleFaiOfferta(richiesta)}
+                            >
+                              Fai Offerta
+                            </button>
+                          ) : (
+                            <span className="text-muted small fw-medium">
+                              {richiesta.stato === 'assegnata' ? 'Assegnata' : 'Completata'}
+                            </span>
+                          )
+                        ) : (
+                          <Link to="/login" className="text-primary small fw-bold text-decoration-none">
+                            Vedi dettagli
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -495,14 +527,14 @@ function RichiestePage() {
               })}
             </div>
 
-            {/* Paginazione */}
+            {/* Paginazione Mac Style */}
             {totalPages > 1 && (
-              <div className="d-flex justify-content-center">
-                <nav>
-                  <ul className="pagination pagination-lg">
+              <div className="d-flex justify-content-center pb-5">
+                <nav className="mac-glass-card p-2">
+                  <ul className="pagination pagination-sm mb-0 border-0">
                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
                       <button 
-                        className="page-link rounded-pill me-2"
+                        className="page-link border-0 rounded-circle bg-transparent text-primary"
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
                       >
@@ -517,7 +549,7 @@ function RichiestePage() {
                         return (
                           <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
                             <button 
-                              className="page-link rounded-pill mx-1"
+                              className={`page-link border-0 rounded-circle mx-1 ${currentPage === page ? 'bg-primary text-white shadow' : 'bg-transparent text-dark'}`}
                               onClick={() => setCurrentPage(page)}
                             >
                               {page}
@@ -527,7 +559,7 @@ function RichiestePage() {
                       } else if (page === currentPage - 3 || page === currentPage + 3) {
                         return (
                           <li key={page} className="page-item disabled">
-                            <span className="page-link rounded-pill mx-1">...</span>
+                            <span className="page-link border-0 bg-transparent">...</span>
                           </li>
                         );
                       }
@@ -536,7 +568,7 @@ function RichiestePage() {
                     
                     <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
                       <button 
-                        className="page-link rounded-pill ms-2"
+                        className="page-link border-0 rounded-circle bg-transparent text-primary"
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages}
                       >
@@ -549,86 +581,96 @@ function RichiestePage() {
             )}
           </>
         ) : (
-          <div className="text-center py-5">
-            <FaExclamationTriangle size={64} className="text-muted mb-4 opacity-50" />
-            <h4 className="text-muted mb-2">Nessuna richiesta trovata</h4>
-            <p className="text-muted mb-4">
+          <div className="text-center py-5 mac-glass-card">
+            <div className="bg-light rounded-circle d-inline-flex p-4 mb-4">
+              <FaExclamationTriangle size={48} className="text-muted opacity-50" />
+            </div>
+            <h4 className="mac-title mb-2">Nessuna richiesta trovata</h4>
+            <p className="mac-subtitle mb-4">
               Prova a modificare i filtri di ricerca o a esplorare tutte le categorie.
             </p>
-            <button className="btn btn-primary rounded-pill px-4" onClick={resetFiltri}>
+            <button className="btn btn-primary rounded-pill px-4 fw-bold" onClick={resetFiltri}>
               Reset Filtri
             </button>
           </div>
         )}
-      </div>
 
-      {/* MODAL OFFERTA */}
+      {/* MODAL OFFERTA - Mac Style */}
       {showModalOfferta && richiestaSelezionata && (
-        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1">
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)' }} tabIndex="-1">
           <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg rounded-4">
-              <div className="modal-header bg-primary bg-gradient text-white border-0 rounded-top-4">
+            <div className="modal-content mac-glass-card border-0 overflow-hidden">
+              <div className="modal-header border-0 p-4">
                 <div>
-                  <h4 className="modal-title mb-1">
-                    <FaHandshake className="me-3" />
+                  <h4 className="mac-title mb-1">
+                    <FaHandshake className="me-2 text-primary" />
                     Fai un'offerta
                   </h4>
-                  <p className="mb-0 opacity-90">Proponi la tua soluzione per: {richiestaSelezionata.titolo}</p>
+                  <p className="mac-subtitle mb-0 small">Proponi la tua soluzione professionale</p>
                 </div>
                 <button 
                   type="button" 
-                  className="btn-close btn-close-white" 
+                  className="btn-close shadow-none" 
                   onClick={handleCloseModalOfferta}
                 ></button>
               </div>
-              <div className="modal-body p-4">
+              <div className="modal-body p-4 pt-0">
                 {/* Messaggio di successo */}
                 {success && (
-                  <div className="alert alert-success alert-dismissible fade show rounded-4 mb-4" role="alert">
+                  <div className="alert alert-success border-0 rounded-4 mb-4 bg-success bg-opacity-10 text-success">
+                    <FaCheckCircle className="me-2" />
                     <strong>{success}</strong>
-                    <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
                   </div>
                 )}
 
                 {/* Messaggio di errore */}
                 {error && (
-                  <div className="alert alert-danger alert-dismissible fade show rounded-4 mb-4" role="alert">
+                  <div className="alert alert-danger border-0 rounded-4 mb-4 bg-danger bg-opacity-10 text-danger">
+                    <FaExclamationTriangle className="me-2" />
                     <strong>{error}</strong>
-                    <button type="button" className="btn-close" onClick={() => setError('')}></button>
                   </div>
                 )}
 
                 {/* Info richiesta */}
-                <div className="card bg-light bg-gradient border-0 rounded-4 mb-4">
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-md-8">
-                        <h6 className="text-primary fw-bold mb-2">{richiestaSelezionata.titolo}</h6>
-                        <p className="text-muted mb-2" style={{ fontSize: '0.9rem' }}>
-                          {richiestaSelezionata.descrizione.length > 150 
-                            ? richiestaSelezionata.descrizione.substring(0, 150) + '...'
-                            : richiestaSelezionata.descrizione
-                          }
-                        </p>
-                      </div>
-                      <div className="col-md-4 text-md-end">
-                        <div className="mb-2">
-                          <small className="text-muted">Budget cliente</small>
-                          <div className="h5 text-success mb-0">
-                            <FaEuroSign className="me-1" />
-                            {richiestaSelezionata.budget}€
-                          </div>
+                <div className="p-3 rounded-4 bg-primary bg-opacity-5 mb-4 border border-primary border-opacity-10">
+                  <div className="row align-items-center">
+                    <div className="col-md-8">
+                      <h6 className="mac-title mb-2 text-primary">{richiestaSelezionata.titolo}</h6>
+                      <p className="mac-subtitle mb-0 small">
+                        {richiestaSelezionata.descrizione.length > 150 
+                          ? richiestaSelezionata.descrizione.substring(0, 150) + '...'
+                          : richiestaSelezionata.descrizione
+                        }
+                      </p>
+                    </div>
+                    <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                      <div className="bg-white bg-opacity-50 p-2 rounded-3 d-inline-block">
+                        <small className="mac-subtitle d-block x-small">BUDGET</small>
+                        <div className="h5 text-success fw-bold mb-0">
+                          {richiestaSelezionata.budget}€
                         </div>
-                        <small className="text-muted">
-                          <FaUser className="me-1" />
-                          {richiestaSelezionata.cliente_username}
-                        </small>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <form onSubmit={handleSubmitOfferta}>
+                  <div className="alert alert-warning border-0 rounded-4 mb-4 bg-warning bg-opacity-10 text-dark small">
+                    <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                      <div>
+                        <FaTicketAlt className="me-2" />
+                        <strong>Ticket:</strong> inviare un’offerta costa {offertaCreditCost} credito
+                      </div>
+                      <div className="bg-white bg-opacity-50 px-2 py-1 rounded-2">
+                        <strong>Saldo:</strong> {userCrediti}
+                      </div>
+                    </div>
+                    {!creditiOk && (
+                      <div className="mt-2 text-danger fw-bold">
+                        Crediti insufficienti: ricarica per poter inviare offerte. <Link to="/crediti" className="text-danger">Vai a Crediti</Link>
+                      </div>
+                    )}
+                  </div>
                   <div className="mb-4">
                     <label className="form-label fw-bold">La tua proposta dettagliata</label>
                     <textarea 
@@ -676,7 +718,7 @@ function RichiestePage() {
                     <button 
                       type="submit" 
                       className="btn btn-primary btn-lg flex-fill rounded-pill shadow"
-                      disabled={!descrizione || !prezzo}
+                      disabled={!descrizione || !prezzo || !creditiOk}
                     >
                       <FaHandshake className="me-2" />
                       Invia Offerta

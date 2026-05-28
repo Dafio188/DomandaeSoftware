@@ -39,52 +39,76 @@ body {
   }
 }
 
-.card {
-  padding: 2em;
+/* Apple Style Global Enhancements */
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
 
-/* Stili per le card delle categorie software */
-.categoria-card .card {
-  background: #ffffff !important;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0,0,0,0.1) !important;
+.card-hover:hover {
+  transform: translateY(-8px) scale(1.01) !important;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.12) !important;
 }
 
-.categoria-card .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+/* Richiesta & Prodotto Cards - Mac Style */
+.richiesta-card .card, .prodotto-card .card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px !important;
+  overflow: hidden;
 }
 
-.categoria-card .card-body {
-  background: #ffffff !important;
+.richiesta-card .card-body, .prodotto-card .card-body {
+  padding: 1.5rem !important;
 }
 
-.categoria-card h5 {
-  color: #2c3e50 !important;
-  font-weight: 700 !important;
+/* Apple-style Section Headers */
+section h2.display-4 {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 1rem;
 }
 
-.categoria-card p {
-  color: #6c757d !important;
+/* Custom Scrollbar Apple Style */
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-.categoria-card .text-muted {
-  color: #6c757d !important;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.categoria-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 1;
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.3);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
-.categoria-card .card-body > * {
-  position: relative;
-  z-index: 2;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 120, 0.5);
+  background-clip: content-box;
+}
+
+/* Stats Strip Mac Style */
+.hiw-stats-strip {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.hiw-stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0071e3;
 }
 
 .read-the-docs {

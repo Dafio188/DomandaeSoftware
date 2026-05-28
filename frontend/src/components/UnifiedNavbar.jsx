@@ -20,14 +20,20 @@ import {
   FaProjectDiagram,
   FaStore,
   FaSearch,
-  FaHandshake
+  FaHandshake,
+  FaTicketAlt
 } from 'react-icons/fa';
+import NotificationBell from './NotificationBell';
 import './UnifiedNavbar.css';
+
+// Versione del logo per forzare il refresh della cache dopo modifiche
+const LOGO_VERSION = '20260411-1400';
 
 function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
   const { user, role, logoutUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const logoSrc = `/images/softmatch-logo.svg?v=${LOGO_VERSION}`;
   
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -40,7 +46,7 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
     if (variant !== 'auto') return variant;
     
     if (location.pathname === '/') return 'transparent';
-    if (location.pathname.startsWith('/dashboard')) return 'dashboard';
+    if (location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin')) return 'dashboard';
     return 'solid';
   };
 
@@ -120,7 +126,9 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
   // Menu items per dashboard
   const dashboardMenuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: FaTachometerAlt },
+    ...(role === 'amministratore' ? [{ path: '/dashboard/admin', label: 'Admin Panel', icon: FaShieldAlt }] : []),
     { path: '/progetti', label: 'I Miei Progetti', icon: FaProjectDiagram },
+    ...(role === 'fornitore' ? [{ path: '/crediti', label: 'Crediti', icon: FaTicketAlt }] : []),
     { path: '/prodotti-pronti', label: 'Prodotti', icon: FaStore }
   ];
 
@@ -186,12 +194,12 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
               <Link to={user ? '/dashboard' : '/'} className="brand-link">
                 <div className="brand-content">
                   <img 
-                    src="/images/LOGO_TECNOBRIDGE.png" 
-                    alt="TechnoBridge" 
+                    src={logoSrc} 
+                    alt="SoftMatch" 
                     className="brand-logo"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'inline';
+                      e.target.onerror = null;
+                      e.target.src = '/images/softmatch-logo.svg';
                     }}
                   />
                 </div>
@@ -216,18 +224,12 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
             </div>
 
             {/* Auth Section */}
-            <div className="navbar-auth d-none d-lg-flex">
+            <div className="navbar-auth d-none d-lg-flex align-items-center">
+              {user && <NotificationBell />}
               {!user ? (
-                <div className="auth-buttons">
-                  <Link to="/login" className="btn btn-outline-light btn-sm">
-                    <FaSignInAlt className="me-1" />
-                    Login
-                  </Link>
-                  <Link to="/register" className="btn btn-warning btn-sm">
-                    <FaUserPlus className="me-1" />
-                    Registrati
-                  </Link>
-                </div>
+                <Link to="/login" className="btn btn-primary rounded-pill px-4 py-2 shadow-sm" style={{ background: '#0071e3', border: 'none', fontWeight: '600' }}>
+                  Accedi / Registrati
+                </Link>
               ) : (
                 <div className="user-menu">
                   {/* User Dropdown */}
@@ -297,11 +299,16 @@ function UnifiedNavbar({ variant = 'auto', autoHide = true }) {
           <div className="mobile-drawer-header">
             <div className="drawer-brand">
               <img 
-                src="/images/LOGO_TECNOBRIDGE.png" 
-                alt="TechnoBridge" 
+                src={logoSrc} 
+                alt="SoftMatch" 
                 className="drawer-logo"
+                style={{ borderRadius: '10px' }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/images/softmatch-logo.svg';
+                }}
               />
-              <span className="drawer-title">TechnoBridge</span>
+              <span className="drawer-title">SoftMatch</span>
             </div>
             <button 
               className="drawer-close"

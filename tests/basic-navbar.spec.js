@@ -17,7 +17,7 @@ test.describe('Basic Navbar Tests', () => {
     await page.waitForLoadState('networkidle');
     
     // Cerca il logo in vari modi
-    const logo = page.locator('img[alt*="TechnoBridge"], img[alt*="logo"], .navbar-brand img');
+    const logo = page.locator('img[alt*="SoftMatch"], img[alt*="logo"], .navbar-brand img');
     await expect(logo.first()).toBeVisible();
   });
 

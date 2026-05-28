@@ -17,326 +17,225 @@ import {
   FaCreditCard,
   FaUserShield
 } from 'react-icons/fa';
-import './ChiSiamo.css';
+import PageHeader from '../components/PageHeader';
+import '../styles/MacStyle.css';
 
 function ChiSiamo() {
   return (
-    <div className="min-vh-100 bg-gradient chi-siamo-page">
-      {/* Hero Section */}
-      <div className="hero-section bg-primary text-white position-relative overflow-hidden">
-        <div className="container py-5 position-relative z-2">
-          <div className="row align-items-center">
-            <div className="col-lg-7">
-              <h1 className="display-3 fw-bold mb-4">
-                Chi Siamo
-                <div className="hero-icon-floating">
-                  <FaRocket size={60} className="text-warning" />
-                </div>
-              </h1>
-              <p className="lead mb-4 opacity-90">
-                Siamo una piattaforma innovativa che connette <strong>clienti</strong> con <strong>sviluppatori professionali</strong> 
-                per realizzare progetti software su misura, garantendo sicurezza, qualità e trasparenza in ogni fase.
-              </p>
-              <div className="d-flex flex-wrap gap-3">
-                <div className="feature-badge">
-                  <FaShieldAlt className="me-2" />
-                  Sicurezza Garantita
-                </div>
-                <div className="feature-badge">
-                  <FaUsers className="me-2" />
-                  Community Verificata
-                </div>
-                <div className="feature-badge">
-                  <FaHandshake className="me-2" />
-                  Pagamenti Protetti
-                </div>
-              </div>
+    <div className="mac-page-wrapper pt-5">
+      {/* Hero Section - Mac Style */}
+      <PageHeader 
+        title="La rivoluzione dello sviluppo software"
+        subtitle="SoftMatch è l'ecosistema digitale dove le idee diventano codice. Connettiamo visione e competenza per creare il software del futuro, con la semplicità e l'eleganza che meritano i grandi progetti."
+        badge="CHI SIAMO"
+        icon={FaRocket}
+        theme="primary"
+      />
+
+      <div className="container mb-5">
+        <div className="row align-items-center">
+          <div className="col-lg-7">
+            <div className="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
+              <span className="mac-badge bg-light text-dark shadow-sm">🛡️ Sicurezza Apple-grade</span>
+              <span className="mac-badge bg-light text-dark shadow-sm">🤝 Community Elite</span>
+              <span className="mac-badge bg-light text-dark shadow-sm">💎 Qualità Garantita</span>
             </div>
-            <div className="col-lg-5 text-center">
-              <div className="hero-illustration">
-                <div className="floating-card">
-                  <div className="card border-0 shadow-lg">
-                    <div className="card-body text-center text-dark">
-                      <FaGlobe size={48} className="text-primary mb-3" />
-                      <h5 className="text-primary">La Nostra Missione</h5>
-                      <p className="small mb-0">
-                        Democratizzare l'accesso allo sviluppo software di qualità
-                      </p>
-                    </div>
-                  </div>
-                </div>
+          </div>
+          <div className="col-lg-5 text-center mt-5 mt-lg-0">
+            <div className="mac-glass-card p-4">
+              <div className="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                <FaGlobe size={32} className="text-primary" />
               </div>
+              <h4 className="mac-title mb-2 h5">La Nostra Missione</h4>
+              <p className="mac-subtitle mb-0 small">
+                Democratizzare l'accesso allo sviluppo software di alta qualità, 
+                eliminando le barriere tra chi ha una visione e chi ha il talento per realizzarla.
+              </p>
             </div>
           </div>
         </div>
-        <div className="hero-decoration"></div>
       </div>
 
       <div className="container py-5">
-        {/* La Nostra Storia */}
-        <div className="row mb-5">
-          <div className="col-12">
-            <div className="text-center mb-5">
-              <h2 className="display-5 fw-bold text-primary mb-3">
-                <FaLightbulb className="me-3 text-warning" />
-                La Nostra Storia
-              </h2>
-              <p className="lead text-light">Come è nata l'idea di Domanda & Software</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="row align-items-center">
-          <div className="col-lg-6">
-            <div className="story-content">
-              <h3 className="fw-bold mb-4 text-primary">La Nostra Storia</h3>
-              <p className="text-light mb-4">
-                Domanda & Software nasce dall'esperienza diretta dei problemi che affliggono 
-                il mondo dello sviluppo software freelance. Troppi progetti falliscono per 
-                mancanza di fiducia, comunicazione inadeguata e assenza di garanzie.
-              </p>
-              
-              <div className="problem-stats mb-4">
-                <div className="row g-3">
+        {/* La Nostra Storia - Mac Style */}
+        <div className="mac-glass-card p-5 mb-5">
+          <div className="row align-items-center">
+            <div className="col-lg-6">
+              <div className="pe-lg-5">
+                <div className="d-flex align-items-center mb-4">
+                  <div className="bg-warning bg-opacity-10 p-2 rounded-3 me-3">
+                    <FaLightbulb className="text-warning" size={24} />
+                  </div>
+                  <h2 className="mac-title mb-0">La Nostra Storia</h2>
+                </div>
+                
+                <p className="mac-subtitle mb-4">
+                  SoftMatch nasce dall'esigenza di risolvere i problemi cronici dello sviluppo software: 
+                  mancanza di trasparenza, ritardi e incertezza sui pagamenti. 
+                  Abbiamo costruito quello che avremmo voluto usare noi stessi.
+                </p>
+                
+                <div className="row g-3 mb-4">
                   <div className="col-6">
-                    <div className="stat-item text-center p-3 bg-danger bg-opacity-10 rounded-3">
-                      <h4 className="text-danger fw-bold mb-1">67%</h4>
-                      <small className="text-light">Progetti falliti per mancanza di fiducia</small>
+                    <div className="p-3 bg-white bg-opacity-50 rounded-4 text-center">
+                      <h3 className="mac-title text-success mb-1">94%</h3>
+                      <small className="mac-subtitle x-small fw-bold">PROGETTI COMPLETATI</small>
                     </div>
                   </div>
                   <div className="col-6">
-                    <div className="stat-item text-center p-3 bg-warning bg-opacity-10 rounded-3">
-                      <h4 className="text-warning fw-bold mb-1">43%</h4>
-                      <small className="text-light">Sviluppatori sottopagati</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <h4 className="fw-bold mb-3 text-success">La Nostra Soluzione</h4>
-              <p className="text-light mb-4">
-                Abbiamo creato una piattaforma che mette al centro la <strong>fiducia</strong>, 
-                la <strong>trasparenza</strong> e la <strong>sicurezza</strong>. Ogni progetto 
-                è supervisionato, ogni pagamento è garantito, ogni comunicazione è protetta.
-              </p>
-              
-              <div className="success-stats mb-4">
-                <div className="row g-3">
-                  <div className="col-6">
-                    <div className="stat-item text-center p-3 bg-success bg-opacity-10 rounded-3">
-                      <h4 className="text-success fw-bold mb-1">94%</h4>
-                      <small className="text-light">Progetti completati con successo</small>
-                    </div>
-                  </div>
-                  <div className="col-6">
-                    <div className="stat-item text-center p-3 bg-info bg-opacity-10 rounded-3">
-                      <h4 className="text-info fw-bold mb-1">4.8/5</h4>
-                      <small className="text-light">Soddisfazione media clienti</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="col-lg-6">
-            <div className="story-visual text-center">
-              <div className="story-illustration">
-                <FaRocket size={120} className="text-primary mb-4" />
-                <h4 className="text-primary fw-bold">Innovazione Continua</h4>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* I Nostri Valori */}
-        <div className="values-section mb-5">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold text-primary mb-3">
-              <FaHeart className="me-3 text-danger" />
-              I Nostri Valori
-            </h2>
-            <p className="lead text-light">I principi che guidano ogni nostra decisione</p>
-          </div>
-          
-          <div className="row g-4">
-            <div className="col-lg-4">
-              <div className="value-card">
-                <div className="value-icon">
-                  <FaShieldAlt />
-                </div>
-                <h5 className="fw-bold mb-3">Sicurezza Prima di Tutto</h5>
-                <p className="text-dark">
-                  Ogni transazione è protetta, ogni comunicazione è supervisionata, 
-                  ogni progetto è garantito. La sicurezza non è un'opzione, è la base.
-                </p>
-              </div>
-            </div>
-            
-            <div className="col-lg-4">
-              <div className="value-card">
-                <div className="value-icon">
-                  <FaHandshake />
-                </div>
-                <h5 className="fw-bold mb-3">Trasparenza Totale</h5>
-                <p className="text-dark">
-                  Nessun costo nascosto, nessuna sorpresa. Tutto è chiaro fin dall'inizio: 
-                  prezzi, tempi, commissioni e garanzie.
-                </p>
-              </div>
-            </div>
-            
-            <div className="col-lg-4">
-              <div className="value-card">
-                <div className="value-icon">
-                  <FaUsers />
-                </div>
-                <h5 className="fw-bold mb-3">Comunità di Qualità</h5>
-                <p className="text-dark">
-                  Solo professionisti verificati e clienti seri. Costruiamo una comunità 
-                  basata sulla competenza e sul rispetto reciproco.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Come Funzioniamo */}
-        <div className="working-section mb-5">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold text-primary mb-3">
-              <FaCogs className="me-3 text-info" />
-              Come Lavoriamo
-            </h2>
-            <p className="lead text-light">Il nostro approccio unico per garantire il successo</p>
-          </div>
-          
-          <div className="row g-4">
-            <div className="col-lg-3 col-md-6">
-              <div className="working-step">
-                <div className="step-number">1</div>
-                <div className="step-icon">
-                  <FaSearch />
-                </div>
-                <h6 className="fw-bold mb-2">Verifica Rigorosa</h6>
-                <p className="small text-dark">
-                  Ogni sviluppatore viene verificato: competenze, portfolio, 
-                  identità e referenze professionali.
-                </p>
-              </div>
-            </div>
-            
-            <div className="col-lg-3 col-md-6">
-              <div className="working-step">
-                <div className="step-number">2</div>
-                <div className="step-icon">
-                  <FaHandshake />
-                </div>
-                <h6 className="fw-bold mb-2">Matching Intelligente</h6>
-                <p className="small text-dark">
-                  Algoritmi avanzati abbinano progetti e sviluppatori 
-                  in base a competenze e compatibilità.
-                </p>
-              </div>
-            </div>
-            
-            <div className="col-lg-3 col-md-6">
-              <div className="working-step">
-                <div className="step-number">3</div>
-                <div className="step-icon">
-                  <FaEye />
-                </div>
-                <h6 className="fw-bold mb-2">Supervisione Attiva</h6>
-                <p className="small text-dark">
-                  Ogni progetto è monitorato da admin esperti che 
-                  intervengono in caso di problemi.
-                </p>
-              </div>
-            </div>
-            
-            <div className="col-lg-3 col-md-6">
-              <div className="working-step">
-                <div className="step-number">4</div>
-                <div className="step-icon">
-                  <FaAward />
-                </div>
-                <h6 className="fw-bold mb-2">Garanzia Totale</h6>
-                <p className="small text-dark">
-                  Pagamenti protetti, qualità garantita, 
-                  soddisfazione assicurata o rimborso.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Privacy e Sicurezza */}
-        <div className="privacy-section">
-          <div className="card border-0 shadow-lg rounded-4 bg-light">
-            <div className="card-body p-5">
-              <div className="text-center mb-4">
-                <FaLock className="me-3 text-warning" size={60} />
-                <h3 className="text-primary fw-bold">Privacy e Sicurezza</h3>
-                <p className="lead text-dark">La vostra privacy è sacra per noi</p>
-              </div>
-              
-              <div className="row g-4">
-                <div className="col-lg-6">
-                  <div className="privacy-item">
-                    <FaShieldAlt className="text-success me-3" size={24} />
-                    <div>
-                      <h6 className="fw-bold mb-1">Crittografia End-to-End</h6>
-                      <p className="small text-dark mb-3">
-                        Tutte le comunicazioni sono crittografate con standard militari. 
-                        Nessuno può intercettare i vostri messaggi.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="privacy-item">
-                    <FaDatabase className="text-info me-3" size={24} />
-                    <div>
-                      <h6 className="fw-bold mb-1">Dati Protetti GDPR</h6>
-                      <p className="small text-dark mb-3">
-                        Conformità totale al GDPR europeo. I vostri dati sono al sicuro 
-                        e utilizzati solo per i servizi richiesti.
-                      </p>
+                    <div className="p-3 bg-white bg-opacity-50 rounded-4 text-center">
+                      <h3 className="mac-title text-info mb-1">4.8/5</h3>
+                      <small className="mac-subtitle x-small fw-bold">RATING UTENTI</small>
                     </div>
                   </div>
                 </div>
                 
-                <div className="col-lg-6">
-                  <div className="privacy-item">
-                    <FaCreditCard className="text-warning me-3" size={24} />
-                    <div>
-                      <h6 className="fw-bold mb-1">Pagamenti Sicuri</h6>
-                      <p className="small text-dark mb-3">
-                        Integrazione con i migliori gateway di pagamento mondiali. 
-                        Le vostre carte sono sempre protette.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="privacy-item">
-                    <FaUserShield className="text-primary me-3" size={24} />
-                    <div>
-                      <h6 className="fw-bold mb-1">Identità Verificata</h6>
-                      <p className="small text-dark mb-3">
-                        Processo di verifica dell'identità per tutti gli utenti. 
-                        Solo persone reali nella nostra piattaforma.
-                      </p>
-                    </div>
+                <h4 className="mac-title mb-3 text-primary">Un Nuovo Standard</h4>
+                <p className="mac-subtitle mb-0">
+                  Ogni riga di codice, ogni transazione e ogni interazione su SoftMatch 
+                  è pensata per costruire fiducia. Non siamo solo una piattaforma, 
+                  siamo il partner tecnologico della tua crescita.
+                </p>
+              </div>
+            </div>
+            
+            <div className="col-lg-6 mt-5 mt-lg-0">
+              <div className="position-relative">
+                <div className="bg-primary bg-opacity-10 rounded-circle position-absolute top-50 start-50 translate-middle" style={{ width: '300px', height: '300px' }}></div>
+                <div className="text-center position-relative">
+                  <FaCode size={180} className="text-primary opacity-25" />
+                  <div className="mac-glass-card p-4 position-absolute top-50 start-50 translate-middle shadow-lg" style={{ minWidth: '200px' }}>
+                    <h5 className="mac-title text-primary mb-0">Innovazione</h5>
+                    <small className="mac-subtitle">Senza compromessi</small>
                   </div>
                 </div>
               </div>
-              
-              <div className="alert alert-info border-0 rounded-3 mt-4">
-                <div className="d-flex align-items-center">
-                  <FaShieldAlt className="me-3 text-info" />
-                  <div>
-                    <strong>Impegno per la Privacy:</strong> Non vendiamo mai i vostri dati a terzi. 
-                    Non inviamo spam. Non tracciamo le vostre attività al di fuori della piattaforma. 
-                    La vostra fiducia è il nostro bene più prezioso.
+            </div>
+          </div>
+        </div>
+
+        {/* I Nostri Valori - Widget Grid */}
+        <div className="text-center mb-5 pt-5">
+          <h2 className="mac-title mb-2">I Nostri Valori</h2>
+          <p className="mac-subtitle">Ciò che ci rende diversi dagli altri</p>
+        </div>
+        
+        <div className="row g-4 mb-5 pb-5">
+          <div className="col-lg-4">
+            <div className="mac-glass-card h-100 p-4 text-center">
+              <div className="bg-danger bg-opacity-10 rounded-circle d-inline-flex p-3 mb-4">
+                <FaShieldAlt className="text-danger" size={24} />
+              </div>
+              <h5 className="mac-title mb-3">Sicurezza Totale</h5>
+              <p className="mac-subtitle small">
+                Transazioni protette e supervisione costante. La tua proprietà intellettuale 
+                e il tuo budget sono al sicuro con noi.
+              </p>
+            </div>
+          </div>
+          
+          <div className="col-lg-4">
+            <div className="mac-glass-card h-100 p-4 text-center">
+              <div className="bg-success bg-opacity-10 rounded-circle d-inline-flex p-3 mb-4">
+                <FaHandshake className="text-success" size={24} />
+              </div>
+              <h5 className="mac-title mb-3">Trasparenza</h5>
+              <p className="mac-subtitle small">
+                Nessun costo nascosto. Comunicazione diretta e chiara tra cliente e fornitore 
+                per tutta la durata del progetto.
+              </p>
+            </div>
+          </div>
+          
+          <div className="col-lg-4">
+            <div className="mac-glass-card h-100 p-4 text-center">
+              <div className="bg-info bg-opacity-10 rounded-circle d-inline-flex p-3 mb-4">
+                <FaUsers className="text-info" size={24} />
+              </div>
+              <h5 className="mac-title mb-3">Eccellenza</h5>
+              <p className="mac-subtitle small">
+                Selezioniamo solo i migliori talenti. La qualità del codice è il nostro 
+                biglietto da visita nel mondo.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Come Funzioniamo - Mac Style */}
+        <div className="mac-glass-card p-5 mb-5 bg-dark bg-opacity-5">
+          <div className="text-center mb-5">
+            <h2 className="mac-title mb-2">Come Lavoriamo</h2>
+            <p className="mac-subtitle">Il nostro approccio unico per il tuo successo</p>
+          </div>
+          
+          <div className="row g-4">
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-3">
+                <div className="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '64px', height: '64px' }}>
+                  <FaSearch className="text-primary" size={24} />
+                </div>
+                <h6 className="mac-title mb-2">Verifica</h6>
+                <p className="mac-subtitle small">Processo di selezione rigoroso per ogni fornitore.</p>
+              </div>
+            </div>
+            
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-3">
+                <div className="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '64px', height: '64px' }}>
+                  <FaHandshake className="text-primary" size={24} />
+                </div>
+                <h6 className="mac-title mb-2">Matching</h6>
+                <p className="mac-subtitle small">Algoritmi per connetterti al talento ideale.</p>
+              </div>
+            </div>
+            
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-3">
+                <div className="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '64px', height: '64px' }}>
+                  <FaEye className="text-primary" size={24} />
+                </div>
+                <h6 className="mac-title mb-2">Monitoraggio</h6>
+                <p className="mac-subtitle small">Supervisione costante su ogni fase del progetto.</p>
+              </div>
+            </div>
+            
+            <div className="col-lg-3 col-md-6">
+              <div className="text-center p-3">
+                <div className="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '64px', height: '64px' }}>
+                  <FaAward className="text-primary" size={24} />
+                </div>
+                <h6 className="mac-title mb-2">Qualità</h6>
+                <p className="mac-subtitle small">Consegna garantita secondo i massimi standard.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Privacy e Sicurezza - Mac Style */}
+        <div className="mac-glass-card p-5 mb-5 border-success border-opacity-10">
+          <div className="row align-items-center">
+            <div className="col-lg-2 text-center mb-4 mb-lg-0">
+              <FaLock size={80} className="text-success opacity-50" />
+            </div>
+            <div className="col-lg-10">
+              <h3 className="mac-title mb-3">La tua sicurezza è la nostra priorità</h3>
+              <div className="row g-4">
+                <div className="col-md-6">
+                  <div className="d-flex align-items-start">
+                    <FaShieldAlt className="text-success me-3 mt-1" />
+                    <div>
+                      <h6 className="mac-title mb-1 small">Crittografia Avanzata</h6>
+                      <p className="mac-subtitle x-small mb-0">Tutti i dati e le comunicazioni sono protetti da protocolli di sicurezza leader del settore.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="d-flex align-items-start">
+                    <FaUserShield className="text-success me-3 mt-1" />
+                    <div>
+                      <h6 className="mac-title mb-1 small">GDPR Compliance</h6>
+                      <p className="mac-subtitle x-small mb-0">Rispettiamo totalmente la tua privacy secondo le normative europee vigenti.</p>
+                    </div>
                   </div>
                 </div>
               </div>

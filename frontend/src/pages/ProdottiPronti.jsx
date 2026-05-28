@@ -24,8 +24,10 @@ import {
   FaCode,
   FaArrowRight,
   FaShoppingCart,
-  FaEnvelope
+  FaEnvelope,
+  FaSearch
 } from 'react-icons/fa';
+import '../styles/MacStyle.css';
 
 function ProdottiPronti() {
   const { user, token } = useAuth();
@@ -76,10 +78,12 @@ function ProdottiPronti() {
     
     // Filtro ricerca
     if (searchTerm) {
-      risultati = risultati.filter(p => 
-        p.titolo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.descrizione.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      risultati = risultati.filter(p => {
+        const titolo = p.titolo || '';
+        const descrizione = p.descrizione || '';
+        return titolo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+               descrizione.toLowerCase().includes(searchTerm.toLowerCase());
+      });
     }
     
     // Ordinamento
@@ -269,82 +273,79 @@ function ProdottiPronti() {
   }
 
   return (
-    <div className="min-vh-100 bg-gradient-light">
-      {/* Header Hero */}
-      <div className="bg-primary text-white position-relative overflow-hidden">
-        <div className="container py-5 position-relative z-2">
-          <div className="row align-items-center">
-            <div className="col-lg-8">
-              <div className="d-flex align-items-center mb-3">
-                <FaShoppingCart className="me-3" size={32} />
-                <span className="badge bg-light text-primary px-3 py-2 rounded-pill">MARKETPLACE</span>
-              </div>
-              <h1 className="display-4 fw-bold mb-3">Prodotti Software Pronti</h1>
-              <p className="lead opacity-90">Scopri soluzioni software innovative create dai nostri fornitori esperti. Trova il prodotto perfetto per le tue esigenze!</p>
+    <div className="py-4">
+      {/* Header Hero - Mac Style */}
+      <div className="row align-items-center mb-5">
+        <div className="col-lg-8">
+          <div className="d-flex align-items-center mb-3">
+            <div className="bg-primary bg-opacity-10 p-3 rounded-4 me-3">
+              <FaShoppingCart className="text-primary" size={32} />
             </div>
-            <div className="col-lg-4 text-center">
-              {user?.ruolo === 'fornitore' && (
-                <button 
-                  className="btn btn-warning btn-lg rounded-pill px-5 py-3 shadow-lg"
-                  onClick={() => setShowCreateForm(!showCreateForm)}
-                >
-                  <FaPlus className="me-2" />
-                  Pubblica Prodotto
-                </button>
-              )}
-            </div>
+            <span className="mac-badge bg-primary text-white">MARKETPLACE</span>
           </div>
+          <h1 className="display-4 mac-title mb-3">Prodotti Software Pronti</h1>
+          <p className="lead mac-subtitle opacity-90">
+            Scopri soluzioni software innovative pronte all'uso. 
+            Risparmia tempo con pacchetti pre-configurati dai nostri migliori esperti.
+          </p>
         </div>
-        <div className="position-absolute top-0 end-0 w-100 h-100 opacity-10">
-          <div className="float-animation" style={{ fontSize: '8rem', position: 'absolute', top: '20%', right: '10%' }}>🚀</div>
-          <div className="float-animation" style={{ fontSize: '4rem', position: 'absolute', top: '60%', right: '20%', animationDelay: '1s' }}>💡</div>
+        <div className="col-lg-4 text-center">
+          {user?.ruolo === 'fornitore' && (
+            <button 
+              className="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow-lg fw-bold"
+              onClick={() => setShowCreateForm(!showCreateForm)}
+            >
+              <FaPlus className="me-2" />
+              Pubblica Prodotto
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="container py-5">
-        {/* Form Creazione Prodotto */}
+      {/* Form Creazione Prodotto - Mac Style Modal/Card */}
         {user?.ruolo === 'fornitore' && showCreateForm && (
           <div className="row mb-5">
             <div className="col-12">
-              <div className="card border-0 shadow-lg rounded-4" style={{ background: 'linear-gradient(145deg, #ffffff, #f8f9fa)' }}>
-                <div className="card-header bg-warning bg-gradient text-white border-0 rounded-top-4">
+              <div className="mac-glass-card p-0 overflow-hidden">
+                <div className="p-4 border-bottom bg-primary bg-opacity-5">
                   <div className="d-flex align-items-center justify-content-between">
                     <div className="d-flex align-items-center">
-                      <FaMagic className="me-3" size={20} />
+                      <div className="bg-primary bg-opacity-10 p-2 rounded-3 me-3">
+                        <FaMagic className="text-primary" size={20} />
+                      </div>
                       <div>
-                        <h5 className="mb-0">Crea il tuo prodotto software</h5>
-                        <small className="opacity-75">Pubblica nel marketplace e inizia a vendere</small>
+                        <h5 className="mb-0 mac-title">Nuovo Prodotto Software</h5>
+                        <p className="mac-subtitle mb-0 small">Compila i dettagli per pubblicare nel marketplace</p>
                       </div>
                     </div>
                     <button 
-                      className="btn btn-outline-light btn-sm rounded-pill"
+                      className="btn btn-link text-muted text-decoration-none"
                       onClick={() => setShowCreateForm(false)}
                     >
                       <FaTimes />
                     </button>
                   </div>
                 </div>
-                <div className="card-body p-4">
+                <div className="p-4">
                   <div className="row">
                     <div className="col-lg-8">
                       <form onSubmit={handleSubmit}>
                         <div className="row">
                           <div className="col-md-6 mb-3">
-                            <label className="form-label fw-bold">Nome del prodotto</label>
+                            <label className="form-label mac-subtitle small text-uppercase fw-bold">Nome del prodotto</label>
                             <input 
                               type="text" 
-                              className="form-control form-control-lg" 
+                              className="form-control rounded-3 mac-input-field" 
                               placeholder="Es: Sistema CRM completo per PMI" 
                               value={titolo} 
                               onChange={e => setTitolo(e.target.value)} 
                               required 
                             />
-                            <small className="text-muted">Scegli un nome accattivante e descrittivo</small>
                           </div>
                           <div className="col-md-6 mb-3">
-                            <label className="form-label fw-bold">Categoria prodotto</label>
+                            <label className="form-label mac-subtitle small text-uppercase fw-bold">Categoria prodotto</label>
                             <select 
-                              className="form-select form-select-lg" 
+                              className="form-select rounded-3 mac-input-field" 
                               value={categoria} 
                               onChange={e => setCategoria(e.target.value)}
                               required
@@ -356,116 +357,83 @@ function ProdottiPronti() {
                                 </option>
                               ))}
                             </select>
-                            {categoria && (
-                              <small className="text-info">
-                                💡 {categorieProdotti.find(c => c.value === categoria)?.desc}
-                              </small>
-                            )}
                           </div>
                         </div>
                         
                         <div className="mb-3">
-                          <label className="form-label fw-bold">Descrizione completa del prodotto</label>
+                          <label className="form-label mac-subtitle small text-uppercase fw-bold">Descrizione completa</label>
                           <textarea 
-                            className="form-control" 
+                            className="form-control rounded-3 mac-input-field" 
                             rows="4"
-                            placeholder="Descrivi dettagliatamente il tuo prodotto: funzionalità, tecnologie usate, cosa include, come si installa..."
+                            placeholder="Funzionalità, tecnologie, cosa include..."
                             value={descrizione} 
                             onChange={e => setDescrizione(e.target.value)} 
                             required 
                           />
-                          <small className="text-muted">
-                            💡 Includi: funzionalità principali, tecnologie utilizzate, requisiti di sistema, supporto incluso
-                          </small>
                         </div>
                         
                         <div className="row">
                           <div className="col-md-4 mb-3">
-                            <label className="form-label fw-bold">Prezzo di vendita</label>
-                            <div className="input-group input-group-lg">
-                              <span className="input-group-text bg-success text-white">
-                                <FaEuroSign />
+                            <label className="form-label mac-subtitle small text-uppercase fw-bold">Prezzo (€)</label>
+                            <div className="input-group">
+                              <span className="input-group-text bg-white border-end-0 rounded-start-3">
+                                <FaEuroSign className="text-success" />
                               </span>
                               <input 
                                 type="number" 
-                                className="form-control" 
+                                className="form-control border-start-0 rounded-end-3 mac-input-field" 
                                 placeholder="299" 
                                 value={prezzo} 
                                 onChange={e => setPrezzo(e.target.value)} 
                                 required 
                               />
                             </div>
-                            <small className="text-muted">Prezzo competitivo per il mercato</small>
                           </div>
                           <div className="col-md-4 mb-3">
-                            <label className="form-label fw-bold">Link demo (opzionale)</label>
+                            <label className="form-label mac-subtitle small text-uppercase fw-bold">Link demo</label>
                             <input 
                               type="url" 
-                              className="form-control form-control-lg" 
-                              placeholder="https://demo.mioprodotto.com" 
+                              className="form-control rounded-3 mac-input-field" 
+                              placeholder="https://demo.com" 
                               value={linkDemo} 
                               onChange={e => setLinkDemo(e.target.value)} 
                             />
-                            <small className="text-muted">URL per provare il prodotto</small>
                           </div>
                           <div className="col-md-4 mb-3">
-                            <label className="form-label fw-bold">Immagine prodotto</label>
+                            <label className="form-label mac-subtitle small text-uppercase fw-bold">Immagine</label>
                             <input 
                               type="file" 
-                              className="form-control" 
-                              accept="image/jpeg,image/png,image/webp"
+                              className="form-control rounded-3 mac-input-field" 
+                              accept="image/*"
                               onChange={handleImageChange}
                             />
-                            <small className="text-muted">Max 5MB - JPG, PNG, WEBP</small>
                           </div>
                         </div>
                         
-                        {anteprima && (
-                          <div className="mb-3 position-relative text-center">
-                            <img 
-                              src={anteprima} 
-                              alt="Anteprima prodotto" 
-                              className="img-thumbnail rounded-3"
-                              style={{ maxHeight: '150px', maxWidth: '200px' }}
-                            />
+                        <div className="d-flex gap-3 mt-4">
+                          <button type="submit" className="btn btn-primary rounded-pill px-4 fw-bold flex-grow-1">
+                            <FaRocket className="me-2" />
+                            Pubblica Prodotto
+                          </button>
+                          {titolo && (
                             <button 
                               type="button" 
-                              className="btn btn-sm btn-danger position-absolute"
-                              style={{ top: '-10px', right: 'calc(50% - 110px)' }}
-                              onClick={removeImage}
-                            >
-                              <FaTimes />
-                            </button>
-                          </div>
-                        )}
-                        
-                        {titolo && categoria && descrizione && prezzo && (
-                          <div className="d-flex gap-2 mt-4">
-                            <button 
-                              type="button" 
-                              className="btn btn-outline-info"
+                              className="btn btn-light rounded-pill px-4"
                               onClick={() => setShowPreview(!showPreview)}
                             >
-                              <FaEye className="me-1" />
-                              {showPreview ? 'Nascondi' : 'Mostra'} anteprima
+                              <FaEye className="me-2" />
+                              {showPreview ? 'Nascondi' : 'Anteprima'}
                             </button>
-                            <button type="submit" className="btn btn-warning btn-lg flex-fill">
-                              <FaRocket className="me-2" />
-                              Pubblica nel marketplace
-                            </button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </form>
                     </div>
                     
                     {/* Anteprima prodotto */}
                     <div className="col-lg-4">
-                      {showPreview && titolo && categoria && descrizione && prezzo && (
-                        <div>
-                          <h6 className="fw-bold mb-3">
-                            <FaLightbulb className="text-warning me-2" />
-                            Così apparirà nel marketplace:
-                          </h6>
+                      {showPreview && titolo && categoria && (
+                        <div className="p-3 bg-light rounded-4 border border-dashed">
+                          <h6 className="mac-subtitle small text-uppercase fw-bold mb-3 text-center">Preview Card</h6>
                           {renderProductPreview()}
                         </div>
                       )}
@@ -477,59 +445,53 @@ function ProdottiPronti() {
           </div>
         )}
 
-        {/* Filtri e Ricerca */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <div className="card border-0 shadow-sm rounded-4">
-              <div className="card-body p-4">
-                <div className="row align-items-center">
-                  <div className="col-md-4">
-                    <div className="input-group">
-                      <span className="input-group-text bg-primary text-white">
-                        <FaFilter />
-                      </span>
-                      <input 
-                        type="text" 
-                        className="form-control" 
-                        placeholder="Cerca prodotti..." 
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <select 
-                      className="form-select" 
-                      value={filtroCategoria}
-                      onChange={e => setFiltroCategoria(e.target.value)}
-                    >
-                      <option value="">Tutte le categorie</option>
-                      {categorieProdotti.map(cat => (
-                        <option key={cat.value} value={cat.value}>
-                          {cat.icon} {cat.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-4">
-                    <select 
-                      className="form-select" 
-                      value={ordinamento}
-                      onChange={e => setOrdinamento(e.target.value)}
-                    >
-                      <option value="recenti">🕒 Più recenti</option>
-                      <option value="prezzo_asc">💰 Prezzo: crescente</option>
-                      <option value="prezzo_desc">💎 Prezzo: decrescente</option>
-                      <option value="alfabetico">🔤 Alfabetico</option>
-                    </select>
-                  </div>
-                </div>
+        {/* Filtri e Ricerca - Mac Style */}
+        <div className="mac-glass-card mb-5 p-4">
+          <div className="row g-3 align-items-center">
+            <div className="col-md-4">
+              <div className="input-group">
+                <span className="input-group-text bg-white border-end-0 rounded-start-3">
+                  <FaSearch className="text-muted" />
+                </span>
+                <input 
+                  type="text" 
+                  className="form-control border-start-0 rounded-end-3 mac-input-field" 
+                  placeholder="Cerca software..." 
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
               </div>
+            </div>
+            <div className="col-md-4">
+              <select 
+                className="form-select rounded-3 mac-input-field" 
+                value={filtroCategoria}
+                onChange={e => setFiltroCategoria(e.target.value)}
+              >
+                <option value="">Tutte le categorie</option>
+                {categorieProdotti.map(cat => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.icon} {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-4">
+              <select 
+                className="form-select rounded-3 mac-input-field" 
+                value={ordinamento}
+                onChange={e => setOrdinamento(e.target.value)}
+              >
+                <option value="recenti">🕒 Più recenti</option>
+                <option value="prezzo_asc">💰 Prezzo: crescente</option>
+                <option value="prezzo_desc">💎 Prezzo: decrescente</option>
+                <option value="alfabetico">🔤 Alfabetico</option>
+              </select>
             </div>
           </div>
         </div>
 
-        {/* Griglia Prodotti */}
+        {/* Griglia Prodotti - Mac Style */}
         <div className="row g-4">
           {prodottiFiltrati.length > 0 ? (
             prodottiFiltrati.map(prodotto => {
@@ -537,78 +499,72 @@ function ProdottiPronti() {
               
               return (
                 <div key={prodotto.id} className="col-lg-4 col-md-6">
-                  <div className="card border-0 shadow-lg rounded-4 h-100 product-card">
-                    <div className="card-body p-4">
-                      <div className="d-flex align-items-center mb-3">
-                        <div className="badge rounded-pill px-3 py-2 me-2" style={{ backgroundColor: categoriaInfo?.color || '#6c757d', color: 'white' }}>
-                          <span className="me-1">{categoriaInfo?.icon || '📦'}</span>
-                          {categoriaInfo?.label || 'Altro'}
-                        </div>
-                        {prodotto.prezzo > 0 && (
-                          <div className="badge bg-success bg-gradient rounded-pill px-3 py-2">
-                            <FaEuroSign className="me-1" />
-                            {prodotto.prezzo}€
-                          </div>
-                        )}
+                  <div className="mac-glass-card h-100 p-4 d-flex flex-column">
+                    <div className="d-flex align-items-center justify-content-between mb-3">
+                      <div className="mac-badge" style={{ backgroundColor: 'rgba(0, 113, 227, 0.1)', color: '#0071e3' }}>
+                        <span className="me-1">{categoriaInfo?.icon || '📦'}</span>
+                        {categoriaInfo?.label || 'Altro'}
                       </div>
-                      
-                      {prodotto.immagine && (
-                        <div className="mb-3">
-                          <img 
-                            src={prodotto.immagine} 
-                            alt={prodotto.titolo}
-                            className="img-fluid rounded-3"
-                            style={{ height: '200px', width: '100%', objectFit: 'cover' }}
-                          />
+                      {prodotto.prezzo > 0 && (
+                        <div className="text-success fw-bold">
+                          <FaEuroSign className="small me-1" />
+                          {prodotto.prezzo}
                         </div>
                       )}
-                      
-                      <h5 className="card-title fw-bold text-primary mb-2">{prodotto.titolo}</h5>
-                      <p className="card-text text-muted mb-3" style={{ 
-                        lineHeight: '1.6',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical'
-                      }}>
-                        {prodotto.descrizione}
-                      </p>
-                      
-                      <div className="row g-2 mb-3">
-                        <div className="col-6">
-                          <small className="text-muted">
-                            <FaUser className="me-1" />
-                            {prodotto.fornitore_username || 'Fornitore'}
-                          </small>
-                        </div>
-                        <div className="col-6">
-                          <small className="text-muted">
-                            <FaCalendar className="me-1" />
-                            {new Date(prodotto.data_pubblicazione).toLocaleDateString('it-IT')}
-                          </small>
-                        </div>
+                    </div>
+                    
+                    {prodotto.immagine && (
+                      <div className="mb-3 position-relative overflow-hidden rounded-4" style={{ height: '180px' }}>
+                        <img 
+                          src={prodotto.immagine} 
+                          alt={prodotto.titolo}
+                          className="w-100 h-100 object-fit-cover"
+                        />
                       </div>
-                      
-                      <div className="d-flex gap-2 mt-auto">
-                        {prodotto.link_demo && (
-                          <a 
-                            href={prodotto.link_demo} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="btn btn-outline-primary btn-sm flex-fill rounded-pill"
-                          >
-                            <FaEye className="me-1" />
-                            Demo
-                          </a>
-                        )}
-                        <button 
-                          className="btn btn-primary btn-sm flex-fill rounded-pill"
-                          onClick={() => contactSupplier(prodotto.fornitore, prodotto.titolo)}
+                    )}
+                    
+                    <h5 className="mac-title mb-2 fs-5">{prodotto.titolo}</h5>
+                    <p className="mac-subtitle mb-4 flex-grow-1 small" style={{ 
+                      lineHeight: '1.5',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical'
+                    }}>
+                      {prodotto.descrizione}
+                    </p>
+                    
+                    <div className="d-flex align-items-center justify-content-between mb-4 p-2 bg-light bg-opacity-50 rounded-3">
+                      <div className="d-flex align-items-center">
+                        <div className="bg-info bg-opacity-10 p-2 rounded-circle me-2">
+                          <FaUser className="text-info" size={10} />
+                        </div>
+                        <small className="mac-subtitle x-small text-uppercase fw-bold">{prodotto.fornitore_username || 'Expert'}</small>
+                      </div>
+                      <small className="mac-subtitle x-small">
+                        {new Date(prodotto.data_pubblicazione).toLocaleDateString('it-IT')}
+                      </small>
+                    </div>
+                    
+                    <div className="d-flex gap-2 mt-auto pt-3 border-top">
+                      {prodotto.link_demo && (
+                        <a 
+                          href={prodotto.link_demo} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="btn btn-light btn-sm flex-fill rounded-pill fw-bold"
                         >
-                          <FaEnvelope className="me-1" />
-                          Contatta
-                        </button>
-                      </div>
+                          <FaEye className="me-1" />
+                          Demo
+                        </a>
+                      )}
+                      <button 
+                        className="btn btn-primary btn-sm flex-fill rounded-pill fw-bold"
+                        onClick={() => contactSupplier(prodotto.fornitore, prodotto.titolo)}
+                      >
+                        <FaEnvelope className="me-1" />
+                        Contatta
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -616,13 +572,15 @@ function ProdottiPronti() {
             })
           ) : (
             <div className="col-12">
-              <div className="text-center py-5">
-                <FaGift size={64} className="text-muted mb-3 opacity-50" />
-                <h4 className="text-muted">Nessun prodotto trovato</h4>
-                <p className="text-muted">
+              <div className="text-center py-5 mac-glass-card">
+                <div className="bg-light rounded-circle d-inline-flex p-4 mb-4">
+                  <FaGift size={48} className="text-muted opacity-50" />
+                </div>
+                <h4 className="mac-title mb-2">Nessun prodotto trovato</h4>
+                <p className="mac-subtitle mb-0">
                   {filtroCategoria || searchTerm ? 
                     'Prova a modificare i filtri di ricerca.' :
-                    'Nessun prodotto disponibile al momento. Torna più tardi!'
+                    'Nessun prodotto disponibile al momento.'
                   }
                 </p>
               </div>
@@ -630,97 +588,24 @@ function ProdottiPronti() {
           )}
         </div>
 
-        {/* Messaggi di successo/errore */}
-        {success && (
-          <div className="alert alert-success border-0 rounded-4 shadow-sm mt-4">
-            <FaCheckCircle className="me-2" />
-            {success}
-          </div>
-        )}
-        {error && (
-          <div className="alert alert-danger border-0 rounded-4 shadow-sm mt-4">
-            <FaExclamationTriangle className="me-2" />
-            {error}
+        {/* Messaggi Feedback */}
+        {(success || error) && (
+          <div className="fixed-bottom p-4 d-flex justify-content-center" style={{ zIndex: 1050 }}>
+            {success && (
+              <div className="mac-glass-card px-4 py-3 text-success shadow-lg d-flex align-items-center">
+                <FaCheckCircle className="me-3" />
+                <strong>{success}</strong>
+              </div>
+            )}
+            {error && (
+              <div className="mac-glass-card px-4 py-3 text-danger shadow-lg d-flex align-items-center">
+                <FaExclamationTriangle className="me-3" />
+                <strong>{error}</strong>
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      {/* CSS Avanzato */}
-      <style>{`
-        .bg-gradient-light {
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        }
-
-        .product-card {
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .product-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
-        }
-
-        .product-card::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-          transition: left 0.5s;
-        }
-
-        .product-card:hover::before {
-          left: 100%;
-        }
-
-        .float-animation {
-          animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        .form-control:focus, .form-select:focus {
-          border-color: #007bff;
-          box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-        }
-
-        .btn-warning {
-          background: linear-gradient(135deg, #ffc107, #ff8c00);
-          border: none;
-        }
-
-        .btn-primary {
-          background: linear-gradient(135deg, #007bff, #0056b3);
-          border: none;
-        }
-
-        .card {
-          border-radius: 1rem !important;
-        }
-
-        .badge {
-          font-size: 0.8rem;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-          .display-4 {
-            font-size: 2rem;
-          }
-          
-          .col-md-4 {
-            margin-bottom: 1rem;
-          }
-        }
-      `}</style>
-    </div>
   );
 }
 

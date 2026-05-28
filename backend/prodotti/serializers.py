@@ -3,12 +3,22 @@ from .models import ProdottoPronto
 
 class ProdottoProntoSerializer(serializers.ModelSerializer):
     fornitore_username = serializers.CharField(source='fornitore.username', read_only=True)
-    fornitore_email = serializers.CharField(source='fornitore.email', read_only=True)
     
     class Meta:
         model = ProdottoPronto
-        fields = '__all__'
+        fields = [
+            'id',
+            'titolo',
+            'descrizione',
+            'fornitore',
+            'fornitore_username',
+            'categoria',
+            'prezzo',
+            'link_demo',
+            'immagine',
+            'data_pubblicazione',
+        ]
         extra_kwargs = {
-            'fornitore': {'required': False},  # Non richiesto in input
-            'data_pubblicazione': {'read_only': True}  # Generato automaticamente
+            'fornitore': {'read_only': True},
+            'data_pubblicazione': {'read_only': True},
         }

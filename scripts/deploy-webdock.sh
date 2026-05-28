@@ -33,7 +33,7 @@ fi
 
 DOMAIN_NAME=$1
 
-log "🚀 Avvio deployment Domanda & Software su Webdock VPS"
+log "🚀 Avvio deployment SoftMatch su Webdock VPS"
 log "🌐 Dominio: $DOMAIN_NAME"
 
 # Verifica se siamo root

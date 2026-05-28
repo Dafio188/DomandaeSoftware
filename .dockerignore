@@ -1,0 +1,17 @@
+**/node_modules
+**/dist
+**/.venv
+**/.git
+**/.next
+**/.cache
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.db.sqlite3
+**/.DS_Store
+**/logs
+**/temp
+**/tmp
+**/backend/staticfiles
+**/backend/media

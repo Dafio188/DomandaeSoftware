@@ -1,0 +1,32 @@
+{
+  "short_name": "SoftMatch",
+  "name": "SoftMatch - Marketplace Sviluppo Software",
+  "description": "Il portale leader per la ricerca di programmatori e preventivi software su misura in Italia.",
+  "categories": ["business", "productivity", "developer tools"],
+  "lang": "it-IT",
+  "id": "/index.html",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/images/softmatch-logo_piccolo.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/softmatch-logo_grande.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/softmatch-logo_grande.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0d6efd",
+  "background_color": "#ffffff"
+}

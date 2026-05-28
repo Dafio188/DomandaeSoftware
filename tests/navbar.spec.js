@@ -15,8 +15,8 @@ test.describe('Navbar Functionality', () => {
     await expect(navbar).toHaveClass(/navbar-transparent/);
   });
 
-  test('logo TechnoBridge è presente e cliccabile', async ({ page }) => {
-    const logo = page.locator('img[alt="TechnoBridge"]');
+  test('logo SoftMatch è presente e cliccabile', async ({ page }) => {
+    const logo = page.locator('img[alt="SoftMatch"]');
     await expect(logo).toBeVisible();
     
     // Test click sul logo - dovrebbe rimanere sulla home

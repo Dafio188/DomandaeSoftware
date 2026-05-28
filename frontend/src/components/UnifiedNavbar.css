@@ -1,170 +1,167 @@
-/* Unified Navbar Styles - Versione 6: Clean Links + Colore Bianco Universale */
+/* Unified Navbar Styles - Versione 8: Unified Slim Apple Bar */
 .unified-navbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
   transform: translateY(0);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  background: rgba(255, 255, 255, 0.15); /* Più trasparente */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+  height: 64px; /* Altezza fissa e snella */
+  display: flex;
+  align-items: center;
 }
 
-/* Transparent variant for homepage - COMPLETAMENTE TRASPARENTE */
-.unified-navbar.navbar-transparent {
-  background: rgba(0, 0, 0, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-/* Scrolled state - più opaco */
-.unified-navbar.navbar-scrolled {
-  background: rgba(0, 0, 0, 0.85);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-/* Dashboard variant */
-.unified-navbar.navbar-dashboard {
-  background: rgba(13, 27, 42, 0.95);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-/* Hidden state */
-.unified-navbar.navbar-hidden {
-  transform: translateY(-100%);
-}
-
-/* Container */
 .navbar-container {
-  max-width: 1400px;
+  width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 30px;
 }
 
 .navbar-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 70px;
-  position: relative;
+  width: 100%;
 }
 
-/* Brand */
+/* Brand - Integrato senza bande separate */
 .navbar-brand {
-  flex-shrink: 0;
-}
-
-.brand-link {
-  text-decoration: none;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border: none;
   display: flex;
   align-items: center;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.02);
+  background: transparent;
 }
 
 .brand-content {
+  background: transparent; /* Rimosso sfondo bianco per integrazione totale */
+  padding: 4px 8px; /* Ridotto padding per snellire */
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.brand-logo {
-  height: 45px;
-  width: auto;
-  object-fit: contain;
-  filter: brightness(1.1);
+  box-shadow: none; /* Rimossa ombra pesante */
   transition: all 0.3s ease;
 }
 
-.brand-logo:hover {
-  filter: brightness(1.3);
-  transform: scale(1.05);
+.brand-logo {
+  height: 32px; /* Leggermente più piccolo per eleganza */
+  width: auto;
+  margin-right: 10px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .brand-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: white;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1d1d1f; /* Colore scuro di default per massima leggibilità */
+  letter-spacing: -0.04em;
 }
 
-/* Navigation Menu */
+/* Quando la navbar è in modalità solid-dark o simili, il testo torna bianco */
+.navbar-solid-dark .brand-text,
+.navbar-dashboard .brand-text {
+  color: #ffffff;
+}
+
+/* Menu di navigazione snello */
 .navbar-menu {
   display: flex;
   align-items: center;
-  gap: 40px; /* Aumentato il gap tra i link */
-  flex: 1;
-  justify-content: center;
+  gap: 24px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-/* LINK DI NAVIGAZIONE - CLEAN SENZA CONTORNI */
 .nav-link {
-  color: white !important; /* FORZATO BIANCO SU TUTTE LE PAGINE */
-  text-decoration: none !important;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 12px 0; /* Solo padding verticale */
+  color: white; /* Default white on transparent */
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* RIMOZIONE COMPLETA DI TUTTI I CONTORNI */
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  
-  /* Miglioramento leggibilità */
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
 }
 
-/* Hover effect SOLO cambio colore */
+/* Quando la navbar è scrollata o in modalità solid, i link diventano scuri */
+.navbar-scrolled .nav-link,
+.navbar-solid .nav-link,
+.navbar-dashboard .nav-link {
+  color: #1d1d1f !important;
+  text-shadow: none;
+  opacity: 0.7;
+}
+
+.navbar-scrolled .nav-link:hover,
+.navbar-solid .nav-link:hover,
+.navbar-dashboard .nav-link:hover {
+  opacity: 1;
+}
+
+.navbar-scrolled .nav-link.active,
+.navbar-solid .nav-link.active,
+.navbar-dashboard .nav-link.active {
+  opacity: 1;
+  color: #0071e3 !important; /* Blu Apple per i link attivi su sfondo chiaro */
+}
+
+/* Background della navbar quando scrollata */
+.navbar-scrolled {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-solid {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 .nav-link:hover {
-  color: #ffc107 !important; /* Giallo solo al testo */
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
+  opacity: 1;
   transform: translateY(-1px);
 }
 
-/* Focus state - rimozione completa */
-.nav-link:focus,
-.nav-link:focus-visible {
-  color: #ffc107 !important;
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* Active state */
 .nav-link.active {
-  color: #ffc107 !important;
-  background: transparent !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
+  opacity: 1;
+  font-weight: 600;
 }
 
-/* Underline effect per active */
 .nav-link.active::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: -4px;
   left: 0;
   right: 0;
   height: 2px;
-  background: #ffc107;
-  border-radius: 1px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+/* Auth Section */
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-buttons .btn {
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  border-radius: 10px;
 }
 
 /* Auth Section */
@@ -195,12 +192,28 @@
   background: transparent;
 }
 
+.navbar-scrolled .auth-buttons .btn-outline-light,
+.navbar-solid .auth-buttons .btn-outline-light,
+.navbar-dashboard .auth-buttons .btn-outline-light {
+  color: #0071e3 !important;
+  border-color: #0071e3 !important;
+}
+
 .auth-buttons .btn-outline-light:hover {
   color: #212529;
   background: white;
   border-color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+}
+
+.navbar-scrolled .auth-buttons .btn-outline-light:hover,
+.navbar-solid .auth-buttons .btn-outline-light:hover,
+.navbar-dashboard .auth-buttons .btn-outline-light:hover {
+  background: #0071e3;
+  color: white !important;
+  border-color: #0071e3;
+  box-shadow: 0 4px 15px rgba(0, 113, 227, 0.3);
 }
 
 .auth-buttons .btn-warning {
@@ -221,7 +234,7 @@
 .user-menu {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 32px; /* Aumentato per separare campanella e utente */
 }
 
 .notification-icon {
@@ -256,6 +269,65 @@
 
 .user-dropdown {
   position: relative;
+}
+
+.user-button {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.user-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-scrolled .user-button:hover,
+.navbar-solid .user-button:hover,
+.navbar-dashboard .user-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.4; /* Più spazio tra nome e ruolo */
+  margin-left: 2px;
+}
+
+.user-name {
+  font-size: 0.95rem; /* Leggermente più grande */
+  font-weight: 700; /* Più Bold */
+  color: white;
+  letter-spacing: -0.01em;
+  transition: color 0.3s ease;
+}
+
+.user-role {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.85); /* Più visibile */
+  font-weight: 500;
+  text-transform: uppercase; /* Più professionale */
+  letter-spacing: 0.03em;
+  transition: color 0.3s ease;
+}
+
+.navbar-scrolled .user-name,
+.navbar-solid .user-name,
+.navbar-dashboard .user-name {
+  color: #1d1d1f;
+}
+
+.navbar-scrolled .user-role,
+.navbar-solid .user-role,
+.navbar-dashboard .user-role {
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .user-avatar {
@@ -333,24 +405,34 @@
 
 /* Mobile Menu Button */
 .mobile-menu-toggle {
-  display: flex;
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  color: white;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
+}
+
+/* Toggle scuro quando scrollato o in modalità solid */
+.navbar-scrolled .mobile-menu-toggle,
+.navbar-solid .mobile-menu-toggle,
+.navbar-dashboard .mobile-menu-toggle {
+  color: #1d1d1f !important;
 }
 
 .mobile-menu-toggle:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
+}
+
+.navbar-scrolled .mobile-menu-toggle:hover,
+.navbar-solid .mobile-menu-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /* Mobile Drawer */
@@ -406,7 +488,7 @@
 }
 
 .drawer-logo {
-  height: 35px;
+  height: 46px;
   width: auto;
   object-fit: contain;
 }

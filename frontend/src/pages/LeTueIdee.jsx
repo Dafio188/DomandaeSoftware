@@ -97,7 +97,7 @@ function LeTueIdee() {
       caricaIdee();
       
       setTimeout(() => setSuccess(''), 5000);
-    } catch (err) {
+    } catch {
       setError('Errore nell\'invio dell\'idea');
     }
     
@@ -110,7 +110,7 @@ function LeTueIdee() {
       console.log(`Voto ${voto} per idea ${ideaId} - Feature da implementare`);
       setError('Feature votazione in arrivo!');
       setTimeout(() => setError(''), 3000);
-    } catch (err) {
+    } catch {
       setError('Errore nella votazione');
       setTimeout(() => setError(''), 3000);
     }
@@ -124,7 +124,7 @@ function LeTueIdee() {
   });
 
   // Funzione per eliminare una richiesta
-  const handleDeleteRichiesta = async (id) => {
+  const _handleDeleteRichiesta = async (id) => {
     if (window.confirm('Sei sicuro di voler eliminare questa richiesta?')) {
       try {
         await axios.delete(`${API_BASE}richieste/${id}/`, {
@@ -170,144 +170,48 @@ function LeTueIdee() {
   }
 
   return (
-    <div className="min-vh-100 bg-gradient idee-page">
+    <div className="py-4">
       {/* Hero Section */}
-      <div className="hero-section bg-primary text-white position-relative overflow-hidden">
-        <div className="container py-5 position-relative z-2">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center">
-              <h1 className="display-3 fw-bold mb-4">
-                <FaLightbulb className="me-3 text-warning" />
-                Le Tue Idee
-              </h1>
-              <p className="lead mb-4 opacity-90">
-                <strong>Aiutaci a migliorare!</strong> Condividi le tue idee, suggerimenti e feedback 
-                per rendere la piattaforma sempre migliore. La tua voce conta!
-              </p>
-              <div className="stats-row">
-                <div className="row g-3 justify-content-center">
-                  <div className="col-auto">
-                    <div className="stat-badge">
-                      <FaComments className="me-2" />
-                      {idee.length} Idee Condivise
-                    </div>
-                  </div>
-                  <div className="col-auto">
-                    <div className="stat-badge">
-                      <FaHeart className="me-2" />
-                      Community Attiva
-                    </div>
-                  </div>
-                  <div className="col-auto">
-                    <div className="stat-badge">
-                      <FaRocket className="me-2" />
-                      Miglioramento Continuo
-                    </div>
-                  </div>
-                </div>
+      <div className="mac-glass-card mb-5 p-5 text-center position-relative overflow-hidden bg-primary text-white">
+        <div className="position-relative z-2">
+          <h1 className="display-3 fw-bold mb-4">
+            <FaLightbulb className="me-3 text-warning" />
+            Le Tue Idee
+          </h1>
+          <p className="lead mb-4 opacity-90">
+            <strong>Aiutaci a migliorare!</strong> Condividi le tue idee, suggerimenti e feedback 
+            per rendere la piattaforma sempre migliore. La tua voce conta!
+          </p>
+          <div className="row g-3 justify-content-center">
+            <div className="col-auto">
+              <div className="mac-badge bg-white bg-opacity-20 text-white">
+                <FaComments className="me-2" />
+                {idee.length} Idee Condivise
+              </div>
+            </div>
+            <div className="col-auto">
+              <div className="mac-badge bg-white bg-opacity-20 text-white">
+                <FaHeart className="me-2" />
+                Community Attiva
               </div>
             </div>
           </div>
         </div>
-        <div className="hero-decoration"></div>
       </div>
 
-      <div className="container py-5">
-        {/* Form Nuova Idea */}
-        <div className="card border-0 shadow-lg rounded-4 mb-5">
-          <div className="card-header bg-gradient-success text-white border-0 rounded-top-4 p-4">
-            <div className="d-flex align-items-center">
-              <FaPlus className="me-3" size={24} />
-              <div>
-                <h4 className="mb-0">Condividi la Tua Idea</h4>
-                <small className="opacity-75">Ogni suggerimento è prezioso per migliorare la piattaforma</small>
-              </div>
-            </div>
-          </div>
-          <div className="card-body p-4">
+      <div className="row g-4">
+        {/* Form per inviare una nuova idea */}
+        <div className="col-lg-4">
+          <div className="mac-glass-card p-4 sticky-top" style={{ top: '110px' }}>
+            <h4 className="mac-title mb-4">Condividi un'idea</h4>
             <form onSubmit={inviaIdea}>
-              <div className="row g-4">
-                <div className="col-md-4">
-                  <label className="form-label fw-bold">
-                    <FaTag className="me-2 text-primary" />
-                    Categoria
-                  </label>
-                  <select 
-                    className="form-select rounded-pill" 
-                    value={categoria} 
-                    onChange={(e) => setCategoria(e.target.value)}
-                  >
-                    {categorie.map(cat => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.icon} {cat.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-md-8">
-                  <label className="form-label fw-bold">
-                    <FaLightbulb className="me-2 text-warning" />
-                    La Tua Idea o Suggerimento
-                  </label>
-                  <textarea 
-                    className="form-control rounded-3" 
-                    rows="4"
-                    placeholder="Descrivi la tua idea in dettaglio... Più informazioni fornisci, meglio potremo valutare e implementare il tuo suggerimento!"
-                    value={nuovaIdea}
-                    onChange={(e) => setNuovaIdea(e.target.value)}
-                    required
-                    maxLength="1000"
-                  />
-                  <div className="d-flex justify-content-between mt-2">
-                    <small className="text-muted">
-                      <FaShieldAlt className="me-1" />
-                      I tuoi dati sono protetti e utilizzati solo per migliorare il servizio
-                    </small>
-                    <small className="text-muted">
-                      {nuovaIdea.length}/1000 caratteri
-                    </small>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="d-flex justify-content-end mt-4">
-                <button 
-                  type="submit" 
-                  className="btn btn-success btn-lg px-5 rounded-pill"
-                  disabled={sending || !nuovaIdea.trim()}
-                >
-                  {sending ? (
-                    <>
-                      <FaSpinner className="fa-spin me-2" />
-                      Invio in corso...
-                    </>
-                  ) : (
-                    <>
-                      <FaPaperPlane className="me-2" />
-                      Condividi Idea
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-
-        {/* Filtri e Ricerca */}
-        <div className="card border-0 shadow-sm rounded-4 mb-4">
-          <div className="card-body p-4">
-            <div className="row g-3 align-items-center">
-              <div className="col-md-4">
-                <label className="form-label fw-bold small">
-                  <FaFilter className="me-2 text-primary" />
-                  Filtra per Categoria
-                </label>
+              <div className="mb-3">
+                <label className="form-label mac-subtitle small text-uppercase fw-bold">Categoria</label>
                 <select 
-                  className="form-select rounded-pill" 
-                  value={filtroCategoria} 
-                  onChange={(e) => setFiltroCategoria(e.target.value)}
+                  className="form-select mac-input-field rounded-3"
+                  value={categoria}
+                  onChange={(e) => setCategoria(e.target.value)}
                 >
-                  <option value="tutte">🌟 Tutte le Categorie</option>
                   {categorie.map(cat => (
                     <option key={cat.value} value={cat.value}>
                       {cat.icon} {cat.label}
@@ -315,30 +219,75 @@ function LeTueIdee() {
                   ))}
                 </select>
               </div>
-              <div className="col-md-6">
-                <label className="form-label fw-bold small">
-                  <FaSearch className="me-2 text-info" />
-                  Cerca nelle Idee
-                </label>
-                <input 
-                  type="text"
-                  className="form-control rounded-pill"
-                  placeholder="Cerca per parole chiave o nome utente..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+              
+              <div className="mb-4">
+                <label className="form-label mac-subtitle small text-uppercase fw-bold">La tua idea</label>
+                <textarea 
+                  className="form-control mac-input-field rounded-4"
+                  rows="6"
+                  placeholder="Descrivi la tua idea in dettaglio..."
+                  value={nuovaIdea}
+                  onChange={(e) => setNuovaIdea(e.target.value)}
+                  required
+                ></textarea>
               </div>
-              <div className="col-md-2">
-                <div className="text-center">
-                  <small className="text-muted fw-bold d-block">Risultati</small>
-                  <span className="badge bg-primary rounded-pill px-3 py-2">
-                    {ideeFiltrate.length}
+              
+              <button 
+                type="submit" 
+                className="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow"
+                disabled={sending}
+              >
+                {sending ? <FaSpinner className="fa-spin me-2" /> : <FaPaperPlane className="me-2" />}
+                Invia Feedback
+              </button>
+            </form>
+            
+            {success && (
+              <div className="alert alert-success mt-4 border-0 rounded-4 animate__animated animate__fadeIn">
+                <FaCheckCircle className="me-2" /> {success}
+              </div>
+            )}
+            
+            {error && (
+              <div className="alert alert-danger mt-4 border-0 rounded-4 animate__animated animate__fadeIn">
+                <FaExclamationTriangle className="me-2" /> {error}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Lista delle idee */}
+        <div className="col-lg-8">
+          <div className="mac-glass-card p-4 mb-4">
+            <div className="row g-3">
+              <div className="col-md-6">
+                <div className="input-group">
+                  <span className="input-group-text bg-transparent border-end-0 rounded-start-pill ps-3">
+                    <FaSearch className="text-muted" />
                   </span>
+                  <input 
+                    type="text" 
+                    className="form-control border-start-0 rounded-end-pill mac-input-field"
+                    placeholder="Cerca tra le idee..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
+              </div>
+              <div className="col-md-6">
+                <select 
+                  className="form-select rounded-pill mac-input-field"
+                  value={filtroCategoria}
+                  onChange={(e) => setFiltroCategoria(e.target.value)}
+                >
+                  <option value="tutte">Tutte le categorie</option>
+                  {categorie.map(cat => (
+                    <option key={cat.value} value={cat.value}>{cat.icon} {cat.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
-        </div>
 
         {/* Lista Idee */}
         {loading ? (
@@ -438,65 +387,30 @@ function LeTueIdee() {
         )}
 
         {/* Privacy Notice */}
-        <div className="card border-0 bg-light rounded-4 mt-5">
-          <div className="card-body p-4">
-            <div className="text-center">
-              <FaShieldAlt size={40} className="text-success mb-3" />
-              <h5 className="fw-bold text-primary mb-3">Privacy e Sicurezza dei Tuoi Dati</h5>
-              <div className="row g-4">
-                <div className="col-md-4">
-                  <div className="privacy-point">
-                    <h6 className="fw-bold text-success">🔒 Dati Protetti</h6>
-                    <small className="text-muted">
-                      Le tue idee sono memorizzate su server sicuri con crittografia avanzata
-                    </small>
-                  </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="privacy-point">
-                    <h6 className="fw-bold text-info">👥 Solo Utenti Autenticati</h6>
-                    <small className="text-muted">
-                      Solo utenti registrati possono visualizzare e interagire con le idee
-                    </small>
-                  </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="privacy-point">
-                    <h6 className="fw-bold text-warning">🎯 Finalità Specifica</h6>
-                    <small className="text-muted">
-                      I dati sono utilizzati esclusivamente per migliorare la piattaforma
-                    </small>
-                  </div>
-                </div>
+        <div className="mac-glass-card p-4 mt-5">
+          <div className="text-center">
+            <FaShieldAlt size={40} className="text-success mb-3 opacity-50" />
+            <h5 className="mac-title mb-3">Privacy e Sicurezza dei Tuoi Dati</h5>
+            <div className="row g-4">
+              <div className="col-md-4">
+                <h6 className="mac-title h6 text-success">🔒 Dati Protetti</h6>
+                <p className="mac-subtitle small">Le tue idee sono memorizzate su server sicuri con crittografia avanzata</p>
               </div>
-              <div className="alert alert-info border-0 rounded-3 mt-4">
-                <small>
-                  <FaShieldAlt className="me-2" />
-                  <strong>Conformità GDPR:</strong> Puoi richiedere la modifica o cancellazione 
-                  delle tue idee contattando l'amministrazione. I tuoi dati non vengono mai 
-                  condivisi con terze parti.
-                </small>
+              <div className="col-md-4">
+                <h6 className="mac-title h6 text-info">👥 Solo Utenti Autenticati</h6>
+                <p className="mac-subtitle small">Solo utenti registrati possono visualizzare e interagire con le idee</p>
+              </div>
+              <div className="col-md-4">
+                <h6 className="mac-title h6 text-warning">🎯 Finalità Specifica</h6>
+                <p className="mac-subtitle small">I dati sono utilizzati esclusivamente per migliorare la piattaforma</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Alert Messages */}
-      {success && (
-        <div className="alert alert-success border-0 rounded-4 shadow-sm position-fixed bottom-0 end-0 m-4" style={{ zIndex: 1050 }}>
-          <FaCheckCircle className="me-2" />
-          {success}
-        </div>
-      )}
-      {error && (
-        <div className="alert alert-danger border-0 rounded-4 shadow-sm position-fixed bottom-0 end-0 m-4" style={{ zIndex: 1050 }}>
-          <FaExclamationTriangle className="me-2" />
-          {error}
-        </div>
-      )}
     </div>
+  </div>
   );
 }
 
-export default LeTueIdee; 
+export default LeTueIdee;

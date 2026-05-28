@@ -17,7 +17,7 @@ class MessaggioViewSet(viewsets.ModelViewSet):
             return Messaggio.objects.none()
         
         # Admin può vedere tutti i messaggi per supervisione
-        if user.is_staff or user.ruolo == 'amministratore':
+        if user.is_staff or user.is_superuser:
             return Messaggio.objects.all()
             
         # Mostra solo i messaggi dei progetti dove l'utente è cliente o fornitore
@@ -28,8 +28,5 @@ class MessaggioViewSet(viewsets.ModelViewSet):
         )
 
     def perform_create(self, serializer):
-        logger.error(f"🔥 PERFORM_CREATE CHIAMATO - User: {self.request.user}")
-        print(f"🔥 PERFORM_CREATE CHIAMATO - User: {self.request.user}")
-        
         # Imposta il mittente come l'utente autenticato
-        serializer.save(mittente=self.request.user) 
+        serializer.save() 

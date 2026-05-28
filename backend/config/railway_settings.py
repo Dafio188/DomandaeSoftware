@@ -135,6 +135,20 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': os.environ.get('DRF_THROTTLE_ANON', '60/hour'),
+        'user': os.environ.get('DRF_THROTTLE_USER', '600/hour'),
+        'auth': os.environ.get('DRF_THROTTLE_AUTH', '10/hour'),
+        'password_reset': os.environ.get('DRF_THROTTLE_PASSWORD_RESET', '5/hour'),
+    },
 }
 
 # CORS per Railway

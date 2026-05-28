@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="160" viewBox="0 0 520 160" fill="none" role="img" aria-label="SoftMatch">
+  <defs>
+    <linearGradient id="g1" x1="34" y1="28" x2="126" y2="132" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EA5E9"/>
+      <stop offset="0.55" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="180" y1="58" x2="440" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D4ED8"/>
+      <stop offset="0.6" stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+    <filter id="shadow" x="-20" y="-20" width="220" height="220" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M80 18c28.72 0 52 23.28 52 52 0 39.2-34.62 61.27-52 72-17.38-10.73-52-32.8-52-72 0-28.72 23.28-52 52-52Z" fill="url(#g1)"/>
+    <path d="M56 60.5c0-10.22 8.28-18.5 18.5-18.5h30.3c6.9 0 12.5 5.6 12.5 12.5 0 6.9-5.6 12.5-12.5 12.5H79.2c-4.64 0-8.4 3.76-8.4 8.4 0 4.64 3.76 8.4 8.4 8.4h13.2c10.22 0 18.5 8.28 18.5 18.5 0 10.22-8.28 18.5-18.5 18.5H62.2c-6.9 0-12.5-5.6-12.5-12.5 0-6.9 5.6-12.5 12.5-12.5h25.6c4.64 0 8.4-3.76 8.4-8.4 0-4.64-3.76-8.4-8.4-8.4H74.5c-10.22 0-18.5-8.28-18.5-18.5Z" fill="rgba(255,255,255,0.9)"/>
+    <path d="M118.5 37.5c3.6 0 6.5 2.9 6.5 6.5s-2.9 6.5-6.5 6.5-6.5-2.9-6.5-6.5 2.9-6.5 6.5-6.5Z" fill="rgba(255,255,255,0.9)"/>
+    <path d="M131.5 48.5c3.04 0 5.5 2.46 5.5 5.5s-2.46 5.5-5.5 5.5-5.5-2.46-5.5-5.5 2.46-5.5 5.5-5.5Z" fill="rgba(255,255,255,0.85)"/>
+  </g>
+  <text x="170" y="108" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial" font-size="72" font-weight="800" letter-spacing="-1">
+    <tspan fill="url(#g2)">SoftMatch</tspan>
+  </text>
+</svg>

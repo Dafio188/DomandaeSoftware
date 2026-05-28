@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   FaQuestionCircle, 
   FaComments, 
@@ -16,14 +17,16 @@ import {
   FaInfoCircle,
   FaLightbulb,
   FaShieldAlt,
-  FaSpinner
+  FaSpinner,
+  FaHeadset,
+  FaUsers
 } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
+import PageHeader from '../components/PageHeader';
 import faqService from '../services/faqService';
-import './FAQ.css';
+import '../styles/MacStyle.css';
 
 function FAQ() {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [expandedFAQ, setExpandedFAQ] = useState(null);
   const [newComment, setNewComment] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,27 +45,41 @@ function FAQ() {
     loadInitialData();
   }, []);
 
-  // Filtra FAQ quando cambiano i parametri di ricerca
+  const loadFAQs = useCallback(async () => {
+    try {
+      let faqsData;
+      
+      if (searchTerm || selectedCategory !== 'all') {
+        faqsData = await faqService.searchFAQs(searchTerm, selectedCategory);
+      } else {
+        faqsData = await faqService.getFAQs();
+      }
+      
+      setFaqs(faqsData);
+    } catch (error) {
+      console.error('Errore nel caricamento FAQ:', error);
+    }
+  }, [searchTerm, selectedCategory]);
+
   useEffect(() => {
     if (categories.length > 0) {
       loadFAQs();
     }
-  }, [searchTerm, selectedCategory, categories]);
+  }, [categories.length, loadFAQs]);
 
   const loadInitialData = async () => {
     try {
       setLoading(true);
       
-      // Carica categorie, FAQ iniziali, commenti e statistiche in parallelo
       const [categoriesData, faqsData, commentsData, statsData] = await Promise.all([
         faqService.getCategories(),
         faqService.getFAQs(),
         faqService.getComments(),
-        faqService.getStats().catch(() => null) // Le statistiche sono opzionali
+        faqService.getStats().catch(() => null)
       ]);
 
       setCategories([
-        { id: 'all', name: 'Tutte le Categorie', icon: 'FaQuestionCircle' },
+        { id: 'all', slug: 'all', name: 'Tutte le Categorie', icon: 'FaQuestionCircle' },
         ...categoriesData
       ]);
       setFaqs(faqsData);
@@ -76,28 +93,9 @@ function FAQ() {
     }
   };
 
-  const loadFAQs = async () => {
-    try {
-      let faqsData;
-      
-      if (searchTerm || selectedCategory !== 'all') {
-        // Usa la ricerca se ci sono filtri
-        faqsData = await faqService.searchFAQs(searchTerm, selectedCategory);
-      } else {
-        // Carica tutte le FAQ
-        faqsData = await faqService.getFAQs();
-      }
-      
-      setFaqs(faqsData);
-    } catch (error) {
-      console.error('Errore nel caricamento FAQ:', error);
-    }
-  };
-
   const toggleFAQ = async (id) => {
     setExpandedFAQ(expandedFAQ === id ? null : id);
     
-    // Se stiamo espandendo una FAQ, carica i suoi dettagli e commenti
     if (expandedFAQ !== id) {
       try {
         const [faqDetails, faqComments] = await Promise.all([
@@ -105,14 +103,12 @@ function FAQ() {
           faqService.getComments(id)
         ]);
         
-        // Aggiorna la FAQ con i dettagli completi
         setFaqs(prevFaqs => 
           prevFaqs.map(faq => 
             faq.id === id ? { ...faq, ...faqDetails } : faq
           )
         );
         
-        // Aggiorna i commenti per questa FAQ
         setComments(faqComments);
       } catch (error) {
         console.error('Errore nel caricamento dettagli FAQ:', error);
@@ -135,22 +131,18 @@ function FAQ() {
       
       const commentData = {
         comment: newComment,
-        faq: expandedFAQ, // Se stiamo commentando una FAQ specifica
+        faq: expandedFAQ,
         is_question: false
       };
       
       const newCommentResponse = await faqService.createComment(commentData);
-      
-      // Aggiungi il nuovo commento alla lista (sarà in stato 'pending')
       setComments(prevComments => [newCommentResponse, ...prevComments]);
       setNewComment('');
-      
-      // Mostra messaggio di successo
-      alert('Commento inviato! Sarà visibile dopo la moderazione.');
+      alert('Commento inviato! Sarà visibile dopo la moderazione dello staff.');
       
     } catch (error) {
       console.error('Errore nell\'invio commento:', error);
-      alert('Errore nell\'invio del commento. Riprova.');
+      alert('Errore nell\'invio del commento. Riprova tra poco.');
     } finally {
       setSubmittingComment(false);
     }
@@ -158,14 +150,13 @@ function FAQ() {
 
   const handleVoteHelpful = async (faqId) => {
     if (!isAuthenticated) {
-      alert('Devi essere autenticato per votare');
+      alert('Devi effettuare il login per votare');
       return;
     }
 
     try {
       const response = await faqService.voteHelpful(faqId);
       
-      // Aggiorna il contatore nella FAQ
       setFaqs(prevFaqs =>
         prevFaqs.map(faq =>
           faq.id === faqId 
@@ -179,7 +170,6 @@ function FAQ() {
         alert('Hai già votato questa FAQ');
       } else {
         console.error('Errore nel voto:', error);
-        alert('Errore nel voto. Riprova.');
       }
     }
   };
@@ -193,7 +183,6 @@ function FAQ() {
     try {
       const response = await faqService.toggleCommentLike(commentId);
       
-      // Aggiorna il commento nella lista
       setComments(prevComments =>
         prevComments.map(comment =>
           comment.id === commentId
@@ -208,11 +197,10 @@ function FAQ() {
       
     } catch (error) {
       console.error('Errore nel like:', error);
-      alert('Errore nel like. Riprova.');
     }
   };
 
-  // Filtra FAQ e commenti localmente per la ricerca in tempo reale
+  // Filtra FAQ localmente per la ricerca in tempo reale
   const filteredFAQs = faqs.filter(faq => {
     const matchesCategory = selectedCategory === 'all' || 
                            faq.category_slug === selectedCategory;
@@ -221,362 +209,302 @@ function FAQ() {
     return matchesCategory && matchesSearch;
   });
 
-  const filteredComments = comments.filter(comment =>
-    comment.status === 'approved' && (
-      !searchTerm ||
-      comment.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comment.user_name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
   if (loading) {
     return (
-      <div className="min-vh-100 bg-gradient faq-page d-flex align-items-center justify-content-center">
-        <div className="text-center text-white">
-          <FaSpinner className="fa-spin mb-3" size={48} />
-          <h4>Caricamento FAQ...</h4>
+      <div className="min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="text-center">
+          <FaSpinner className="text-primary mb-3" size={48} style={{ animation: 'spin 1s linear infinite' }} />
+          <h5 className="mac-subtitle mt-3">Caricamento Centro Aiuto...</h5>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-vh-100 bg-gradient faq-page">
-      {/* Hero Section */}
-      <div className="hero-section bg-primary text-white position-relative overflow-hidden">
-        <div className="container py-5 position-relative z-2">
-          <div className="row align-items-center">
-            <div className="col-lg-8 mx-auto text-center">
-              <h1 className="display-3 fw-bold mb-4">
-                <FaQuestionCircle className="me-3 text-warning" />
-                FAQ & Community
-              </h1>
-              <p className="lead mb-4 opacity-90">
-                Trova risposte alle domande più frequenti e partecipa alla discussione con la nostra community. 
-                Gli <strong>utenti registrati</strong> possono lasciare commenti e ricevere risposte dirette dal nostro team di esperti.
-              </p>
-              <div className="d-flex flex-wrap justify-content-center gap-3">
-                <div className="feature-badge">
-                  <FaQuestionCircle className="me-2" />
-                  {stats?.total_faqs || 0} FAQ
-                </div>
-                <div className="feature-badge">
-                  <FaComments className="me-2" />
-                  {stats?.total_comments || 0} Commenti
-                </div>
-                <div className="feature-badge">
-                  <FaUserShield className="me-2" />
-                  Supporto Admin
-                </div>
-              </div>
+    <div className="py-5">
+      {/* Hero Section - Mac Style */}
+      <PageHeader 
+        title="Centro Aiuto & FAQ"
+        subtitle="Trova risposte rapide alle domande più comuni o contatta il nostro team di supporto. Siamo qui per aiutarti a far crescere il tuo business su SoftMatch."
+        badge="SUPPORTO & FAQ"
+        icon={FaQuestionCircle}
+        theme="info"
+      />
+
+      {/* Badge Features */}
+      <div className="row justify-content-center mb-5">
+        <div className="col-lg-8">
+          <div className="d-flex flex-wrap justify-content-center gap-3">
+            <div className="mac-glass-card px-4 py-2 d-flex align-items-center shadow-sm">
+              <FaHeadset className="text-success me-2" size={16} />
+              <span className="small fw-bold">Supporto 24/7</span>
+            </div>
+            <div className="mac-glass-card px-4 py-2 d-flex align-items-center shadow-sm">
+              <FaUsers className="text-primary me-2" size={16} />
+              <span className="small fw-bold">Community Attiva</span>
+            </div>
+            <div className="mac-glass-card px-4 py-2 d-flex align-items-center shadow-sm">
+              <FaShieldAlt className="text-warning me-2" size={16} />
+              <span className="small fw-bold">Staff Certificato</span>
             </div>
           </div>
         </div>
-        <div className="hero-decoration"></div>
       </div>
 
-      <div className="container py-5">
-        {/* Sezione Ricerca e Filtri */}
-        <div className="search-section mb-5">
-          <div className="row g-4">
-            <div className="col-lg-8">
-              <div className="search-box">
-                <FaSearch className="search-icon" />
-                <input
-                  type="text"
-                  className="form-control form-control-lg"
-                  placeholder="Cerca nelle FAQ o nei commenti..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+      <div className="row g-4">
+        {/* Sidebar Filtri - Mac Style */}
+        <div className="col-lg-3">
+          <div className="sticky-top" style={{ top: '100px' }}>
+            <div className="mac-glass-card p-4 mb-4">
+              <h5 className="mac-title mb-4 d-flex align-items-center">
+                <FaFilter className="me-2 text-primary" size={16} /> 
+                Categorie
+              </h5>
+              <div className="d-flex flex-column gap-2">
+                {categories.map(category => (
+                  <button 
+                    key={category.id} 
+                    className={`btn text-start fw-semibold rounded-3 px-3 py-2 d-flex align-items-center transition-all ${
+                      selectedCategory === category.slug 
+                        ? 'btn-primary shadow-sm' 
+                        : 'btn-light-transparent mac-subtitle'
+                    }`}
+                    onClick={() => setSelectedCategory(category.slug)}
+                    style={{ fontSize: '0.9rem', border: 'none' }}
+                  >
+                    <FaQuestionCircle 
+                      className={`me-2 ${selectedCategory === category.slug ? 'text-white' : 'text-primary'}`} 
+                      size={13} 
+                    />
+                    {category.name}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="col-lg-4">
-              <select
-                className="form-select form-select-lg"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+
+            {/* Statistiche Community */}
+            {stats && (
+              <div className="mac-glass-card p-4">
+                <h5 className="mac-title mb-4">Statistiche</h5>
+                <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                  <span className="mac-subtitle small">FAQ totali</span>
+                  <span className="fw-bold text-primary">{stats.total_faqs}</span>
+                </div>
+                <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                  <span className="mac-subtitle small">Commenti</span>
+                  <span className="fw-bold text-info">{stats.total_comments}</span>
+                </div>
+                <div className="d-flex justify-content-between align-items-center">
+                  <span className="mac-subtitle small">Voti utili</span>
+                  <span className="fw-bold text-success">{stats.total_helpful_votes}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Sezione FAQ */}
-        <div className="faq-section mb-5">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold text-primary mb-3">
-              <FaQuestionCircle className="me-3 text-info" />
-              Domande Frequenti
-            </h2>
-            <p className="lead text-light">
-              Le risposte alle domande più comuni sulla nostra piattaforma
-            </p>
-          </div>
-
-          <div className="row">
-            <div className="col-lg-10 mx-auto">
-              {filteredFAQs.length > 0 ? (
-                filteredFAQs.map(faq => (
-                  <div key={faq.id} className="faq-item mb-3">
-                    <div 
-                      className="faq-question"
-                      onClick={() => toggleFAQ(faq.id)}
-                    >
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div className="flex-grow-1">
-                          <h5 className="mb-1 fw-bold">{faq.question}</h5>
-                          <small className="text-muted">
-                            {faq.category_name} • {faq.views_count} visualizzazioni • {faq.helpful_count} voti utili
-                          </small>
-                        </div>
-                        <div className="faq-toggle">
-                          {expandedFAQ === faq.id ? <FaMinus /> : <FaPlus />}
-                        </div>
-                      </div>
-                    </div>
-                    {expandedFAQ === faq.id && (
-                      <div className="faq-answer">
-                        <p className="mb-3">{faq.answer}</p>
-                        
-                        {/* Azioni FAQ */}
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div>
-                            {isAuthenticated && faq.can_vote_helpful && !faq.user_has_voted_helpful && (
-                              <button 
-                                className="btn btn-sm btn-outline-success me-2"
-                                onClick={() => handleVoteHelpful(faq.id)}
-                              >
-                                <FaThumbsUp className="me-1" />
-                                Utile ({faq.helpful_count})
-                              </button>
-                            )}
-                            {faq.user_has_voted_helpful && (
-                              <span className="text-success">
-                                <FaThumbsUp className="me-1" />
-                                Hai trovato utile questa FAQ
-                              </span>
-                            )}
-                          </div>
-                          <small className="text-muted">
-                            {faq.comments_count || 0} commenti
-                          </small>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-5">
-                  <FaQuestionCircle size={48} className="text-muted mb-3" />
-                  <h5 className="text-muted">Nessuna FAQ trovata</h5>
-                  <p className="text-muted">Prova a modificare i filtri di ricerca</p>
-                </div>
+        {/* Contenuto principale */}
+        <div className="col-lg-9">
+          {/* Barra di Ricerca */}
+          <div className="mac-glass-card p-4 mb-5">
+            <div className="input-group input-group-lg border-0 bg-light rounded-4 p-1 shadow-sm">
+              <span className="input-group-text bg-transparent border-0 ps-3">
+                <FaSearch className="text-muted" />
+              </span>
+              <input 
+                type="text" 
+                className="form-control bg-transparent border-0 shadow-none ps-2" 
+                placeholder="Cerca tra le domande frequenti..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ borderRadius: '0 15px 15px 0' }}
+              />
+              {searchTerm && (
+                <button 
+                  className="btn btn-light border-0 rounded-4 me-1"
+                  onClick={() => setSearchTerm('')}
+                >
+                  ✕
+                </button>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Sezione Community Comments */}
-        <div className="community-section">
-          <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold text-primary mb-3">
-              <FaComments className="me-3 text-success" />
-              Community & Supporto
-            </h2>
-            <p className="lead text-light">
-              Condividi la tua esperienza, fai domande e ricevi risposte dal nostro team
-            </p>
-          </div>
-
-          {/* Info Box per utenti non registrati */}
-          {!isAuthenticated && (
-            <div className="alert alert-info border-0 rounded-4 mb-4">
-              <div className="d-flex align-items-center">
-                <FaInfoCircle className="me-3 text-info" size={24} />
-                <div>
-                  <strong>Per Utenti Registrati:</strong> Accedi al tuo account per lasciare commenti, 
-                  fare domande specifiche e ricevere risposte personalizzate dal nostro team di supporto.
-                  <br />
-                  <small className="text-muted">
-                    Non hai un account? <a href="/register" className="text-decoration-none">Registrati gratuitamente</a>
-                  </small>
-                </div>
-              </div>
+          {/* Lista FAQ */}
+          <div className="mb-5">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h4 className="mac-title mb-0">
+                Domande Frequenti
+              </h4>
+              <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                {filteredFAQs.length} risposta{filteredFAQs.length !== 1 ? 'e' : ''}
+              </span>
             </div>
-          )}
 
-          {/* Form per nuovo commento */}
-          {isAuthenticated && (
-            <div className="comment-form-section mb-5">
-              <div className="card border-0 shadow-lg rounded-4">
-                <div className="card-body p-4">
-                  <h5 className="fw-bold mb-3 text-primary">
-                    <FaPaperPlane className="me-2" />
-                    Lascia un Commento o una Domanda
-                  </h5>
-                  <form onSubmit={handleSubmitComment}>
-                    <div className="mb-3">
-                      <textarea
-                        className="form-control"
-                        rows="4"
-                        placeholder="Condividi la tua esperienza, fai una domanda o lascia un feedback..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        required
-                        disabled={submittingComment}
-                      ></textarea>
-                    </div>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <small className="text-muted">
-                        <FaExclamationTriangle className="me-1" />
-                        I commenti sono moderati e riceverai una risposta entro 24 ore
-                      </small>
-                      <button 
-                        type="submit" 
-                        className="btn btn-primary"
-                        disabled={submittingComment}
-                      >
-                        {submittingComment ? (
-                          <>
-                            <FaSpinner className="fa-spin me-2" />
-                            Invio...
-                          </>
-                        ) : (
-                          <>
-                            <FaPaperPlane className="me-2" />
-                            Invia Commento
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Lista Commenti */}
-          <div className="comments-list">
-            <h5 className="fw-bold mb-4 text-primary">
-              Commenti della Community ({filteredComments.length})
-            </h5>
-            
-            {filteredComments.length > 0 ? (
-              filteredComments.map(comment => (
-                <div key={comment.id} className="comment-item mb-4">
-                  <div className="card border-0 shadow-sm rounded-3">
-                    <div className="card-body p-4">
-                      {/* Header del commento */}
-                      <div className="d-flex justify-content-between align-items-start mb-3">
-                        <div className="d-flex align-items-center">
-                          <div className={`user-avatar ${comment.user_type}`}>
-                            {comment.user_type === 'fornitore' ? <FaUserShield /> : <FaUser />}
-                          </div>
-                          <div className="ms-3">
-                            <h6 className="mb-0 fw-bold">{comment.user_name || comment.user_username}</h6>
-                            <small className="text-muted">
-                              {comment.user_type === 'fornitore' ? 'Sviluppatore' : 'Cliente'} • {faqService.formatDate(comment.created_at)}
-                            </small>
-                          </div>
-                        </div>
-                        <div className="d-flex align-items-center">
-                          {isAuthenticated && comment.can_like && (
-                            <button 
-                              className={`btn btn-sm me-2 ${comment.user_has_liked ? 'btn-primary' : 'btn-outline-primary'}`}
-                              onClick={() => handleToggleCommentLike(comment.id)}
-                            >
-                              <FaThumbsUp className="me-1" />
-                              {comment.likes_count}
-                            </button>
-                          )}
-                          {!isAuthenticated && (
-                            <span className="btn btn-sm btn-outline-secondary me-2">
-                              <FaThumbsUp className="me-1" />
-                              {comment.likes_count}
-                            </span>
-                          )}
-                        </div>
+            {filteredFAQs.length > 0 ? (
+              filteredFAQs.map(faq => (
+                <div key={faq.id} className="mac-glass-card mb-3 overflow-hidden border-0" style={{ borderRadius: '20px', transition: 'all 0.3s ease' }}>
+                  <button 
+                    className="w-100 text-start bg-transparent border-0 p-4 d-flex justify-content-between align-items-center"
+                    onClick={() => toggleFAQ(faq.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="d-flex align-items-center">
+                      <div className="bg-primary bg-opacity-10 p-2 rounded-3 me-3 flex-shrink-0">
+                        <FaQuestionCircle className="text-primary" size={16} />
                       </div>
-
-                      {/* Contenuto del commento */}
-                      <p className="mb-3">{comment.comment}</p>
-
-                      {/* Risposta Admin */}
-                      {comment.admin_reply && (
-                        <div className="admin-reply mt-3 p-3 bg-light rounded-3">
-                          <div className="d-flex align-items-center mb-2">
-                            <div className="admin-avatar">
-                              <FaCrown />
-                            </div>
-                            <div className="ms-2">
-                              <h6 className="mb-0 fw-bold text-warning">
-                                {comment.admin_reply.admin_name || comment.admin_reply.admin_username}
-                              </h6>
-                              <small className="text-muted">
-                                Team Domanda & Software • {faqService.formatDate(comment.admin_reply.created_at)}
-                              </small>
-                            </div>
-                          </div>
-                          <p className="mb-0 text-dark">{comment.admin_reply.reply}</p>
-                        </div>
-                      )}
-
-                      {/* In attesa di risposta */}
-                      {!comment.admin_reply && (
-                        <div className="pending-reply mt-3 p-3 bg-warning bg-opacity-10 rounded-3">
-                          <div className="d-flex align-items-center">
-                            <FaExclamationTriangle className="text-warning me-2" />
-                            <small className="text-muted">
-                              <strong>In attesa di risposta admin</strong> - Riceverai una notifica quando il team risponderà
-                            </small>
-                          </div>
-                        </div>
-                      )}
+                      <h5 className="mac-title mb-0" style={{ fontSize: '1rem', fontWeight: 600 }}>
+                        {faq.question}
+                      </h5>
                     </div>
-                  </div>
+                    <div className="flex-shrink-0 ms-3">
+                      {expandedFAQ === faq.id 
+                        ? <FaMinus className="text-primary" size={14} /> 
+                        : <FaPlus className="text-muted" size={14} />
+                      }
+                    </div>
+                  </button>
+                  
+                  {expandedFAQ === faq.id && (
+                    <div className="px-4 pb-4 bg-light bg-opacity-40 border-top">
+                      <p className="mac-subtitle pt-4 mb-4" style={{ lineHeight: '1.7' }}>
+                        {faq.answer}
+                      </p>
+                      
+                      <div className="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div className="d-flex align-items-center gap-3">
+                          <span className="mac-subtitle small">Questa risposta ti è stata utile?</span>
+                          <button 
+                            className={`btn btn-sm rounded-pill px-3 ${faq.user_has_voted_helpful ? 'btn-success' : 'btn-outline-success'}`}
+                            onClick={() => handleVoteHelpful(faq.id)}
+                            disabled={faq.user_has_voted_helpful}
+                          >
+                            <FaThumbsUp className="me-1" size={12} /> {faq.helpful_count || 0}
+                          </button>
+                        </div>
+                        <span className="mac-subtitle small">
+                          Categoria: <strong>{faq.category_name}</strong>
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
-              <div className="text-center py-5">
-                <FaComments size={48} className="text-muted mb-3" />
-                <h5 className="text-muted">Nessun commento trovato</h5>
-                <p className="text-muted">Sii il primo a lasciare un commento!</p>
+              <div className="text-center py-5 mac-glass-card">
+                <FaSearch size={48} className="text-muted mb-3" />
+                <h5 className="mac-title">Nessuna FAQ trovata</h5>
+                <p className="mac-subtitle">Prova con un termine di ricerca diverso o cambia categoria</p>
+                <button className="btn btn-primary mac-button" onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}>
+                  Mostra tutte le FAQ
+                </button>
               </div>
             )}
           </div>
 
-          {/* Call to Action */}
-          <div className="cta-section mt-5">
-            <div className="card border-0 shadow-lg rounded-4 bg-gradient-primary text-white">
-              <div className="card-body p-5 text-center">
-                <FaUserShield size={60} className="mb-4 text-warning" />
-                <h3 className="fw-bold mb-3">Hai Bisogno di Supporto Personalizzato?</h3>
-                <p className="lead mb-4">
-                  Il nostro team di esperti è sempre disponibile per aiutarti con qualsiasi domanda specifica
-                </p>
-                <div className="d-flex flex-wrap justify-content-center gap-3">
-                  <a href="/contatti" className="btn btn-light btn-lg">
-                    <FaComments className="me-2" />
-                    Contatta il Supporto
-                  </a>
-                  <a href="/docs" className="btn btn-outline-light btn-lg">
-                    <FaQuestionCircle className="me-2" />
-                    Guida Completa
-                  </a>
+          {/* Area Discussione Community */}
+          <div className="mb-5">
+            <h4 className="mac-title mb-4">Comunità di discussione</h4>
+            <div className="mac-glass-card p-4">
+              {/* Form Commento */}
+              <form onSubmit={handleSubmitComment} className="mb-5">
+                <div className="d-flex align-items-start gap-3">
+                  <div className="bg-primary bg-opacity-10 p-2 rounded-circle d-none d-md-flex align-items-center justify-content-center" style={{width: 40, height: 40}}>
+                    <FaUser className="text-primary" size={14} />
+                  </div>
+                  <div className="flex-grow-1">
+                    <textarea 
+                      className="form-control border-0 bg-light rounded-4 mb-3" 
+                      rows="3" 
+                      placeholder={isAuthenticated 
+                        ? "Hai una domanda o vuoi condividere la tua esperienza con la community?" 
+                        : "Esegui il login per partecipare alla discussione"
+                      }
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      disabled={!isAuthenticated}
+                      style={{ resize: 'none', padding: '15px' }}
+                    />
+                    <div className="d-flex justify-content-between align-items-center">
+                      <small className="mac-subtitle">I commenti sono moderati dallo staff prima della pubblicazione</small>
+                      <button 
+                        type="submit" 
+                        className="btn btn-primary mac-button rounded-pill px-4"
+                        disabled={!isAuthenticated || submittingComment || !newComment.trim()}
+                      >
+                        {submittingComment 
+                          ? <FaSpinner className="me-2" style={{ animation: 'spin 1s linear infinite' }} /> 
+                          : <FaPaperPlane className="me-2" />
+                        }
+                        Commento pubblico
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              </form>
+
+              {/* Lista Commenti */}
+              <div className="comments-list">
+                {comments.length > 0 ? (
+                  comments.map(comment => (
+                    <div key={comment.id} className="mb-4 pb-4 border-bottom">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div className="d-flex align-items-center">
+                          <div className="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style={{width: 36, height: 36}}>
+                            <FaUser size={14} className="text-secondary" />
+                          </div>
+                          <div>
+                            <h6 className="mb-0 fw-bold" style={{ fontSize: '0.9rem' }}>{comment.user_username}</h6>
+                            <small className="text-muted">{new Date(comment.created_at).toLocaleDateString('it-IT')}</small>
+                          </div>
+                        </div>
+                        {comment.is_official && (
+                          <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">
+                            <FaCrown className="me-1" size={10} /> Staff
+                          </span>
+                        )}
+                      </div>
+                      <p className="mac-subtitle mb-3 ms-5">{comment.comment}</p>
+                      <div className="ms-5 d-flex gap-3">
+                        <button 
+                          className={`btn btn-sm btn-link text-decoration-none p-0 ${comment.user_has_liked ? 'text-danger' : 'text-muted'}`}
+                          onClick={() => handleToggleCommentLike(comment.id)}
+                        >
+                          <FaThumbsUp className="me-1" size={12} /> {comment.likes_count} Like
+                        </button>
+                        <button className="btn btn-sm btn-link text-decoration-none p-0 text-muted">
+                          <FaReply className="me-1" size={12} /> Rispondi
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-4">
+                    <FaComments size={36} className="text-muted mb-3" />
+                    <p className="mac-subtitle mb-0">Nessun commento presente. Sii il primo a partecipare!</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .btn-light-transparent {
+          background: transparent !important;
+          color: inherit;
+        }
+        .btn-light-transparent:hover {
+          background: rgba(0,0,0,0.04) !important;
+        }
+      ` }} />
     </div>
   );
 }
 
-export default FAQ; 
+export default FAQ;

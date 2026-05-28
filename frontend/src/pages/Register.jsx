@@ -28,7 +28,7 @@ function Register() {
       });
       setSuccess('Registrazione avvenuta con successo! Ora puoi accedere.');
       setTimeout(() => navigate('/login'), 1500);
-    } catch (err) {
+    } catch {
       setError('Errore nella registrazione. Username o email già usati?');
     }
   };

@@ -33,7 +33,7 @@ fi
 
 DOMAIN_NAME=$1
 
-log "🚀 Avvio deployment Domanda & Software su Webdock VPS NANO4"
+log "🚀 Avvio deployment SoftMatch su Webdock VPS NANO4"
 log "🌐 Dominio: $DOMAIN_NAME"
 log "💾 Configurazione ottimizzata per risorse limitate"
 
